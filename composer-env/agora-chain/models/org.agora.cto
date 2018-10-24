@@ -1,0 +1,80 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * The model for AgoraChain is composed of:
+ *
+ *  Participants: Ciudadanos and Legisladores
+ *  Assets:       Votos and Elecciones
+ *  Transactions: Votar, Crear Elecciones, Abrir Elecciones, Cerrar Elecciones, Designar Representante
+ *
+ */
+
+namespace org.agora
+
+/*
+ * Defines a citizen (Ciudadano). A citizen is identified by their ID, includes their name and  
+ * last name, and can be related to another citizen, who'll be their representative.
+ */
+participant Ciudadano identified by ciudadanoID{
+  o String ciudadanoID
+  o String nombre
+  o String apellidos
+  --> Ciudadano representante
+}
+
+/*
+ * Defines a legislator (Legislador). A legislator is identified by their ID and includes their 
+ * name and last name.
+ */
+participant Legislador identified by legisladorID{
+  o String legisladorID
+  o String nombre
+  o String apellidos
+}
+
+/*
+ * Defines a voting process (Elecciones). A voting process is identified by its ID and includes
+ * a description, a list of categories, whether or not it's open and the final result. 
+ * It's related to a legislator, who'll be its creator.
+ */
+asset Elecciones identified by eleccionesID{
+  o String eleccionesID
+  o String descripcion
+  o Categoria[] categorias
+  o Boolean abierta
+  o Opcion resultado
+  --> Legislador creador
+}
+
+/*
+ * Defines a transaction where a citizen votes in a voting process.
+ */
+transaction EmiteVoto {
+  --> Ciudadano votante
+  --> Elecciones elecciones
+  o Opcion valor
+  o Boolean anulado
+}
+
+enum Categoria {
+  o MEDIOAMBIENTE
+  o ECONOMÍA
+  o SANIDAD
+}
+
+enum Opcion {
+  o FAVOR
+  o CONTRA
+}

@@ -19,7 +19,7 @@
 
 /**
  * Sample transaction
- * @param {org.example.agora.SampleTransaction} sampleTransaction
+ * @param {org.agora.SampleTransaction} sampleTransaction
  * @transaction
  */
 async function sampleTransaction(tx) {
@@ -30,12 +30,12 @@ async function sampleTransaction(tx) {
     tx.asset.value = tx.newValue;
 
     // Get the asset registry for the asset.
-    const assetRegistry = await getAssetRegistry('org.example.agora.SampleAsset');
+    const assetRegistry = await getAssetRegistry('org.agora.SampleAsset');
     // Update the asset in the asset registry.
     await assetRegistry.update(tx.asset);
 
     // Emit an event for the modified asset.
-    let event = getFactory().newEvent('org.example.agora', 'SampleEvent');
+    let event = getFactory().newEvent('org.agora', 'SampleEvent');
     event.asset = tx.asset;
     event.oldValue = oldValue;
     event.newValue = tx.newValue;
