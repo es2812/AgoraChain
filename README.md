@@ -1,16 +1,8 @@
 # AgoraChain
 A blockchain voting system based on liquid democracy developed with Hyperledger Composer
 
-# TODO
-- [] org.agora.cto
-    - [x] Participants
-    - [x] Assets
-    - [] Transactions
-- [] logic.js
-- [] permissions.acl
-- [] Figure out:
-    - Is the Voto asset necessary or can it be defined as a transaction?
-    - Who is the referenced Ciudadano in a represented vote?
-- [] Deploy
-- [] Angular API
-- [] Test
+# Proposed Project Milestones
+- [ ] _20.November.2018_. Finish proposal, analysis and design phase.
+- [ ] _25.December.2018_. Finish implementation.
+- [ ] _02.January.2019_ Finish API.
+- [ ] _09.January.2019_ End of project.
