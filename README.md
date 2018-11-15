@@ -75,9 +75,9 @@ Smart contracts are defined in Hyperledger Composer as **Transaction Functions**
 - On **close elections**, count the number of votes in the ledger and change the state of the asset to the result. An important aspect is to count **public votes** as the number of citizens that politician represents *unless* the citizen has issued their own vote in that election.
 - On **public vote**, ensure the restrictions of the **Representation** asset for each of the represented citizens are respected, if they're not, null **Representation**.
 
-#### System Diagram
+#### Domain Model
 
-![Class diagram of the system](https://raw.githubusercontent.com/es2812/AgoraChain/master/Diagrams/ClassDiagram.png "Class diagram")
+![Domain diagram of the system](https://raw.githubusercontent.com/es2812/AgoraChain/master/Diagrams/ClassDiagram.png "Domain diagram")
 
 ## References
 
