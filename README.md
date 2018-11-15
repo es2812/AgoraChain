@@ -77,7 +77,7 @@ Smart contracts are defined in Hyperledger Composer as **Transaction Functions**
 
 #### System Diagram
 
-![Class diagram of the system](https://github.com/es2812/AgoraChain/tree/master/Diagrams/ClassDiagram.png "Class diagram")
+![Class diagram of the system](https://raw.githubusercontent.com/es2812/AgoraChain/master/Diagrams/ClassDiagram.png "Class diagram")
 
 ## References
 
