@@ -46,7 +46,7 @@ Members of the blockchain. They may own assets and submit transactions. Each par
 These objects represent the (intangible) goods used in the system.
 
 - **Election**: This asset represents a voting process, it's owned by one legislator.
-- **Votes**: This asset represents a vote, it's owned by a citizen or politician.
+- **Vote**: This asset represents a vote, it's owned by a citizen or politician.
 - **Representation**: This asset represents a relationship of trust between a citizen and a politician.
 
 #### Transactions
@@ -74,6 +74,10 @@ Smart contracts are defined in Hyperledger Composer as **Transaction Functions**
 
 - On **close elections**, count the number of votes in the ledger and change the state of the asset to the result. An important aspect is to count **public votes** as the number of citizens that politician represents *unless* the citizen has issued their own vote in that election.
 - On **public vote**, ensure the restrictions of the **Representation** asset for each of the represented citizens are respected, if they're not, null **Representation**.
+
+#### System Diagram
+
+![Class diagram of the system](https://github.com/es2812/AgoraChain/tree/master/Diagrams/ClassDiagram.png "Class diagram")
 
 ## References
 
