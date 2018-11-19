@@ -18,16 +18,13 @@ After reviewing proposals on both Blockchain systems [\[1\]](#References) for tr
 2. Any citizen can declare themselves a "politician", and a citizen can set that politician as their representation. Each citizen can only have one representative at one given point.
 3. Votes issued directly by citizens are **anonymous**, except for that citizen.
 4. Votes issued by politicians are **public** to everyone in the network.
-5. Representation is **private**, except for the citizen represented.
-6. Representation can be nulled at any point, including automatic nulling based on a politician's choice in any given election.
-7. Citizens and politicians can change their vote until election is closed.
-8. To minimize bias, election results are public only after the election is closed.
-9. Citizens with representation can still vote directly, without that nulling the representation.
-
+5. Representation can be nulled at any point, including automatic nulling based on a politician's choice in any given election.
+6. Citizens and politicians can change their vote until election is closed.
+7. Citizens with representation can still vote directly, without that nulling the representation.
 
 ### System modelling
 
-This system will be implemented using a Blockchain, developed with Hyperledger Composer. Hyperledger allows permissioned blockchains, and Composer allows for easy modelling, deployment and usage of the system. Validation policies and security will probably require some direct interaction with Hyperledger Fabric, which is what Composer uses to deploy the network.
+This system will be implemented using a Blockchain, developed with Hyperledger Composer. Hyperledger allows permissioned blockchains, and Composer allows for easy modelling, deployment and usage of the system.
 
 Hyperledger Composer's modelling allows for three types of building blocks: participants, assets and transactions.
 
@@ -77,7 +74,27 @@ Smart contracts are defined in Hyperledger Composer as **Transaction Functions**
 
 #### Domain Model
 
-![Domain diagram of the system](https://raw.githubusercontent.com/es2812/AgoraChain/master/Diagrams/ClassDiagram.png "Domain diagram")
+![Domain diagram of the system](https://raw.githubusercontent.com/es2812/AgoraChain/master/Diagrams/ClassDiagram.png) 
+Domain diagram
+
+#### Privacy concerns
+
+Since it's an important principle of our system, there was a need to implement some levels of privacy in the *Anonymous vote* transaction and the *Vote* asset, which must keep a secret who the voter was.
+
+It was decided to include a user-set password, *ballotID*, which will be used to keep the voter ID on the transaction and on the Vote asset secret. Thus, only knowledge of this password will allow someone to check the voter. The voter id on the transaction and asset relating to the *anonymous vote* will be a hash of the sum of *ballotID* and *voterID*.
+
+This solution, however, might allow a citizen to vote many times with fraudulent passwords (since there's no way to know the voterID of a vote directly without the user-provided password). For that reason, the system will also keep a parallel, private blockchain, that registers whether a voter has voted in an election. This blockchain will be accessible only to the validator nodes in the system.
+
+
+#### Sequence diagrams
+
+![Anonymous Voting Sequence](https://raw.githubusercontent.com/es2812/AgoraChain/master/Diagrams/tx_voting.png) 
+Anonymous Vote Transaction Sequence Diagram
+![Public Voting Sequence](https://raw.githubusercontent.com/es2812/AgoraChain/master/Diagrams/tx_votingpolitic.png)
+Public Vote Transaction Sequence Diagram
+![Trust Sequence](https://raw.githubusercontent.com/es2812/AgoraChain/master/Diagrams/tx_trust.png)Trust Transaction Sequence Diagram
+![Election Management Sequence](https://raw.githubusercontent.com/es2812/AgoraChain/master/Diagrams/tx_elections.png)
+Election Creation/Opening/Closing Transaction Sequence Diagram
 
 ## References
 
