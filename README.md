@@ -3,7 +3,7 @@ A blockchain voting system based on liquid democracy developed with Hyperledger 
 
 ## Proposed Project Milestones
 
-- [ ] _20.November.2018_. Finish proposal, analysis and design phase.
+- [x] _20.November.2018_. Finish proposal, analysis and design phase.
 - [ ] _25.December.2018_. Finish implementation.
 - [ ] _02.January.2019_ Finish API.
 - [ ] _09.January.2019_ End of project.
@@ -35,7 +35,7 @@ The way Hyperledger Composer operates is with two blockchains, the **ledger**, w
 Members of the blockchain. They may own assets and submit transactions. Each participant in the network has an *Identity*, defined as a digital certificate and a private key.
 
 - **Citizens**: These participants can issue anonymous votes and delegate on politicians.
-- **Politicians**: These participants can be delegated on by citizens, and can issue public votes.
+- **Politicians**: These participants can be delegated on by citizens, and can issue public votes. The way a member of the blockchain declares himself a politician requires the issuing of a new identity, and will be done outside the blockchain itself (but still through the API).
 - **Legislators**: These participants can create, open, and close elections.
 
 #### Assets
@@ -53,6 +53,7 @@ The mechanism by which Participants interact with Assets.
 - Citizen transactions:
 
     - **Trust**: Creates a Representation asset between the Citizen and a Politician. 
+    - **NullTrust**: Deletes the Representation asset between the Citizen and his current representative.
     - **Anonymous vote**: Creates or modifies (if the citizen has already voted) the Vote asset by the Citizen, related to an Election asset.
 
 - Politician transactions:
@@ -69,7 +70,7 @@ The mechanism by which Participants interact with Assets.
 
 Smart contracts are defined in Hyperledger Composer as **Transaction Functions**, and will be invoked on a transaction. We define the following Transaction Functions in the system:
 
-- On **close elections**, count the number of votes in the ledger and change the state of the asset to the result. An important aspect is to count **public votes** as the number of citizens that politician represents *unless* the citizen has issued their own vote in that election.
+- On **close elections**, count the number of votes in the ledger and change the state of the asset to the result. An important aspect is to count **public votes** as the number of citizens that politician represents right now *unless* the citizen has issued their own vote in that election.
 - On **public vote**, ensure the restrictions of the **Representation** asset for each of the represented citizens are respected, if they're not, null **Representation**.
 
 #### Privacy concerns
