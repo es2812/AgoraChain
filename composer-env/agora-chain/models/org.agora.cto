@@ -12,69 +12,118 @@
  * limitations under the License.
  */
 
-/**
- * The model for AgoraChain is composed of:
- *
- *  Participants: Ciudadanos and Legisladores
- *  Assets:       Votos and Elecciones
- *  Transactions: Votar, Crear Elecciones, Abrir Elecciones, Cerrar Elecciones, Designar Representante
- *
- */
-
 namespace org.agora
 
 /*
- * Defines a citizen (Ciudadano). A citizen is identified by their ID, includes their name and  
- * last name, and can be related to another citizen, who'll be their representative.
- */
-participant Ciudadano identified by ciudadanoID{
-  o String ciudadanoID
-  o String nombre
-  o String apellidos
-  --> Ciudadano representante
+Participants:
+
+- Citizens: These participants can issue anonymous votes and delegate on politicians.
+- Politicians: These participants can be delegated on by citizens, and can issue public votes. The way a member of the blockchain declares himself a politician requires the issuing of a new identity, and will be done outside the blockchain itself (but still through the API).
+- Legislators: These participants can create, open, and close elections.
+*/
+
+participant Citizen identified by idCitizen {
+  o String idCitizen
+  o String name
+}
+
+participant Politician identified by idPolitician{
+  o String idPolitician
+  o String name
+  o String information
+}
+
+participant Legislator identified by idLegislator{
+  o String idLegislator
+  o String name
 }
 
 /*
- * Defines a legislator (Legislador). A legislator is identified by their ID and includes their 
- * name and last name.
- */
-participant Legislador identified by legisladorID{
-  o String legisladorID
-  o String nombre
-  o String apellidos
+Assets
+
+These objects represent the (intangible) goods used in the system.
+
+- Election: This asset represents a voting process, it's owned by one legislator.
+- PublicVote: This asset represents a public vote, it's owned by a politician.
+- AnonymousVote: This asset represents an anonymous vote, it doesn't have an owner but can be indexed by the secretVoterID (hash(voterID+password)).
+- Representation: This asset represents a relationship of trust between a citizen and a politician.
+*/
+
+asset Election identified by idElection{
+  o String idElection
+  o String description
+  o String category
+  o String[] options
+  o String result
+  o Boolean closed
+  --> Legislator Owner
+}
+
+asset PublicVote identified by idVote{
+  o String idVote
+  o String choice
+  --> Politician voter
+  --> Election elections
+}
+
+asset AnonymousVote identified by idVote{
+  o String idVote
+  o String choice
+  o String secretVoterID
+  --> Election elections
+}
+
+asset Representation identified by idRepresentation{
+  o String idRepresentation
+  o String[] restrictions
+  --> Citizen trustee
+  --> Politician trusted
 }
 
 /*
- * Defines a voting process (Elecciones). A voting process is identified by its ID and includes
- * a description, a list of categories, whether or not it's open and the final result. 
- * It's related to a legislator, who'll be its creator.
- */
-asset Elecciones identified by eleccionesID{
-  o String eleccionesID
-  o String descripcion
-  o Categoria[] categorias
-  o Boolean abierta
-  o Opcion resultado
-  --> Legislador creador
+Transactions
+  - Trust: Creates a Representation asset between the Citizen and a Politician. 
+  - NullTrust: Deletes the Representation asset between the Citizen and his current representative.
+  - Anonymous vote: Creates or modifies (if the citizen has already voted) the Vote asset by the Citizen, related to an Election asset.
+  - Public vote: Creates or modifies (if the politician has already voted) the Vote by the Politician, related to an Election asset.
+  - Create elections: Creates an Election asset.
+  - Open elections: Allows votes on an Election asset.
+  - Close elections: Stops allowing votes on an Election asset.
+*/
+
+transaction tx_trust {
+  o String[] restrictions
+  --> Citizen trustee
+  --> Politician trusted
 }
 
-/*
- * Defines a transaction where a citizen votes in a voting process.
- */
-transaction EmiteVoto {
-  --> Ciudadano votante
-  --> Elecciones elecciones
-  o Opcion valor
-  o Boolean anulado
+transaction tx_nulltrust {
+  --> Representation representationToNull
 }
 
-enum Categoria {
-  o MEDIOAMBIENTE
-  o ECONOMÍA
-  o SANIDAD
+transaction tx_createElections{
+  o String description
+  o String[] options
+  o String category
+  --> Legislator owner
 }
 
-enum Opcion {
-  o FAVOR
-  o CONTRA
+transaction tx_openElections{
+  --> Election elections
+}
+
+transaction tx_closeElections{
+  --> Election elections
+}
+
+transaction tx_publicVote{
+  o String choice
+  --> Election elections
+  --> Politician voter
+}
+
+transaction tx_secretVote{
+  o String choice
+  o String secretVoterID
+  --> Election elections
 }
