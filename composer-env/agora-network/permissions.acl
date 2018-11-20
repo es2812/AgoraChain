@@ -15,28 +15,12 @@
 /**
  * Sample access control list.
  */
-rule EverybodyCanReadEverything {
-    description: "Allow all participants read access to all resources"
-    participant: "org.agora.SampleParticipant"
-    operation: READ
-    resource: "org.agora.*"
-    action: ALLOW
-}
 
 rule EverybodyCanSubmitTransactions {
     description: "Allow all participants to submit transactions"
-    participant: "org.agora.SampleParticipant"
+    participant: "ANY"
     operation: CREATE
-    resource: "org.agora.SampleTransaction"
-    action: ALLOW
-}
-
-rule OwnerHasFullAccessToTheirAssets {
-    description: "Allow all participants full access to their assets"
-    participant(p): "org.agora.SampleParticipant"
-    operation: ALL
-    resource(r): "org.agora.SampleAsset"
-    condition: (r.owner.getIdentifier() === p.getIdentifier())
+    resource: "org.agora.net.SampleTransaction"
     action: ALLOW
 }
 

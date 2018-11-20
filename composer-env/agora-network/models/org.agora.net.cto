@@ -1,0 +1,106 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Write your model definitions here
+ */
+
+namespace org.agora.net
+
+participant Citizen identified by citizenID {
+  o String citizenID
+  o String name
+}
+
+participant Politician identified by politicianID {
+  o String politicianID
+  o String name
+  o String info
+}
+
+participant Legislator identified by legislatorID {
+  o String legislatorID
+  o String name
+}
+
+asset Election identified by idElection{
+  o String idElection
+  o String description
+  o String category
+  o String[] options
+  o String result
+  o Boolean closed
+  --> Legislator Owner
+}
+
+asset PublicVote identified by idVote{
+  o String idVote
+  o String choice
+  --> Politician voter
+  --> Election elections
+}
+
+asset AnonymousVote identified by idVote{
+  o String idVote
+  o String choice
+  o String secretVoterID
+  --> Election elections
+}
+
+asset Representation identified by idRepresentation{
+  o String idRepresentation //since there can only be one representation for a given citizen it can be indexed by hash(citizenID)
+  o String[] restrictions
+  --> Citizen trustee
+  --> Politician trusted
+}
+
+transaction TX_Trust {
+  o String[] restrictions
+  --> Citizen trustee
+  --> Politician trusted
+}
+
+transaction TX_Nulltrust {
+  --> Representation representationToNull
+}
+
+transaction TX_CreateElections{
+  o String description
+  o String[] options
+  o String category
+  --> Legislator owner
+}
+
+transaction TX_OpenElections{
+  --> Election elections
+}
+
+transaction TX_CloseElections{
+  --> Election elections
+}
+
+transaction TX_PublicVote{
+  o String choice
+  --> Election elections
+  --> Politician voter
+}
+
+transaction TX_SecretVote{
+  o String choice
+  o String secretVoterID
+  --> Election elections
+}
+
+transaction SampleDemo {
+}

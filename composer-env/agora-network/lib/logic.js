@@ -19,25 +19,15 @@
 
 /**
  * Sample transaction
- * @param {org.agora.SampleTransaction} sampleTransaction
+ * @param {org.agora.net.SampleDemo} sampleDemo
  * @transaction
  */
-async function sampleTransaction(tx) {
-    // Save the old value of the asset.
-    const oldValue = tx.asset.value;
+async function sampleDemo(tx) {
+    const factory = await getFactory();
+    var alicia = factory.newResource('org.agora.net','Citizen','CT_01');
+    alicia.name = 'Alicia'
 
-    // Update the asset with the new value.
-    tx.asset.value = tx.newValue;
-
-    // Get the asset registry for the asset.
-    const assetRegistry = await getAssetRegistry('org.agora.SampleAsset');
+    const assetRegistry = await getAssetRegistry('org.agora.net.Citizen');
     // Update the asset in the asset registry.
-    await assetRegistry.update(tx.asset);
-
-    // Emit an event for the modified asset.
-    let event = getFactory().newEvent('org.agora', 'SampleEvent');
-    event.asset = tx.asset;
-    event.oldValue = oldValue;
-    event.newValue = tx.newValue;
-    emit(event);
+    await assetRegistry.update(alicia);
 }

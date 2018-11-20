@@ -26,7 +26,7 @@ const chai = require('chai');
 chai.should();
 chai.use(require('chai-as-promised'));
 
-const namespace = 'org.agora';
+const namespace = 'org.example.mynetwork';
 const assetType = 'SampleAsset';
 const assetNS = namespace + '.' + assetType;
 const participantType = 'SampleParticipant';
