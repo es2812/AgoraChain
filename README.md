@@ -76,7 +76,7 @@ Smart contracts are defined in Hyperledger Composer as **Transaction Functions**
 
 Since it's an important principle of our system, there was a need to implement some levels of privacy in the *Anonymous vote* transaction and the *Vote* asset, which must keep a secret who the voter was, while still keeping the rest of the asset and transaction's content public.
 
-It was decided to include a user-set password, *ballotID*, which will be used to keep the voter ID on the transaction and on the Vote asset secret. Thus, only knowledge of this password will allow someone to check the voter. The voter id on the transaction and asset relating to the *anonymous vote* will be a hash of the sum of *ballotID* and *voterID*.
+It was decided to include a user-set password which will be used to keep the voter ID on the transaction and on the Vote asset secret. Thus, only knowledge of this password will allow someone to check the voter. The voter id on the transaction and asset relating to the *anonymous vote* will be a hash of the sum of *password* and *voterID*.
 
 This solution, however, might allow a citizen to vote many times with fraudulent passwords (since there's no way to know the voterID of a vote directly without the user-provided password). For that reason, the system will also keep a parallel, private blockchain, that registers whether a voter has voted in an election. This blockchain will be accessible only to the validator nodes in the system.
 
