@@ -72,19 +72,21 @@ Smart contracts are defined in Hyperledger Composer as **Transaction Functions**
 - On **close elections**, count the number of votes in the ledger and change the state of the asset to the result. An important aspect is to count **public votes** as the number of citizens that politician represents *unless* the citizen has issued their own vote in that election.
 - On **public vote**, ensure the restrictions of the **Representation** asset for each of the represented citizens are respected, if they're not, null **Representation**.
 
-#### Domain Model
-
-![Domain diagram of the system](https://raw.githubusercontent.com/es2812/AgoraChain/master/Diagrams/ClassDiagram.png) 
-Domain diagram
-
 #### Privacy concerns
 
-Since it's an important principle of our system, there was a need to implement some levels of privacy in the *Anonymous vote* transaction and the *Vote* asset, which must keep a secret who the voter was.
+Since it's an important principle of our system, there was a need to implement some levels of privacy in the *Anonymous vote* transaction and the *Vote* asset, which must keep a secret who the voter was, while still keeping the rest of the asset and transaction's content public.
 
 It was decided to include a user-set password, *ballotID*, which will be used to keep the voter ID on the transaction and on the Vote asset secret. Thus, only knowledge of this password will allow someone to check the voter. The voter id on the transaction and asset relating to the *anonymous vote* will be a hash of the sum of *ballotID* and *voterID*.
 
 This solution, however, might allow a citizen to vote many times with fraudulent passwords (since there's no way to know the voterID of a vote directly without the user-provided password). For that reason, the system will also keep a parallel, private blockchain, that registers whether a voter has voted in an election. This blockchain will be accessible only to the validator nodes in the system.
 
+As a consequence, the Vote asset will be duplicated, as a PublicVote that contains its owner (that must be a Politician) and an AnonymousVote that won't keep track of its owner, but rather will have a special _secretID_ field that will allow indexing with the citizen that issued it only with the given password.
+
+
+#### Domain Model
+
+![Domain diagram of the system](https://raw.githubusercontent.com/es2812/AgoraChain/master/Diagrams/ClassDiagram.png) 
+Domain diagram
 
 #### Sequence diagrams
 
