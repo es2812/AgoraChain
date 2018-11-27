@@ -1,0 +1,4 @@
+*.bna
+*.card
+node-report.*.txt
+DevServer_connection.json

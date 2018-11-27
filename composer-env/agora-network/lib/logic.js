@@ -24,10 +24,30 @@
  */
 async function sampleDemo(tx) {
     const factory = await getFactory();
-    var alicia = factory.newResource('org.agora.net','Citizen','CT_01');
-    alicia.name = 'Alicia'
+    const NS = 'org.agora.net';
+    //creating a couple of sample citizens
+    var alicia = factory.newResource(NS,'Citizen','CT_01');
+    var eli = factory.newResource(NS,'Citizen','CT_02');
+    alicia.name = 'Alicia';
+    eli.name = 'Eli';
 
-    const assetRegistry = await getAssetRegistry('org.agora.net.Citizen');
-    // Update the asset in the asset registry.
-    await assetRegistry.update(alicia);
+    var participantRegistry = await getParticipantRegistry(NS+'.Citizen');
+    // Update the participant in the participant registry.
+    await participantRegistry.addAll([alicia,eli]);
+    
+    //creating sample legislator
+    var diane = factory.newResource(NS,'Legislator','LG_01');
+    diane.name = 'Diane';
+    participantRegistry = await getParticipantRegistry(NS+'.Legislator');
+    // Update the participant in the participant registry.
+    await participantRegistry.add(diane);
+
+    //creating sample politician
+    var peter = factory.newResource(NS,'Politician','PL_01');
+    peter.name = 'Peter';
+    peter.info = 'I have morals for days!';
+    participantRegistry = await getParticipantRegistry(NS+'.Politician');
+    // Update the participant in the participant registry.
+    await participantRegistry.add(peter);
+    
 }

@@ -20,7 +20,7 @@ rule EverybodyCanSubmitTransactions {
     description: "Allow all participants to submit transactions"
     participant: "ANY"
     operation: CREATE
-    resource: "org.agora.net.SampleTransaction"
+    resource: "org.agora.net.*"
     action: ALLOW
 }
 
