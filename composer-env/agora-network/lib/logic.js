@@ -13,12 +13,43 @@
  */
 
 'use strict';
-/**
- * Write your transction processor functions here
- */
 
 /**
- * Sample transaction
+ * Implementation of the trust transaction.
+ * @param {org.agora.net.TX_Trust} trustTransaction
+ * @transaction
+ */
+async function trustTransaction(tx) {
+    //The trustee participant (of type Citizen) trusts the trusted participant (of type Citizen)
+    const trustee = tx.trustee;
+    const trusted = tx.trusted;
+    //Should we check types?
+    //The issuer can add a series of restrictions in the following format:
+    //[Trusted won't vote option P in elections with category K]
+    //We leave this TODO for now
+
+    const NS = 'org.agora.net';
+    //We check if the Representation asset exists
+    const representationRegistry = await getAssetRegistry(NS+'.Representation');
+    //The way Representation is indexed, we'll find it under the same ID as the trustee (unique for trustee)
+    check = await representationRegistry.exists(trustee.citizenID);
+    if(check){
+        asset = representationRegistry.get(trustee.citizenID);
+        asset.trusted = trusted;
+        await representationRegistry.update(asset);
+    }
+    else{
+        //We create it
+        const factory = await getFactory();
+        asset = factory.newResource(NS,'Representation',trustee.citizenID);
+        asset.trustee = trustee;
+        asset.trusted = trusted;
+        await representationRegistry.add(asset);
+    }    
+}
+
+/**
+ * Demo that creates some participants for testing purposes.
  * @param {org.agora.net.SampleDemo} sampleDemo
  * @transaction
  */

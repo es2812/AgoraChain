@@ -26,7 +26,7 @@ participant Citizen identified by citizenID {
 participant Politician identified by politicianID {
   o String politicianID
   o String name
-  o String info
+  o String info optional
 }
 
 participant Legislator identified by legislatorID {
@@ -34,39 +34,39 @@ participant Legislator identified by legislatorID {
   o String name
 }
 
-asset Election identified by idElection{
-  o String idElection
+asset Election identified by electionID{
+  o String electionID
   o String description
   o String category
   o String[] options
-  o String result
-  o Boolean closed
+  o String result default=""
+  o Boolean closed default=true
   --> Legislator Owner
 }
 
-asset PublicVote identified by idVote{
-  o String idVote
-  o String choice
+asset PublicVote identified by voteID{
+  o String voteID //hash(voterID+electionsID)
+  o String choice optional //optionality represents a blank vote
   --> Politician voter
   --> Election elections
 }
 
-asset AnonymousVote identified by idVote{
-  o String idVote
-  o String choice
+asset AnonymousVote identified by voteID{
+  o String voteID //hash(secretVoterID+electionsID)
+  o String choice optional //optionality represents a blank vote
   o String secretVoterID
   --> Election elections
 }
 
-asset Representation identified by idRepresentation{
-  o String idRepresentation //since there can only be one representation for a given citizen it can be indexed by hash(citizenID)
-  o String[] restrictions
+asset Representation identified by trusteeID{
+  o String trusteeID
+  o String[] restrictions optional
   --> Citizen trustee
   --> Politician trusted
 }
 
 transaction TX_Trust {
-  o String[] restrictions
+  o String[] restrictions optional
   --> Citizen trustee
   --> Politician trusted
 }
@@ -91,13 +91,13 @@ transaction TX_CloseElections{
 }
 
 transaction TX_PublicVote{
-  o String choice
+  o String choice optional //optionality represents blank vote
   --> Election elections
   --> Politician voter
 }
 
 transaction TX_SecretVote{
-  o String choice
+  o String choice optional //optionality represents blank vote
   o String secretVoterID
   --> Election elections
 }
