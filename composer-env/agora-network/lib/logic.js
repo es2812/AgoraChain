@@ -20,9 +20,6 @@
  * @transaction
  */
 async function trustTransaction(tx) {
-    //The trustee participant (of type Citizen) trusts the trusted participant (of type Citizen)
-    const trustee = tx.trustee;
-    const trusted = tx.trusted;
     //Should we check types?
     //The issuer can add a series of restrictions in the following format:
     //[Trusted won't vote option P in elections with category K]
@@ -32,20 +29,38 @@ async function trustTransaction(tx) {
     //We check if the Representation asset exists
     const representationRegistry = await getAssetRegistry(NS+'.Representation');
     //The way Representation is indexed, we'll find it under the same ID as the trustee (unique for trustee)
-    check = await representationRegistry.exists(trustee.citizenID);
+    check = await representationRegistry.exists(tx.trustee.getIdentifier());
     if(check){
-        asset = representationRegistry.get(trustee.citizenID);
-        asset.trusted = trusted;
-        await representationRegistry.update(asset);
+        console.log("Representation#"+tx.trustee.getIdentifier()+" exists");
+        rep = await representationRegistry.get(tx.trustee.getIdentifier());
+        rep.trusted = tx.trusted;
+        await representationRegistry.update(rep);
+        console.log("Representation#"+rep.getIdentifier()+" updated");
     }
     else{
+        console.log("Representation#"+tx.trustee.getIdentifier()+" exists");
         //We create it
         const factory = await getFactory();
-        asset = factory.newResource(NS,'Representation',trustee.citizenID);
-        asset.trustee = trustee;
-        asset.trusted = trusted;
-        await representationRegistry.add(asset);
+        rep = factory.newResource(NS,'Representation',tx.trustee.getIdentifier());
+        rep.trustee = tx.trustee;
+        rep.trusted = tx.trusted;
+        await representationRegistry.add(rep);
+        console.log("Representation#"+rep.getIdentifier()+" added");
     }    
+}
+
+/**
+ * Implementation of the null trust transaction.
+ * @param {org.agora.net.TX_Nulltrust} nullTrustTransaction
+ * @transaction
+ */
+async function nullTrustTransaction(tx){
+    let id = tx.representationToNull.getIdentifier();
+    const NS = 'org.agora.net';
+    var representationRegistry = await getAssetRegistry(NS+'.Representation');
+    //we remove the given representation
+    await representationRegistry.remove(tx.representationToNull);
+    console.log("Representation#"+id+" deleted");
 }
 
 /**
@@ -57,28 +72,31 @@ async function sampleDemo(tx) {
     const factory = await getFactory();
     const NS = 'org.agora.net';
     //creating a couple of sample citizens
-    var alicia = factory.newResource(NS,'Citizen','CT_01');
-    var eli = factory.newResource(NS,'Citizen','CT_02');
-    alicia.name = 'Alicia';
-    eli.name = 'Eli';
+    var alicia = factory.newResource(NS,'Citizen','Alicia');
+    var eli = factory.newResource(NS,'Citizen','Eli');
+    alicia.name = 'Alicia Florrick';
+    eli.name = 'Eli Gold';
 
     var participantRegistry = await getParticipantRegistry(NS+'.Citizen');
     // Update the participant in the participant registry.
     await participantRegistry.addAll([alicia,eli]);
     
     //creating sample legislator
-    var diane = factory.newResource(NS,'Legislator','LG_01');
-    diane.name = 'Diane';
+    var diane = factory.newResource(NS,'Legislator','Diane');
+    diane.name = 'Diane Lockhart';
     participantRegistry = await getParticipantRegistry(NS+'.Legislator');
     // Update the participant in the participant registry.
     await participantRegistry.add(diane);
 
-    //creating sample politician
-    var peter = factory.newResource(NS,'Politician','PL_01');
-    peter.name = 'Peter';
+    //creating sample politicians
+    var peter = factory.newResource(NS,'Politician','Peter');
+    peter.name = 'Peter Florrick';
     peter.info = 'I have morals for days!';
+    var will = factory.newResource(NS,'Politician','Will');
+    will.name = 'Will Gardner';
     participantRegistry = await getParticipantRegistry(NS+'.Politician');
     // Update the participant in the participant registry.
-    await participantRegistry.add(peter);
-    
+    await participantRegistry.addAll([peter,will]);
+
 }
+

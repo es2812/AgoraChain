@@ -1,0 +1,5 @@
+composer transaction submit -c admin@agora-network -d '{"$class":"org.agora.net.SampleDemo"}'
+composer transaction submit -c admin@agora-network -d '{"$class":"org.agora.net.TX_Trust", "trustee":"resource:org.agora.net.Citizen#Alicia", "trusted":"resource:org.agora.net.Politician#Peter"}'
+composer transaction submit -c admin@agora-network -d '{"$class":"org.agora.net.TX_Trust", "trustee":"resource:org.agora.net.Citizen#Alicia", "trusted":"resource:org.agora.net.Politician#Will"}'
+composer transaction submit -c admin@agora-network -d '{"$class":"org.agora.net.TX_Trust", "trustee":"resource:org.agora.net.Citizen#Eli", "trusted":"resource:org.agora.net.Politician#Peter"}'
+composer transaction submit -c admin@agora-network -d '{"$class":"org.agora.net.TX_Nulltrust", "representationToNull":"resource:org.agora.net.Representation#Eli"}'
