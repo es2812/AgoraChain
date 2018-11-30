@@ -81,6 +81,42 @@ async function createElectionTransacton(tx){
     await electionRegistry.add(created_elections);
 }
 
+/**
+ * Implementation of the open elections transaction.
+ * @param {org.agora.net.TX_OpenElections} openElectionsTransaction
+ * @transaction
+ */
+async function openElectionTransacton(tx){
+    //This transaction takes the election to be opened
+    if(tx.elections.closed){
+
+        tx.elections.closed = false;
+
+        let electionRegistry = await getAssetRegistry(NS+'.Election');
+        await electionRegistry.update(tx.elections);
+    }
+    else{
+        throw new Error(tx.elections+" is already open");
+    }
+}
+
+/**
+ * Implementation of the close elections transaction.
+ * @param {org.agora.net.TX_CloseElections} closeElectionsTransaction
+ * @transaction
+ */
+async function closeElectionTransacton(tx){
+    //This transaction takes the election to be closed
+    if(!tx.elections.closed){
+        tx.elections.closed = true;
+
+        let electionRegistry = await getAssetRegistry(NS+'.Election');
+        await electionRegistry.update(tx.elections);
+    }
+    else{
+        throw new Error(tx.elections+" is already closed");
+    }
+}
 
 /**
  * Demo that creates some participants for testing purposes.
