@@ -18,20 +18,20 @@
 
 namespace org.agora.net
 
-participant Citizen identified by citizenID {
-  o String citizenID
+participant Person identified by id{
+  o String id
   o String name
+  o String lastname
 }
 
-participant Politician identified by politicianID {
-  o String politicianID
-  o String name
+participant Citizen extends Person {
+}
+
+participant Politician extends Person{
   o String info optional
 }
 
-participant Legislator identified by legislatorID {
-  o String legislatorID
-  o String name
+participant Legislator extends Person {
 }
 
 asset Election identified by electionID{
@@ -44,18 +44,18 @@ asset Election identified by electionID{
   --> Legislator Owner
 }
 
-asset PublicVote identified by voteID{
-  o String voteID //hash(voterID+electionsID)
-  o String choice optional //optionality represents a blank vote
-  --> Politician voter
+asset Vote identified by voteID{
+  o String voteID
+  o String choice optional //optionality represents blank vote
   --> Election elections
 }
 
-asset AnonymousVote identified by voteID{
-  o String voteID //hash(secretVoterID+electionsID)
-  o String choice optional //optionality represents a blank vote
+asset PublicVote extends Vote{
+  --> Politician voter
+}
+
+asset AnonymousVote extends Vote{
   o String secretVoterID
-  --> Election elections
 }
 
 asset Representation identified by trusteeID{
