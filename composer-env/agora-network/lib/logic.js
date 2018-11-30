@@ -112,9 +112,49 @@ async function closeElectionTransacton(tx){
 
         let electionRegistry = await getAssetRegistry(NS+'.Election');
         await electionRegistry.update(tx.elections);
+
+        //TODO: count votes
     }
     else{
         throw new Error(tx.elections+" is already closed");
+    }
+}
+
+/**
+ * Implementation of the public vote transaction.
+ * @param {org.agora.net.TX_PublicVote} publicVoteTransaction
+ * @transaction
+ */
+async function publicVoteTransaction(tx){
+    //we can only vote on open elections
+    if(tx.elections.closed){
+        throw new Error("Elections "+tx.elections+" is not open");
+    }
+    else{
+        let voteRegistry = await getAssetRegistry(NS+'.PublicVote');
+        //we need to check whether the vote already exists
+        //the id should be concat(electionsID+politicianID)
+        let id = tx.elections.getIdentifier()+tx.voter.getIdentifier();
+        let check = await voteRegistry.exists(id);
+        if(check){
+            let vote = await voteRegistry.get(id);
+            //we update the vote
+            if(tx.choice!='' && tx.choice!=null){
+                vote.choice = tx.choice;
+            }
+            voteRegistry.update(vote);
+        }
+        else{
+            //we create the vote
+            const factory = await getFactory();
+            let vote = factory.newResource(NS,'PublicVote',id);
+            vote.elections = tx.elections;
+            vote.voter = tx.voter;
+            if(tx.choice!='' && tx.choice!=null){
+                vote.choice = tx.choice;
+            }
+            voteRegistry.add(vote);
+        }
     }
 }
 
@@ -157,4 +197,3 @@ async function sampleDemo(tx) {
     // Update the participant in the participant registry.
     await participantRegistry.addAll([peter,will]);
 }
-
