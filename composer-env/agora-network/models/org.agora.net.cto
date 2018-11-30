@@ -18,7 +18,7 @@
 
 namespace org.agora.net
 
-participant Person identified by id{
+abstract participant Person identified by id{
   o String id
   o String name
   o String lastname
@@ -39,13 +39,13 @@ asset Election identified by electionID{
   o String description
   o String category
   o String[] options
-  o String result default=""
-  o Boolean closed default=true
-  --> Legislator Owner
+  o String result default="" optional
+  o Boolean closed default=true optional
+  --> Legislator owner
 }
 
-asset Vote identified by voteID{
-  o String voteID
+abstract asset Vote identified by voteID{
+  o String voteID //will be a combination of politicianID/secretVoterID+electionsID
   o String choice optional //optionality represents blank vote
   --> Election elections
 }
@@ -76,6 +76,7 @@ transaction TX_Nulltrust {
 }
 
 transaction TX_CreateElections{
+  o String electionID //blockchain requires a deterministic ID, so the ID should be created on the client side
   o String description
   o String[] options
   o String category

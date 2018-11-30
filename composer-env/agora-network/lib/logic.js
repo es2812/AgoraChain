@@ -13,23 +13,22 @@
  */
 
 'use strict';
-
+const NS = 'org.agora.net';
 /**
  * Implementation of the trust transaction.
  * @param {org.agora.net.TX_Trust} trustTransaction
  * @transaction
  */
 async function trustTransaction(tx) {
-    //Should we check types?
     //The issuer can add a series of restrictions in the following format:
     //[Trusted won't vote option P in elections with category K]
     //We leave this TODO for now
 
-    const NS = 'org.agora.net';
     //We check if the Representation asset exists
     const representationRegistry = await getAssetRegistry(NS+'.Representation');
     //The way Representation is indexed, we'll find it under the same ID as the trustee (unique for trustee)
-    check = await representationRegistry.exists(tx.trustee.getIdentifier());
+    let check = await representationRegistry.exists(tx.trustee.getIdentifier());
+    let rep;
     if(check){
         console.log("Representation#"+tx.trustee.getIdentifier()+" exists");
         rep = await representationRegistry.get(tx.trustee.getIdentifier());
@@ -56,12 +55,32 @@ async function trustTransaction(tx) {
  */
 async function nullTrustTransaction(tx){
     let id = tx.representationToNull.getIdentifier();
-    const NS = 'org.agora.net';
-    var representationRegistry = await getAssetRegistry(NS+'.Representation');
+    let representationRegistry = await getAssetRegistry(NS+'.Representation');
     //we remove the given representation
     await representationRegistry.remove(tx.representationToNull);
     console.log("Representation#"+id+" deleted");
 }
+
+/**
+ * Implementation of the create election transaction.
+ * @param {org.agora.net.TX_CreateElections} createElectionTransaction
+ * @transaction
+ */
+async function createElectionTransacton(tx){
+    //This transaction takes an id, descriptor for the elections, a list of options, a category and its owner
+
+    const factory = await getFactory();
+
+    let created_elections = factory.newResource(NS,'Election',tx.electionID);
+    created_elections.description = tx.description;
+    created_elections.options = tx.options;
+    created_elections.category = tx.category;
+    created_elections.owner = tx.owner;
+
+    let electionRegistry = await getAssetRegistry(NS+'.Election');
+    await electionRegistry.add(created_elections);
+}
+
 
 /**
  * Demo that creates some participants for testing purposes.
@@ -70,33 +89,36 @@ async function nullTrustTransaction(tx){
  */
 async function sampleDemo(tx) {
     const factory = await getFactory();
-    const NS = 'org.agora.net';
     //creating a couple of sample citizens
-    var alicia = factory.newResource(NS,'Citizen','Alicia');
-    var eli = factory.newResource(NS,'Citizen','Eli');
-    alicia.name = 'Alicia Florrick';
-    eli.name = 'Eli Gold';
+    let alicia = factory.newResource(NS,'Citizen','CT_01');
+    let eli = factory.newResource(NS,'Citizen','CT_02');
+    alicia.name = 'Alicia';
+    alicia.lastname = 'Florrick';
+    eli.name = 'Eli';
+    eli.lastname = 'Gold';
 
-    var participantRegistry = await getParticipantRegistry(NS+'.Citizen');
+    let participantRegistry = await getParticipantRegistry(NS+'.Citizen');
     // Update the participant in the participant registry.
     await participantRegistry.addAll([alicia,eli]);
     
     //creating sample legislator
-    var diane = factory.newResource(NS,'Legislator','Diane');
-    diane.name = 'Diane Lockhart';
+    let diane = factory.newResource(NS,'Legislator','LG_01');
+    diane.name = 'Diane';
+    diane.lastname = 'Lockhart';
     participantRegistry = await getParticipantRegistry(NS+'.Legislator');
     // Update the participant in the participant registry.
     await participantRegistry.add(diane);
 
     //creating sample politicians
-    var peter = factory.newResource(NS,'Politician','Peter');
-    peter.name = 'Peter Florrick';
+    let peter = factory.newResource(NS,'Politician','PL_01');
+    peter.name = 'Peter';
+    peter.lastname = 'Florrick';
     peter.info = 'I have morals for days!';
-    var will = factory.newResource(NS,'Politician','Will');
-    will.name = 'Will Gardner';
+    let will = factory.newResource(NS,'Politician','PL_02');
+    will.name = 'Will';
+    will.lastname = 'Gardner';
     participantRegistry = await getParticipantRegistry(NS+'.Politician');
     // Update the participant in the participant registry.
     await participantRegistry.addAll([peter,will]);
-
 }
 
