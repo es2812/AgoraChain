@@ -45,7 +45,7 @@ asset Election identified by electionID{
 }
 
 abstract asset Vote identified by voteID{
-  o String voteID //will be a combination of politicianID/secretVoterID+electionsID
+  o String voteID //will be politicianID+electionsID or anonymousHash
   o String choice optional //optionality represents blank vote
   --> Election elections
 }
@@ -55,7 +55,6 @@ asset PublicVote extends Vote{
 }
 
 asset AnonymousVote extends Vote{
-  o String secretVoterID
 }
 
 asset Representation identified by trusteeID{
@@ -63,6 +62,39 @@ asset Representation identified by trusteeID{
   o String[] restrictions optional
   --> Citizen trustee
   --> Politician trusted
+}
+
+/**
+  * This transaction represents that the voter has voted in the elections. 
+  * Viewing this transaction will only be allowed for the validator nodes.
+  *
+  * This transaction returns a ballotID which the voter can use to vote
+  * and change their vote via the SecretVote transaction.
+ */
+@returns(String)
+transaction TX_Registry{
+  o String secret //used to generate the ballotID, recommended a random string (can be generated in client side)
+  --> Citizen voter 
+  --> Election elections
+}
+
+/**
+  * This asset represents a ballot "given" to the citizen after they have registered
+  * that they're going to vote.
+  *
+  * Its purpose is to check whether a citizen has already voted in an election,
+  * thus changing his vote on the next AnonymousVote transaction, or not counting
+  * their representation's vote.
+  *
+  * It is indexed by the hash(ballotID+voterID) since that is the identifier the citizen
+  * will use to vote, and this simplifies the access.
+  *
+  * This asset must be kept secret except for validator nodes.
+ */
+asset Ballot identified by anonymousHash{
+  o String anonymousHash //hash(ballotID+voterID)
+  --> Citizen voter
+  --> Election elections
 }
 
 transaction TX_Trust {
@@ -99,7 +131,7 @@ transaction TX_PublicVote{
 
 transaction TX_SecretVote{
   o String choice optional //optionality represents blank vote
-  o String secretVoterID
+  o String anonymousHash //hash(voterID+ballotID) calculated on client side
   --> Election elections
 }
 
