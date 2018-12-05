@@ -21,7 +21,7 @@ const NS = 'org.agora.net';
  */
 async function trustTransaction(tx) {
     //The issuer can add a series of restrictions in the following format:
-    //[Trusted won't vote option P in elections with category K]
+    //[Trusted won't vote option P in election with category K]
     //We leave this TODO for now
 
     //We check if the Representation asset exists
@@ -67,87 +67,191 @@ async function nullTrustTransaction(tx){
  * @transaction
  */
 async function createElectionTransacton(tx){
-    //This transaction takes an id, descriptor for the elections, 
+    //This transaction takes an id, descriptor for the election, 
     //a list of options, a category and its owner
     const factory = await getFactory();
 
-    let created_elections = factory.newResource(NS,'Election',tx.electionID);
-    created_elections.description = tx.description;
-    created_elections.options = tx.options;
-    created_elections.category = tx.category;
-    created_elections.owner = tx.owner;
+    let created_election = factory.newResource(NS,'Election',tx.electionID);
+    created_election.description = tx.description;
+    created_election.options = tx.options;
+    created_election.category = tx.category;
+    created_election.owner = tx.owner;
 
     let electionRegistry = await getAssetRegistry(NS+'.Election');
-    await electionRegistry.add(created_elections);
+    await electionRegistry.add(created_election);
     console.log("Election#"+tx.electionID+" created");
 }
 
 /**
- * Implementation of the open elections transaction.
+ * Implementation of the open election transaction.
  * @param {org.agora.net.TX_OpenElections} openElectionsTransaction
  * @transaction
  */
 async function openElectionTransacton(tx){
     //This transaction takes the election to be opened
-    if(tx.elections.closed){
+    if(tx.election.closed){
 
-        tx.elections.closed = false;
+        tx.election.closed = false;
 
         let electionRegistry = await getAssetRegistry(NS+'.Election');
-        await electionRegistry.update(tx.elections);
-        console.log("Election#"+tx.elections.getIdentifier()+" opened");
+        await electionRegistry.update(tx.election);
+        console.log("Election#"+tx.election.getIdentifier()+" opened");
     }
     else{
-        throw new Error("Election#"+ tx.elections.getIdentifier() +" is already open");
+        throw new Error("Election#"+ tx.election.getIdentifier() +" is already open");
     }
 }
 
-async function countVotes(voteRegistry,electionsID){
-    votes = await voteRegistry.getAll();
-    //we keep votes for this election only
-    console.log("Total votes of this type in the system: ");
-    console.log(votes);
+async function countVotes(votes,nr){
     var results = {};
-    votes = votes.filter(v => v.elections.getIdentifier() == electionsID);
     if(votes.length > 0){
-        votes = votes.map(v => v.choice);
-        console.log("Votes in Election#"+electionsID+": ");
-        console.log(votes);
-        votes.forEach(curr => (curr in results) ? results[curr]+=1:results[curr]=1);
+        if(nr!=null){
+            votes.forEach(v => 
+                (v.choice in results) ? 
+                results[v.choice]+=1+nr[v.voter.getIdentifier()]
+                :results[v.choice]=1+nr[v.voter.getIdentifier()]);
+        }
+        else{
+            votes.forEach(v => (v.choice in results) ? results[v.choice]+=1:results[v.choice]=1);
+        }
     }
     return results;
 }
 
 /**
- * Implementation of the close elections transaction.
+ * Implementation of the close election transaction.
  * @param {org.agora.net.TX_CloseElections} closeElectionsTransaction
  * @transaction
  */
 async function closeElectionTransacton(tx){
     //This transaction takes the election to be closed
-    if(!tx.elections.closed){
-        tx.elections.closed = true;
+    if(!tx.election.closed){
+        tx.election.closed = true;
 
         let electionRegistry = await getAssetRegistry(NS+'.Election');
-        await electionRegistry.update(tx.elections);
-        console.log("Election#"+tx.elections.getIdentifier()+" closed");
+        console.log("Election#"+tx.election.getIdentifier()+" closed");
 
         //counting votes
+        //TODO: account for NULL votes
         let publicVoteRegistry = await getAssetRegistry(NS+'.PublicVote');
         let secretVoteRegistry = await getAssetRegistry(NS+'.AnonymousVote');
 
-        //counting secret votes:
-        let resultsecret = await countVotes(secretVoteRegistry,tx.elections.getIdentifier());
+        //counting secret votes directly:
+        let votesS = await secretVoteRegistry.getAll();
+        //we keep only votes from this election
+        votesS = votesS.filter(v => v.election.getIdentifier() == tx.election.getIdentifier());
+        console.log("Votos Secretos: ");
+        console.log(votesS);
+        let resultsecret = await countVotes(votesS,null);
         console.log("Results Secret: ");
         console.log(resultsecret);
-        let resultpublic = await countVotes(publicVoteRegistry,tx.elections.getIdentifier());
+
+        //in public voting we must consider activate representations 
+        //belonging to citizens who haven't voted secretly already
+        let votesP = await publicVoteRegistry.getAll();
+        //we keep only votes from this election
+        votesP = votesP.filter(v => v.election.getIdentifier() == tx.election.getIdentifier());
+        console.log("Votos Públicos:");
+        console.log(votesP);
+        //for each public vote we have to track down every representation in which the politician is involved
+        let representationRegistry = await getAssetRegistry(NS+'.Representation');
+        let representations = await representationRegistry.getAll();
+        console.log("Representaciones:");
+        console.log(representations);
+
+        if(representations.length>0){ //if there are no representations we simply count the votes normally
+            //we store the list of ids from politicians that have voted
+            let politicians = votesP.map(v=>v.voter.getIdentifier());
+            console.log("Políticos:")
+            console.log(politicians);
+            //for each politician we calculate how many representations they are in
+            let count = {}; 
+            politicians.forEach(p => count[p]=representations.filter(r=>r.trusted.getIdentifier()==p).length);
+
+            console.log("Cuenta representaciones:");
+            console.log(count);
+            //for each voter registered in the election, we check:
+            // (1) if they voted
+            // (2) if they have representation
+            //if (1) and (2) are true we subtract one vote from their trusted politician's count
+            let ballotRegitry = await getAssetRegistry(NS+'.Ballot');
+            let ballots = await ballotRegitry.getAll();
+            ballots = ballots.filter(b=>b.election.getIdentifier()==tx.election.getIdentifier());
+
+            //(1)
+            let identifierVotes = votesS.map(v=>v.getIdentifier());
+            let citizensWhoVoted = ballots.filter(b => b.anonymousHash in identifierVotes).map(b => b.voter);
+            console.log("Citizens who voted:")
+            console.log(citizensWhoVoted)
+            //(2)
+            citizensWhoVoted = citizensWhoVoted.map(c => c.getIdentifier());
+            representations = representations.filter(r => r.trustee.getIdentifier() in citizensWhoVoted); //holds all the representations whose trustees have voted
+            console.log("Representations whose trustees have voted:")
+            console.log(representations)
+
+            //we fix the count 
+            representations.forEach(r => count[r.trusted.getIdentifier()]-=1);
+            console.log("Count fixed:")
+            console.log(count);
+
+            var resultpublic = await countVotes(votesP,count);      
+        }
+        else{
+            var resultpublic = await countVotes(votesP,null);
+        }
         console.log("Results Public: ");
         console.log(resultpublic);
         
-        //TODO: consider representations
+        //we reduce resultpublic and resultsecret into one array
+        //in the same order than the options array in the election 
+        //and set it as the result
+        let options = tx.election.options;
+        let array_results = new Array(options.length).fill(0);
+        let choicesInPublic = Object.keys(resultpublic);
+        let choicesInSecret = Object.keys(resultsecret);
+        
+        options.forEach(function(op,index) {
+            if(choicesInPublic.includes(op)){
+                array_results[index]+=resultpublic[op];
+            }
+        });
+        options.forEach(function(op,index){
+            if(choicesInSecret.includes(op)){
+                array_results[index]+=resultsecret[op];
+            }   
+        });
+
+        //we add all possible write-ins as extra options in the field in the election asset
+        //and add the number of votes at the end of the result array in the same order
+        let writeins_ = new Set(choicesInPublic.filter(c => 
+            !(options.includes(c))).concat(choicesInSecret.filter(c => !(options.includes(c)))));
+        let writeins = Array.from(writeins_)
+        console.log("Write-ins:");
+        console.log(writeins);
+        if(writeins.length>0){
+            empty = new Array(writeins.length).fill(0);
+            array_results = array_results.concat(empty); //we extend the results array to also contain indexes for the writeins
+
+            writeins.forEach(function(op,index) {
+                if(choicesInPublic.includes(op)){
+                    array_results[options.length+index]+=resultpublic[op]; //the write-ins go after all the original options
+                }
+            });
+            writeins.forEach(function(op,index){
+                if(choicesInSecret.includes(op)){
+                    array_results[options.length+index]+=resultsecret[op]; //the write-ins go after all the original options
+                }   
+            });
+
+            tx.election.writeins = writeins;
+        }
+        tx.election.results = array_results;
+
+        await electionRegistry.update(tx.election);
+        console.log("Election#"+tx.election.getIdentifier()+" updated.");
     }
     else{
-        throw new Error("Election#"+tx.elections.getIdentifier()+" is already closed");
+        throw new Error("Election#"+tx.election.getIdentifier()+" is already closed");
     }
 }
 
@@ -157,15 +261,15 @@ async function closeElectionTransacton(tx){
  * @transaction
  */
 async function publicVoteTransaction(tx){
-    //we can only vote on open elections
-    if(tx.elections.closed){
-        throw new Error("Elections "+tx.elections+" is not open");
+    //we can only vote on open election
+    if(tx.election.closed){
+        throw new Error("Elections "+tx.election+" is not open");
     }
     else{
         let voteRegistry = await getAssetRegistry(NS+'.PublicVote');
         //we need to check whether the vote already exists
-        //the id should be concat(electionsID,politicianID)
-        let id = tx.elections.getIdentifier()+tx.voter.getIdentifier();
+        //the id should be concat(electionID,politicianID)
+        let id = tx.election.getIdentifier()+tx.voter.getIdentifier();
         let check = await voteRegistry.exists(id);
         if(check){
             let vote = await voteRegistry.get(id);
@@ -175,20 +279,20 @@ async function publicVoteTransaction(tx){
             }
             voteRegistry.update(vote);
             console.log("Vote#"+id+" issued by Politician#"+tx.voter.getIdentifier()+
-            " in Election#"+tx.elections.getIdentifier()+" updated");
+            " in Election#"+tx.election.getIdentifier()+" updated");
         }
         else{
             //we create the vote
             const factory = await getFactory();
             let vote = factory.newResource(NS,'PublicVote',id);
-            vote.elections = tx.elections;
+            vote.election = tx.election;
             vote.voter = tx.voter;
             if(tx.choice!='' && tx.choice!=null){
                 vote.choice = tx.choice;
             }
             voteRegistry.add(vote);
             console.log("Vote#"+id+" issued by Politician#"+tx.voter.getIdentifier()+
-            " in Election#"+tx.elections.getIdentifier()+" created");
+            " in Election#"+tx.election.getIdentifier()+" created");
         }
     }
 }
@@ -199,9 +303,9 @@ async function publicVoteTransaction(tx){
  * @transaction
  */
 async function secretVoteTransaction(tx){
-    //we can only vote on open elections
-    if(tx.elections.closed){
-        throw new Error("Elections "+tx.elections+" is not open");
+    //we can only vote on open election
+    if(tx.election.closed){
+        throw new Error("Elections "+tx.election+" is not open");
     }
     else{
         //citizen must have registered to vote beforehand
@@ -224,18 +328,18 @@ async function secretVoteTransaction(tx){
                 }
                 await voteRegistry.update(vote);
                 console.log("Vote#"+tx.anonymousHash+
-                " in Election#"+tx.elections.getIdentifier()+" updated");
+                " in Election#"+tx.election.getIdentifier()+" updated");
             }
             else{
                 let factory = await getFactory();
                 let vote =  factory.newResource(NS,'AnonymousVote',tx.anonymousHash);
-                vote.elections = tx.elections;
+                vote.election = tx.election;
                 if(tx.choice){
                     vote.choice = tx.choice;
                 }
                 await voteRegistry.add(vote);
                 console.log("Vote#"+tx.anonymousHash+
-                " in Election#"+tx.elections.getIdentifier()+" added");
+                " in Election#"+tx.election.getIdentifier()+" added");
             }
         }
 
@@ -251,24 +355,24 @@ async function registerTransaction(tx){
     //we check that the user isn't already registered
     let ballotRegistry = await getAssetRegistry(NS+'.Ballot');
     let ballots = await ballotRegistry.getAll();
-    ballots = ballots.filter(ballot => ballot.elections==tx.elections && ballot.voter == tx.voter);
+    ballots = ballots.filter(ballot => ballot.election==tx.election && ballot.voter == tx.voter);
     let userIsRegistered = (ballots.length!=0);
 
     if(!userIsRegistered){
         //we generate a ballotID
-        //TODO: hash(tx.secret+tx.voterID+tx.electionsID)
-        let ballotID = tx.secret+tx.voter.getIdentifier()+tx.elections.getIdentifier();
+        //TODO: hash(tx.secret+tx.voterID+tx.electionID)
+        let ballotID = tx.secret+tx.voter.getIdentifier()+tx.election.getIdentifier();
 
         let factory = await getFactory();
         let ballot =  factory.newResource(NS,'Ballot',ballotID+tx.voterID.getIdentifier());
         await ballotRegistry.add(ballot);
         console.log("Ballot#"+ballot.getIdentifier()+" from Citizen#"+tx.voter.getIdentifier()+
-        " in Election#"+tx.elections.getIdentifier()+" created");
+        " in Election#"+tx.election.getIdentifier()+" created");
         console.log("ballotID: "+ballotID);
         return ballotID;
     }
     else{
-        throw new Error("Citizen#"+tx.voter.getIdentifier()+" is already registered to vote in Election#"+tx.elections.getIdentifier());
+        throw new Error("Citizen#"+tx.voter.getIdentifier()+" is already registered to vote in Election#"+tx.election.getIdentifier());
     }    
 }
 
@@ -322,18 +426,23 @@ async function sampleDemo(tx) {
     let electionRegistry = await getAssetRegistry(NS+'.Election');
     await electionRegistry.add(e01);
 
+    //We create some representations
+    let rp01 = factory.newResource(NS,'Representation','CT_02PL_01');
+    rp01.trustee = eli;
+    rp01.trusted = peter;
+    
+    let representationRegistry = await getAssetRegistry(NS+'.Representation');
+    await representationRegistry.add(rp01);
+
     //We create some public votes for Peter and Will
-    let v01 = factory.newResource(NS,'PublicVote','PL_01EL_01');
+    let v01 = factory.newResource(NS,'PublicVote','EL_01PL_01');
     v01.choice = "Option 1";
-    v01.elections = e01;
+    v01.election = e01;
     v01.voter = peter;
-    let v02 = factory.newResource(NS,'PublicVote','PL_02EL_01');
+    let v02 = factory.newResource(NS,'PublicVote','EL_01PL_02');
     v02.choice = "Option 3";
-    v02.elections = e01;
+    v02.election = e01;
     v02.voter = will;
-
-
     let voteRegistry = await getAssetRegistry(NS+'.PublicVote');
-
     await voteRegistry.addAll([v01,v02]);
 }

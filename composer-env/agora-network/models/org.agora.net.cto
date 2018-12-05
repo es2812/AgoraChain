@@ -39,15 +39,16 @@ asset Election identified by electionID{
   o String description
   o String category
   o String[] options
-  o String result default="" optional
+  o String[] writeins optional
+  o Integer[] results optional
   o Boolean closed default=true optional
   --> Legislator owner
 }
 
 abstract asset Vote identified by voteID{
-  o String voteID //will be politicianID+electionsID or anonymousHash
+  o String voteID //will be politicianID+electionID or anonymousHash
   o String choice optional //optionality represents blank vote
-  --> Election elections
+  --> Election election
 }
 
 asset PublicVote extends Vote{
@@ -65,7 +66,7 @@ asset Representation identified by trusteeID{
 }
 
 /**
-  * This transaction represents that the voter has voted in the elections. 
+  * This transaction represents that the voter has voted in the election. 
   * Viewing this transaction will only be allowed for the validator nodes.
   *
   * This transaction returns a ballotID which the voter can use to vote
@@ -75,7 +76,7 @@ asset Representation identified by trusteeID{
 transaction TX_Registry{
   o String secret //used to generate the ballotID, recommended a random string (can be generated in client side)
   --> Citizen voter 
-  --> Election elections
+  --> Election election
 }
 
 /**
@@ -94,7 +95,7 @@ transaction TX_Registry{
 asset Ballot identified by anonymousHash{
   o String anonymousHash //hash(ballotID+voterID)
   --> Citizen voter
-  --> Election elections
+  --> Election election
 }
 
 transaction TX_Trust {
@@ -116,23 +117,23 @@ transaction TX_CreateElections{
 }
 
 transaction TX_OpenElections{
-  --> Election elections
+  --> Election election
 }
 
 transaction TX_CloseElections{
-  --> Election elections
+  --> Election election
 }
 
 transaction TX_PublicVote{
   o String choice optional //optionality represents blank vote
-  --> Election elections
+  --> Election election
   --> Politician voter
 }
 
 transaction TX_SecretVote{
   o String choice optional //optionality represents blank vote
   o String anonymousHash //hash(voterID+ballotID) calculated on client side
-  --> Election elections
+  --> Election election
 }
 
 transaction SampleDemo {

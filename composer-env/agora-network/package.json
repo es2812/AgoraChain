@@ -3,7 +3,7 @@
     "composer": "^0.20.4"
   },
   "name": "agora-network",
-  "version": "0.0.63",
+  "version": "0.0.82",
   "description": ".",
   "scripts": {
     "prepublish": "mkdirp ./dist && composer archive create --sourceType dir --sourceName . -a ./dist/tutorial-network.bna",
