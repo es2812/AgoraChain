@@ -132,7 +132,6 @@ async function closeElectionTransacton(tx){
         console.log("Election#"+tx.election.getIdentifier()+" closed");
 
         //counting votes
-        //TODO: account for NULL votes
         let publicVoteRegistry = await getAssetRegistry(NS+'.PublicVote');
         let secretVoteRegistry = await getAssetRegistry(NS+'.AnonymousVote');
 
@@ -180,12 +179,13 @@ async function closeElectionTransacton(tx){
 
             //(1)
             let identifierVotes = votesS.map(v=>v.getIdentifier());
-            let citizensWhoVoted = ballots.filter(b => b.anonymousHash in identifierVotes).map(b => b.voter);
+            //TODO: adapt this to v.getIdentifier being a hash of b.anonymousHash
+            let citizensWhoVoted = ballots.filter(b => identifierVotes.includes(b.anonymousHash)).map(b => b.voter);
             console.log("Citizens who voted:")
             console.log(citizensWhoVoted)
             //(2)
             citizensWhoVoted = citizensWhoVoted.map(c => c.getIdentifier());
-            representations = representations.filter(r => r.trustee.getIdentifier() in citizensWhoVoted); //holds all the representations whose trustees have voted
+            representations = representations.filter(r => citizensWhoVoted.includes(r.trustee.getIdentifier())); //holds all the representations whose trustees have voted
             console.log("Representations whose trustees have voted:")
             console.log(representations)
 
@@ -274,8 +274,11 @@ async function publicVoteTransaction(tx){
         if(check){
             let vote = await voteRegistry.get(id);
             //we update the vote
-            if(tx.choice!='' && tx.choice!=null){
+            if(tx.choice!='' || tx.choice!=null){
                 vote.choice = tx.choice;
+            }
+            else{
+                vote.choice = null;
             }
             voteRegistry.update(vote);
             console.log("Vote#"+id+" issued by Politician#"+tx.voter.getIdentifier()+
@@ -287,8 +290,11 @@ async function publicVoteTransaction(tx){
             let vote = factory.newResource(NS,'PublicVote',id);
             vote.election = tx.election;
             vote.voter = tx.voter;
-            if(tx.choice!='' && tx.choice!=null){
+            if(tx.choice!='' || tx.choice!=null){
                 vote.choice = tx.choice;
+            }
+            else{
+                vote.choice = null;
             }
             voteRegistry.add(vote);
             console.log("Vote#"+id+" issued by Politician#"+tx.voter.getIdentifier()+
@@ -304,6 +310,8 @@ async function publicVoteTransaction(tx){
  */
 async function secretVoteTransaction(tx){
     //we can only vote on open election
+    //TODO: the id of the secretvote should be a hash of tx.anonymousHash to avoid
+    //someone voting just by knowing tx.anonymousHash
     if(tx.election.closed){
         throw new Error("Elections "+tx.election+" is not open");
     }
@@ -312,7 +320,7 @@ async function secretVoteTransaction(tx){
         let ballotRegistry = await getAssetRegistry(NS+'.Ballot');
         let registered = await ballotRegistry.exists(tx.anonymousHash);
         if(!registered){
-            throw new Error("Ballot indexed by secret" +tx.anonymousHash+" not found.");
+            throw new Error("Ballot indexed by hash "  +tx.anonymousHash+" not found.");
         }
         else{
             //we check if this is the citizen's first vote
@@ -320,7 +328,7 @@ async function secretVoteTransaction(tx){
             let notFirstVote = await voteRegistry.exists(tx.anonymousHash);
             if(notFirstVote){
                 let vote = await voteResgitry.get(tx.anonymousHash);
-                if(tx.choice){
+                if(tx.choice!='' || tx.choice!=null){
                     vote.choice = tx.choice;
                 }
                 else{
@@ -334,8 +342,11 @@ async function secretVoteTransaction(tx){
                 let factory = await getFactory();
                 let vote =  factory.newResource(NS,'AnonymousVote',tx.anonymousHash);
                 vote.election = tx.election;
-                if(tx.choice){
+                if(tx.choice!='' || tx.choice!=null){
                     vote.choice = tx.choice;
+                }
+                else{
+                    vote.choice = null;
                 }
                 await voteRegistry.add(vote);
                 console.log("Vote#"+tx.anonymousHash+
@@ -355,7 +366,7 @@ async function registerTransaction(tx){
     //we check that the user isn't already registered
     let ballotRegistry = await getAssetRegistry(NS+'.Ballot');
     let ballots = await ballotRegistry.getAll();
-    ballots = ballots.filter(ballot => ballot.election==tx.election && ballot.voter == tx.voter);
+    ballots = ballots.filter(ballot => ballot.election.getIdentifier()==tx.election.getIdentifier() && ballot.voter.getIdentifier() == tx.voter.getIdentifier());
     let userIsRegistered = (ballots.length!=0);
 
     if(!userIsRegistered){
@@ -364,7 +375,9 @@ async function registerTransaction(tx){
         let ballotID = tx.secret+tx.voter.getIdentifier()+tx.election.getIdentifier();
 
         let factory = await getFactory();
-        let ballot =  factory.newResource(NS,'Ballot',ballotID+tx.voterID.getIdentifier());
+        let ballot =  factory.newResource(NS,'Ballot',ballotID);
+        ballot.voter = tx.voter;
+        ballot.election = tx.election;
         await ballotRegistry.add(ballot);
         console.log("Ballot#"+ballot.getIdentifier()+" from Citizen#"+tx.voter.getIdentifier()+
         " in Election#"+tx.election.getIdentifier()+" created");

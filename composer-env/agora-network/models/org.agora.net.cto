@@ -39,8 +39,8 @@ asset Election identified by electionID{
   o String description
   o String category
   o String[] options
-  o String[] writeins optional
-  o Integer[] results optional
+  o String[] writeins optional //holds all write-in values an user has set, including blank votes which will be saved as "undefined"
+  o Integer[] results optional //holds the number of votes for each option and write-in, in the order established by the String arrays
   o Boolean closed default=true optional
   --> Legislator owner
 }
