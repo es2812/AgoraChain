@@ -1,4 +1,5 @@
 # AgoraChain
+
 A blockchain voting system based on liquid democracy developed with Hyperledger Composer
 
 ## Proposed Project Milestones
@@ -52,19 +53,19 @@ The mechanism by which Participants interact with Assets.
 
 - Citizen transactions:
 
-    - **Trust**: Creates a Representation asset between the Citizen and a Politician. 
-    - **NullTrust**: Deletes the Representation asset between the Citizen and his current representative.
-    - **Anonymous vote**: Creates or modifies (if the citizen has already voted) the Vote asset by the Citizen, related to an Election asset.
+  - **Trust**: Creates a Representation asset between the Citizen and a Politician.
+  - **NullTrust**: Deletes the Representation asset between the Citizen and his current representative.
+  - **Anonymous vote**: Creates or modifies (if the citizen has already voted) the Vote asset by the Citizen, related to an Election asset.
 
 - Politician transactions:
 
-    - **Public vote**: Creates or modifies (if the politician has already voted) the Vote by the Politician, related to an Election asset.
+  - **Public vote**: Creates or modifies (if the politician has already voted) the Vote by the Politician, related to an Election asset.
 
 - Legislator transactions:
 
-    - **Create elections**: Creates an Election asset.
-    - **Open elections**: Allows votes on an Election asset.
-    - **Close elections**: Stops allowing votes on an Election asset.
+  - **Create elections**: Creates an Election asset.
+  - **Open elections**: Allows votes on an Election asset.
+  - **Close elections**: Stops allowing votes on an Election asset.
 
 #### Smart contracts
 
@@ -87,15 +88,14 @@ Restrictions must be set for the **Envelope** asset to allow its access and util
 
 TODO: update domain diagram
 
-![Domain diagram of the system](https://raw.githubusercontent.com/es2812/AgoraChain/master/Diagrams/ClassDiagram.png) 
+![Domain diagram of the system](https://raw.githubusercontent.com/es2812/AgoraChain/master/Diagrams/ClassDiagram.png)
 Domain diagram
-
 
 #### Sequence diagrams
 
 TODO: update sequence diagrams
 
-![Anonymous Voting Sequence](https://raw.githubusercontent.com/es2812/AgoraChain/master/Diagrams/tx_voting.png) 
+![Anonymous Voting Sequence](https://raw.githubusercontent.com/es2812/AgoraChain/master/Diagrams/tx_voting.png)
 Anonymous Vote Transaction Sequence Diagram
 ![Public Voting Sequence](https://raw.githubusercontent.com/es2812/AgoraChain/master/Diagrams/tx_votingpolitic.png)
 Public Vote Transaction Sequence Diagram
