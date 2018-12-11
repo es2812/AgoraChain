@@ -1,6 +1,6 @@
 #!/bin/bash
 if [[ -z $1 ]]; then
-    echo usage: update.sh VERSION
+    echo usage: start.sh VERSION
 else
     echo Restarting Fabric
     ~/fabric-dev-servers/stopFabric.sh
