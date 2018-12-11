@@ -10,7 +10,7 @@ There's currently two ways of running the project:
 
 ### On the cloud (recommended). 
 
-[The cloud version of composer-playground](https://composer-playground.mybluemix.net/) can be used to run the latest `.bna` file. This file can be found under [composer-env/agora-network/dist](https://github.com/es2812/AgoraChain/tree/master/composer-env/agora-network/dist).
+[The cloud version of composer-playground](https://composer-playground.mybluemix.net/) can be used to import the latest `.bna` file. This file can be found under [composer-env/agora-network/dist](https://github.com/es2812/AgoraChain/tree/master/composer-env/agora-network/dist).
 
 An effort is made to keep this image up-to-date with the files in the repository, but it can be generated using the `createFile.sh` script (under that same directory). See the next point for requisites and instructions to generate the `.bna` file.
 
