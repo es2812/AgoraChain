@@ -90,7 +90,7 @@ Restrictions must be set for the **Envelope** asset to allow its access and util
 
 ![Domain diagram of the system](https://raw.githubusercontent.com/es2812/AgoraChain/d9398842b154da627e7f171968842f2a36767a85/Diagrams/ClassDiagram.png)
 Domain diagram
-
+<!-- 
 #### Sequence diagrams
 
 TODO: update sequence diagrams
@@ -101,7 +101,7 @@ Anonymous Vote Transaction Sequence Diagram
 Public Vote Transaction Sequence Diagram
 ![Trust Sequence](https://raw.githubusercontent.com/es2812/AgoraChain/master/Diagrams/tx_trust.png)Trust Transaction Sequence Diagram
 ![Election Management Sequence](https://raw.githubusercontent.com/es2812/AgoraChain/master/Diagrams/tx_elections.png)
-Election Creation/Opening/Closing Transaction Sequence Diagram
+Election Creation/Opening/Closing Transaction Sequence Diagram -->
 
 ## References
 
