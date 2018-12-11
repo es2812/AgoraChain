@@ -2,6 +2,30 @@
 
 A blockchain voting system based on liquid democracy developed with Hyperledger Composer
 
+## Running the project
+
+As of this moment, this project runs on hyperledger fabric, using the set of `composer-cli` commands for deployment.
+
+There's currently two ways of running the project:
+
+### On the cloud (recommended). 
+
+[The cloud version of composer-playground](https://composer-playground.mybluemix.net/) can be used to run the latest `.bna` file. This file can be found under [composer-env/agora-network/dist](https://github.com/es2812/AgoraChain/tree/master/composer-env/agora-network/dist).
+
+An effort is made to keep this image up-to-date with the files in the repository, but it can be generated using the `createFile.sh` script (under that same directory). See the next point for requisites and instructions to generate the `.bna` file.
+
+### Locally.
+
+Follow these steps:
+
+1. Follow the [Installing the development environment tutorial](https://hyperledger.github.io/composer/latest/installing/development-tools.html) in the Hyperledger Composer website.
+2. [`createFile.sh`](https://github.com/es2812/AgoraChain/tree/master/composer-env/agora-network/dist/createFile.sh) generates a `.bna` file according to the network definition. You must specify a version, check the field 'version' in [`package.json`](https://github.com/es2812/AgoraChain/tree/master/composer-env/agora-network/package.json) and specify a **higher** version than the one found in that file.
+3. With a `.bna` file created, [`start.sh`](https://github.com/es2812/AgoraChain/tree/master/composer-env/agora-network/dist/start.sh) boots up the Fabric network and installs the chaincode. You must specify the version of the `.bna` file you want to use.
+4. The command `composer-playground` starts a local version of the playground in the browser.
+5. If you prefer you can issue transactions and create participants using `composer-cli` commands. The file [`test.sh`](https://github.com/es2812/AgoraChain/tree/master/composer-env/agora-network/dist/test.sh) contains a few examples of this.
+
+You can undeploy and kill the network with the [`stop.sh`](https://github.com/es2812/AgoraChain/tree/master/composer-env/agora-network/dist/stop.sh) script
+
 ## Proposed Project Milestones
 
 - [x] _20.November.2018_. Finish proposal, analysis and design phase.
