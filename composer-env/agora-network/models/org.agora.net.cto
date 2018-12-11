@@ -12,10 +12,6 @@
  * limitations under the License.
  */
 
-/**
- * Write your model definitions here
- */
-
 namespace org.agora.net
 
 abstract participant Person identified by id{
@@ -39,23 +35,31 @@ asset Election identified by electionID{
   o String description
   o String category
   o String[] options
-  o String[] writeins optional //holds all write-in values an user has set, including blank votes which will be saved as "undefined"
+  o String[] writeins optional //holds all write-in values an user has set, including blank votes which will be saved as ""
   o Integer[] results optional //holds the number of votes for each option and write-in, in the order established by the String arrays
   o Boolean closed default=true optional
   --> Legislator owner
 }
 
-abstract asset Vote identified by voteID{
-  o String voteID //will be politicianID+electionID or anonymousHash
-  o String choice optional //optionality represents blank vote
+asset Vote identified by voteID{
+  o String voteID
+  o String choice default="" optional //optionality represents blank vote
   --> Election election
+  --> Politician voter optional //only set if the vote has been issued by a politician
 }
 
-asset PublicVote extends Vote{
-  --> Politician voter
-}
-
-asset AnonymousVote extends Vote{
+/*
+* This asset represents the concept of an "outer envelope" used in mail voting.
+* The vote itself (Vote) is anonymous for citizens (voter won't be set)
+* but the envelope is identified to avoid double voting, false voters, etc. 
+*
+* Any access to this asset will be restricted except for its owner (voter) or validator nodes.
+*/
+asset Envelope identified by envelopeID{
+  o String envelopeID
+  --> Citizen voter
+  --> Election election
+  --> Vote vote optional //optionality is set to allow creating of the envelope but not voting
 }
 
 asset Representation identified by trusteeID{
@@ -63,39 +67,6 @@ asset Representation identified by trusteeID{
   o String[] restrictions optional
   --> Citizen trustee
   --> Politician trusted
-}
-
-/**
-  * This transaction represents that the voter has voted in the election. 
-  * Viewing this transaction will only be allowed for the validator nodes.
-  *
-  * This transaction returns a ballotID which the voter can use to vote
-  * and change their vote via the SecretVote transaction.
- */
-@returns(String)
-transaction TX_Registry{
-  o String secret //used to generate the ballotID, recommended a random string (can be generated in client side)
-  --> Citizen voter 
-  --> Election election
-}
-
-/**
-  * This asset represents a ballot "given" to the citizen after they have registered
-  * that they're going to vote.
-  *
-  * Its purpose is to check whether a citizen has already voted in an election,
-  * thus changing his vote on the next AnonymousVote transaction, or not counting
-  * their representation's vote.
-  *
-  * It is indexed by the hash(ballotID+voterID) since that is the identifier the citizen
-  * will use to vote, and this simplifies the access.
-  *
-  * This asset must be kept secret except for validator nodes.
- */
-asset Ballot identified by anonymousHash{
-  o String anonymousHash //hash(ballotID+voterID)
-  --> Citizen voter
-  --> Election election
 }
 
 transaction TX_Trust {
@@ -108,7 +79,7 @@ transaction TX_Nulltrust {
   --> Representation representationToNull
 }
 
-transaction TX_CreateElections{
+transaction TX_CreateElection{
   o String electionID //blockchain requires a deterministic ID, so the ID should be created on the client side
   o String description
   o String[] options
@@ -116,25 +87,39 @@ transaction TX_CreateElections{
   --> Legislator owner
 }
 
-transaction TX_OpenElections{
+transaction TX_OpenElection{
   --> Election election
 }
 
-transaction TX_CloseElections{
+transaction TX_CloseElection{
   --> Election election
 }
 
 transaction TX_PublicVote{
-  o String choice optional //optionality represents blank vote
+  o String choice default="" optional //optionality represents blank vote
   --> Election election
   --> Politician voter
 }
 
-transaction TX_SecretVote{
-  o String choice optional //optionality represents blank vote
-  o String anonymousHash //hash(voterID+ballotID) calculated on client side
+/*
+* This transaction creates the outer, identified envelope that allows secret voting.
+* The vote will be "introduced" in the envelope in the TX_SecretVote stage, so that
+* no information about the choice of this voter leaks.
+*
+* TODO: can this transaction be public? (probably no)
+*/
+transaction TX_PrepareEnvelope{
+  o String envelopeID
+  --> Citizen voter
   --> Election election
 }
-
-transaction SampleDemo {
+/**
+* In this transaction the secret vote is set and placed inside the envelope.
+* The envelope can already contain a vote, in which case its a change of vote.
+* 
+* TODO: can this transaction be public? (probably no, definitely not its issuer)
+ */
+transaction TX_SecretVote{
+  o String choice optional //optionality represents blank vote
+  --> Envelope envelope
 }

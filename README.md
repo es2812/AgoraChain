@@ -77,19 +77,23 @@ Smart contracts are defined in Hyperledger Composer as **Transaction Functions**
 
 Since it's an important principle of our system, there was a need to implement some levels of privacy in the *Anonymous vote* transaction and the *Vote* asset, which must keep a secret who the voter was, while still keeping the rest of the asset and transaction's content public.
 
-It was decided to include a user-set password which will be used to keep the voter ID on the transaction and on the Vote asset secret. Thus, only knowledge of this password will allow someone to check the voter. The voter id on the transaction and asset relating to the *anonymous vote* will be a hash of the sum of *password* and *voterID*.
+It was decided to implement a "double envelope" scheme, used in traditional mail voting. Thus we create the asset **Envelope**. This asset keeps track of the voter, election, and points to a **Vote** asset.
 
-This solution, however, might allow a citizen to vote many times with fraudulent passwords (since there's no way to know the voterID of a vote directly without the user-provided password). For that reason, the system will also keep a parallel, private blockchain, that registers whether a voter has voted in an election. This blockchain will be accessible only to the validator nodes in the system.
+Said **Vote** asset doesn't have a public voter set for Citizens (it does for Politicians), and so it acts as the inner, secret, envelope which contains the choice of the Citizen.
 
-As a consequence, the Vote asset will be duplicated, as a PublicVote that contains its owner (that must be a Politician) and an AnonymousVote that won't keep track of its owner, but rather will have a special _secretID_ field that will allow indexing with the citizen that issued it only with the given password.
-
+Restrictions must be set for the **Envelope** asset to allow its access and utilization only to the citizen that issued it.
 
 #### Domain Model
+
+TODO: update domain diagram
 
 ![Domain diagram of the system](https://raw.githubusercontent.com/es2812/AgoraChain/master/Diagrams/ClassDiagram.png) 
 Domain diagram
 
+
 #### Sequence diagrams
+
+TODO: update sequence diagrams
 
 ![Anonymous Voting Sequence](https://raw.githubusercontent.com/es2812/AgoraChain/master/Diagrams/tx_voting.png) 
 Anonymous Vote Transaction Sequence Diagram
