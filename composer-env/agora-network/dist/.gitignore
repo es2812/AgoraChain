@@ -2,4 +2,4 @@
 *.card
 node-report.*.txt
 DevServer_connection.json
-createFile.sh
+test_nostop.sh
