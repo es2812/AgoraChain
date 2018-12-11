@@ -44,7 +44,8 @@ Members of the blockchain. They may own assets and submit transactions. Each par
 These objects represent the (intangible) goods used in the system.
 
 - **Election**: This asset represents a voting process, it's owned by one legislator.
-- **Vote**: This asset represents a vote, it's owned by a citizen or politician.
+- **Vote**: This asset represents a vote, it's issued by a citizen or politician, pointing to the voter in the latter case.
+- **Envelope**: This asset represents an identified "envelope" that holds the secret vote by the citizen. Access to it will be restricted.
 - **Representation**: This asset represents a relationship of trust between a citizen and a politician.
 
 #### Transactions
@@ -55,6 +56,7 @@ The mechanism by which Participants interact with Assets.
 
   - **Trust**: Creates a Representation asset between the Citizen and a Politician.
   - **NullTrust**: Deletes the Representation asset between the Citizen and his current representative.
+  - **PrepareEnvelope**: Prepares an identified Envelope that will allow the Citizen to vote anonymously.
   - **Anonymous vote**: Creates or modifies (if the citizen has already voted) the Vote asset by the Citizen, related to an Election asset.
 
 - Politician transactions:
@@ -86,9 +88,7 @@ Restrictions must be set for the **Envelope** asset to allow its access and util
 
 #### Domain Model
 
-TODO: update domain diagram
-
-![Domain diagram of the system](https://raw.githubusercontent.com/es2812/AgoraChain/master/Diagrams/ClassDiagram.png)
+![Domain diagram of the system](https://raw.githubusercontent.com/es2812/AgoraChain/d9398842b154da627e7f171968842f2a36767a85/Diagrams/ClassDiagram.png)
 Domain diagram
 
 #### Sequence diagrams
