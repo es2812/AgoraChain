@@ -21,6 +21,7 @@ abstract participant Person identified by id{
 }
 
 participant Citizen extends Person {
+  --> Politician representation optional
 }
 
 participant Politician extends Person{
@@ -62,21 +63,36 @@ asset Envelope identified by envelopeID{
   --> Vote vote optional //optionality is set to allow creating of the envelope but not voting
 }
 
-asset Representation identified by trusteeID{
-  o String trusteeID
-  o String[] restrictions optional
+/**
+* This asset represents the restrictions that can be applied to a Representation
+* they contain a choice and a category, so that if the trusted ever votes that choice
+* in an election with that category, the Representation will be automatically nulled.
+ */
+asset Restriction identified by restrictionID{
+  o String restrictionID
+  o String category
+  o String choice
   --> Citizen trustee
-  --> Politician trusted
 }
 
 transaction TX_Trust {
-  o String[] restrictions optional
   --> Citizen trustee
   --> Politician trusted
 }
 
+transaction TX_AddRestriction{
+  o String restrictionID  
+  o String category
+  o String choice
+  --> Citizen trustee
+}
+
+transaction TX_RemoveRestriction{
+  --> Restriction restriction
+}
+
 transaction TX_Nulltrust {
-  --> Representation representationToNull
+  --> Citizen representedToNull
 }
 
 transaction TX_CreateElection{
