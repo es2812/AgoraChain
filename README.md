@@ -30,7 +30,7 @@ You can undeploy and kill the network with the [`stop.sh`](https://github.com/es
 ## Proposed Project Milestones
 
 - [x] _20.November.2018_. Finish proposal, analysis and design phase.
-- [ ] _25.December.2018_. Finish implementation.
+- [x] _25.December.2018_. Finish implementation.
 - [ ] _02.January.2019_ Finish API.
 - [ ] _09.January.2019_ End of project.
 
