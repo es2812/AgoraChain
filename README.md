@@ -14,13 +14,14 @@ There's currently two ways of running the project:
 
 An effort is made to keep this image up-to-date with the files in the repository, but it can be generated using the `createFile.sh` script (under that same directory). See the next point for requisites and instructions to generate the `.bna` file.
 
+After importing the `.bna` file you can create ID cards for each participant created and use those ID cards to interact with the network.
+
 ### Locally.
 
 Follow these steps:
 
 1. Follow the [Installing the development environment tutorial](https://hyperledger.github.io/composer/latest/installing/development-tools.html) in the Hyperledger Composer website.
-2. [`createFile.sh`](https://github.com/es2812/AgoraChain/tree/master/composer-env/agora-network/dist/createFile.sh) generates a `.bna` file according to the network definition. You must specify a version, check the field 'version' in [`package.json`](https://github.com/es2812/AgoraChain/tree/master/composer-env/agora-network/package.json) and specify a **higher** version than the one found in that file.
-3. With a `.bna` file created, [`start.sh`](https://github.com/es2812/AgoraChain/tree/master/composer-env/agora-network/dist/start.sh) boots up the Fabric network and installs the chaincode. You must specify the version of the `.bna` file you want to use.
+2. [`deploy.sh`](https://github.com/es2812/AgoraChain/tree/master/composer-env/agora-network/dist/deploy.sh) generates a `.bna` file according to the network definition, boots up the Fabric network and installs the chaincode, and creates a few test participants and their ID cards, importing them. You must specify a version, check the field 'version' in [`package.json`](https://github.com/es2812/AgoraChain/tree/master/composer-env/agora-network/package.json) and specify a **higher** version than the one found in that file.
 4. The command `composer-playground` starts a local version of the playground in the browser.
 5. If you prefer you can issue transactions and create participants using `composer-cli` commands. The file [`test.sh`](https://github.com/es2812/AgoraChain/tree/master/composer-env/agora-network/dist/test.sh) contains a few examples of this.
 

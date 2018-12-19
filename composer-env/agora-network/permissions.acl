@@ -13,37 +13,334 @@
  */
 
 /**
- * Sample access control list.
+ * We have the following restrictions:
+ *  - Participants can issue: TX_Trust, TX_AddRestriction, TX_RemoveRestriction, TX_Nulltrust, TX_PrepareEnvelope, TX_SecretVote
+ *  - Politicians can issue: TX_PublicVote
+ *  - Legislators can issue: TX_CreateElection, TX_OpenElection, TX_CloseElection
+ *
+ * Some transactions need to access assets that should otherwise be restricted for that participant, 
+ * but they'll be accesible only through those transactions:
+ *  - TX_PublicVote can read Restrictions and read and update Citizens they represent (to null the representation if necessary).
+ *  - TX_CloseElection can read Votes to count them, and read Envelopes and Citizens to 
+ *    check representation and whether they have voted.
+ *
+ * We also restrict the creation, deletion and updating of Assets to be done only following the transaction,
+ * since manual access will not trigger a possible smart contract or event.
+ *
+ * Politicians and Legislators are visible, and all the assets are visible except for the Envelope 
+ * and Restriction assets, which can only be viewed by their voter and trustee respectively.
  */
 
-rule EverybodyCanSubmitTransactions {
-    description: "Allow all participants to submit transactions"
-    participant: "ANY"
-    operation: CREATE
-    resource: "org.agora.net.*"
-    action: ALLOW
-}
-
-rule SystemACL {
-  description:  "System ACL to permit all access"
-  participant: "org.hyperledger.composer.system.Participant"
-  operation: ALL
-  resource: "org.hyperledger.composer.system.**"
-  action: ALLOW
-}
-
-rule NetworkAdminUser {
-    description: "Grant business network administrators full access to user resources"
+rule NetworkAdminSystem {
+    description: "Grant business network administrators full access to system resources"
     participant: "org.hyperledger.composer.system.NetworkAdmin"
     operation: ALL
     resource: "**"
     action: ALLOW
 }
 
-rule NetworkAdminSystem {
-    description: "Grant business network administrators full access to system resources"
-    participant: "org.hyperledger.composer.system.NetworkAdmin"
+rule EverybodyCanAccessNetwork{
+  description: "Every participant can access the network."
+  participant: "org.hyperledger.composer.system.Participant"
+  operation: ALL
+  resource: "org.hyperledger.composer.system.**"
+  action: ALLOW
+}
+
+rule EnvelopeSecretAsset {
+  description: "Nobody but the voter can see envelopes"
+  participant (p): "org.agora.net.Citizen"
+  operation: ALL
+  resource (e): "org.agora.net.Envelope"
+  condition: (e.voter.getIdentifier() == p.getIdentifier())
+  action: ALLOW
+}
+
+rule RestrictionSecretAsset {
+  description: "Nobody but the trustee can see restrictions"
+  participant (p): "org.agora.net.Citizen"
+  operation: READ
+  resource (r): "org.agora.net.Restriction"
+  condition: (r.trustee.getIdentifier() == p.getIdentifier())
+  action: ALLOW
+}
+
+rule ReadAccessElection {
+  description: "Everyone can read the election assets"
+  participant (p): "ANY"
+  operation: READ
+  resource (r): "org.agora.net.Election"
+  condition: (true)
+  action: ALLOW
+}
+
+rule ReadAccessVote {
+  description: "Everyone can read the vote assets"
+  participant (p): "ANY"
+  operation: READ
+  resource (r): "org.agora.net.Vote"
+  condition: (true)
+  action: ALLOW
+}
+
+rule EverybodyCanAccessThemselves {
+  description: "Every participant can read or update themselves."
+  participant (p): "org.hyperledger.composer.system.Participant"
+  operation: READ, UPDATE
+  resource (r): "org.hyperledger.composer.system.Participant"
+  condition: (p.getIdentifier()==r.getIdentifier())
+  action: ALLOW
+}
+
+rule PoliticiansArePublic {
+  description: "Every participant can see Politicians."
+  participant: "ANY"
+  operation: READ
+  resource: "org.agora.net.Politician"
+  action: ALLOW
+}
+
+rule LegislatorsArePublic {
+  description: "Every participant can see Legislators."
+  participant: "ANY"
+  operation: READ
+  resource: "org.agora.net.Legislator"
+  action: ALLOW
+}
+
+rule TrusteeCanSubmitTrust {
+    description: "Citizen can submit TX_Trust only with herself as the trustee."
+    participant (c): "org.agora.net.Citizen"
     operation: ALL
-    resource: "org.hyperledger.composer.system.**"
+    resource (t): "org.agora.net.TX_Trust"
+    condition: (t.trustee.getIdentifier() == c.getIdentifier())
     action: ALLOW
+}
+
+rule TrusteeCanNullTrust {
+  description: "Citizen can submit TX_Nulltrust only with herself as the representedToNull."
+  participant (c): "org.agora.net.Citizen"
+  operation: ALL
+  resource (t): "org.agora.net.TX_Nulltrust"
+  condition: (t.representedToNull.getIdentifier() == c.getIdentifier())
+  action: ALLOW
+}
+
+rule TrusteeCanAddRestriction {
+  description: "Citizen can submit TX_AddRestriction only with herself as the trustee."
+  participant (c): "org.agora.net.Citizen"
+  operation: CREATE
+  resource (t): "org.agora.net.TX_AddRestriction"
+  condition: (t.trustee.getIdentifier() == c.getIdentifier())
+  action: ALLOW
+}
+
+rule RestrictionCreationThruTX {
+  description: "Citizen can only create the Restriction asset through the TX_AddRestriction transaction."
+  participant (c): "org.agora.net.Citizen"
+  operation: CREATE
+  resource (r): "org.agora.net.Restriction"
+  transaction (tx): "org.agora.net.TX_AddRestriction"
+  condition: ( r.trustee.getIdentifier() == c.getIdentifier() &&
+               tx.trustee.getIdentifier() == c.getIdentifier() )
+  action: ALLOW
+}
+
+rule TrusteeCanRemoveRestriction {
+  description: "Citizen can submit TX_RemoveRestriction only on restrictions whose trustee is herself."
+  participant (c): "org.agora.net.Citizen"
+  operation: CREATE
+  resource (t): "org.agora.net.TX_RemoveRestriction"
+  condition: (t.restriction.trustee.getIdentifier() == c.getIdentifier())
+  action: ALLOW
+}
+
+rule RestrictionRemovalThruTX {
+  description: "Citizen can only delete a Restriction asset through the TX_RemoveRestriction transaction."
+  participant (c): "org.agora.net.Citizen"
+  operation: DELETE
+  resource (r): "org.agora.net.Restriction"
+  transaction (tx): "org.agora.net.TX_RemoveRestriction"
+  condition: ( r.trustee.getIdentifier() == c.getIdentifier() &&
+               tx.restriction.getIdentifier() == r.getIdentifier() )
+  action: ALLOW
+}
+
+rule VoterCanPrepareEnvelope {
+  description: "Citizen can submit TX_PrepareEnvelope only with herself as the voter."
+  participant (c): "org.agora.net.Citizen"
+  operation: CREATE
+  resource (t): "org.agora.net.TX_PrepareEnvelope"
+  condition: (t.voter.getIdentifier() == c.getIdentifier())
+  action: ALLOW
+}
+
+rule EnvelopeCreationThruTX {
+  description: "Envelope creation is only possible through the TX_PrepareEnvelope transaction."
+  participant (c): "org.agora.net.Citizen"
+  operation: CREATE
+  resource (e): "org.agora.net.Envelope"
+  transaction (tx): "org.agora.net.TX_PrepareEnvelope"
+  condition: ( e.voter.getIdentifier() == c.getIdentifier() &&
+               tx.voter.getIdentifier() == c.getIdentifier() )
+  action: ALLOW
+}
+
+rule VoterCanSecretVote {
+  description: "Citizen can submit TX_SecretVote using only envelopes with her as the voter."
+  participant (c): "org.agora.net.Citizen"
+  operation: CREATE
+  resource (t): "org.agora.net.TX_SecretVote"
+  condition: (t.envelope.voter.getIdentifier() == c.getIdentifier())
+  action: ALLOW
+}
+
+rule EnvelopeUpdateThruTX {
+  description: "Envelopes can only be updated through the TX_SecretVote transaction."
+  participant (c): "org.agora.net.Citizen"
+  operation: UPDATE
+  resource (e): "org.agora.net.Envelope"
+  transaction (tx): "org.agora.net.TX_SecretVote"
+  condition: ( tx.envelope.getIdentifier() == e.getIdentifier() )
+  action: ALLOW
+}
+
+rule SecretVoteCreationAndUpdateThruTX {
+  description: "The Vote asset can only be updated and created by Citizens through the TX_SecretVote transaction"
+  participant (c): "org.agora.net.Citizen"
+  operation: UPDATE, CREATE
+  resource (v): "org.agora.net.Vote"
+  transaction (tx): "org.agora.net.TX_SecretVote"
+  condition: ( tx.envelope.vote == undefined || v.getIdentifier() == tx.envelope.vote.getIdentifier() )
+  action: ALLOW
+}
+
+rule VoterCanPublicVote {
+  description: "Politician can submit TX_PublicVote only when they're the voter"
+  participant (p): "org.agora.net.Politician"
+  operation: ALL
+  resource (t): "org.agora.net.TX_PublicVote"
+  condition: (t.voter.getIdentifier() == p.getIdentifier())
+  action: ALLOW
+}
+
+rule PublicVoteCreationAndUpdateThruTX {
+  description: "The Vote asset can only be updated and created by Politicians through the TX_PublicVote transaction"
+  participant (p): "org.agora.net.Politician"
+  operation: CREATE, UPDATE
+  resource (v): "org.agora.net.Vote"
+  transaction (tx): "org.agora.net.TX_PublicVote"
+  condition: ( v.voter.getIdentifier() == p.getIdentifier() )
+  action: ALLOW
+}
+
+rule PolicitianCanSeeRestrictionsThruTX {
+  description: "The Restriction asset from citizens he represents can be read by the Politician through the TX_PublicVote transaction"
+  participant (p): "org.agora.net.Politician"
+  operation: READ
+  resource (r): "org.agora.net.Restriction"
+  transaction (tx): "org.agora.net.TX_PublicVote"
+  condition: ( r.trustee.representation.getIdentifier() == p.getIdentifier() )
+  action: ALLOW
+}
+
+rule PoliticianCanNullRepresentationThruTX {
+  description: "Politician can null representations they're the trusted of only through the TX_PublicVote transaction"
+  participant (p): "org.agora.net.Politician"
+  operation: UPDATE, READ
+  resource (r): "org.agora.net.Citizen"
+  transaction (tx): "org.agora.net.TX_PublicVote"
+  condition: ( r.representation.getIdentifier() == p.getIdentifier() && 
+               r.representation.getIdentifier() == tx.voter.getIdentifier() )
+  action: ALLOW
+}
+
+rule LegislatorCanCreateElection {
+  description: "Legislator can submit TX_CreateElection only with herself as the owner"
+  participant (l): "org.agora.net.Legislator"
+  operation: ALL
+  resource (t): "org.agora.net.TX_CreateElection"
+  condition: (t.owner.getIdentifier() == l.getIdentifier())
+  action: ALLOW
+}
+
+rule LegislatorCanOpenElection {
+  description: "Legislator can submit TX_OpenElection only with herself as the owner"
+  participant (l): "org.agora.net.Legislator"
+  operation: ALL
+  resource (t): "org.agora.net.TX_OpenElection"
+  condition: (t.election.owner.getIdentifier() == l.getIdentifier())
+  action: ALLOW
+}
+
+rule LegislatorCanCloseElection {
+  description: "Legislator can submit TX_CloseElection only with herself as the owner"
+  participant (l): "org.agora.net.Legislator"
+  operation: ALL
+  resource (t): "org.agora.net.TX_CloseElection"
+  condition: (t.election.owner.getIdentifier() == l.getIdentifier())
+  action: ALLOW
+}
+
+rule CreateElectionOnlyThruTX {
+  description: "Creation of elections can only be done through the transaction TX_CreateElection"
+  participant (l): "org.agora.net.Legislator"
+  operation: CREATE
+  resource (e): "org.agora.net.Election"
+  transaction (tx): "org.agora.net.TX_CreateElection"
+  condition: ( e.owner.getIdentifier() == l.getIdentifier() &&
+               e.owner.getIdentifier() == tx.owner.getIdentifier() )
+  action: ALLOW
+}
+
+rule OpenElectionOnlyThruTX {
+  description: "Update of elections can only be done through the transaction TX_OpenElection"
+  participant (l): "org.agora.net.Legislator"
+  operation: UPDATE
+  resource (e): "org.agora.net.Election"
+  transaction (tx): "org.agora.net.TX_OpenElection"
+  condition: ( e.owner.getIdentifier() == l.getIdentifier() &&
+               e.owner.getIdentifier() == tx.election.owner.getIdentifier() )
+  action: ALLOW
+}
+
+rule CloseElectionOnlyThruTX {
+  description: "Update of elections can only be done through the transaction TX_CloseElection"
+  participant (l): "org.agora.net.Legislator"
+  operation: UPDATE
+  resource (e): "org.agora.net.Election"
+  transaction (tx): "org.agora.net.TX_CloseElection"
+  condition: ( e.owner.getIdentifier() == l.getIdentifier() &&
+               e.owner.getIdentifier() == tx.election.owner.getIdentifier() )
+  action: ALLOW
+}
+
+rule LegislatorCanReadEnvelopesThruTX {
+  description: "Legislator can read envelopes from that election through TX_CloseElection"
+  participant (l): "org.agora.net.Legislator"
+  operation: READ
+  resource (e): "org.agora.net.Envelope"
+  transaction (tx): "org.agora.net.TX_CloseElection"
+  condition: ( e.election.getIdentifier() == tx.election.getIdentifier() )
+  action: ALLOW
+}
+
+rule LegislatorCanReadVotesThruTX {
+  description: "Legislator can read votes from that election through TX_CloseElection"
+  participant (l): "org.agora.net.Legislator"
+  operation: READ
+  resource (v): "org.agora.net.Vote"
+  transaction (tx): "org.agora.net.TX_CloseElection"
+  condition: ( v.election.getIdentifier() == tx.election.getIdentifier() )
+  action: ALLOW
+}
+
+rule LegislatorCanReadCitizensThruTX {
+  description: "Legislator can read the citizens (to access their representation) through TX_CloseElection"
+  participant (l): "org.agora.net.Legislator"
+  operation: READ
+  resource (c): "org.agora.net.Citizen"
+  transaction (tx): "org.agora.net.TX_CloseElection"
+  condition: (true)
+  action: ALLOW
 }

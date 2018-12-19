@@ -440,18 +440,23 @@ async function envelopeTransaction(tx){
     let envelopes = await envelopeRegistry.getAll();
     envelopes = envelopes.filter(e => 
         e.election.getIdentifier()==tx.election.getIdentifier() && e.voter.getIdentifier() == tx.voter.getIdentifier());
-
     if(envelopes.length==0){
-        //TODO: decide id for the envelope (it can't give away the voter id). for now we take it from client api
-        let factory = await getFactory();
-        
-        let envelope =  factory.newResource(NS,'Envelope',tx.envelopeID);
-        envelope.voter = factory.newRelationship(NS,'Citizen',tx.voter.getIdentifier());
-        envelope.election = factory.newRelationship(NS,'Election',tx.election.getIdentifier());
+        //we can only create an envelope for an open election
+        if(tx.election.closed){
+            throw new Error(tx.election+" is not open");
+        }
+        else{
+            //TODO: decide id for the envelope (it can't give away the voter id). for now we take it from client api
+            let factory = await getFactory();
+            
+            let envelope =  factory.newResource(NS,'Envelope',tx.envelopeID);
+            envelope.voter = factory.newRelationship(NS,'Citizen',tx.voter.getIdentifier());
+            envelope.election = factory.newRelationship(NS,'Election',tx.election.getIdentifier());
 
-        await envelopeRegistry.add(envelope);
-        console.log("Envelope#"+envelope.getIdentifier()+" from Citizen#"+tx.voter.getIdentifier()+
-        " in Election#"+tx.election.getIdentifier()+" created");
+            await envelopeRegistry.add(envelope);
+            console.log("Envelope#"+envelope.getIdentifier()+" from Citizen#"+tx.voter.getIdentifier()+
+            " in Election#"+tx.election.getIdentifier()+" created");
+        }
     }
     else{
         throw new Error("Citizen#"+tx.voter.getIdentifier()+" already has an envelope for Election#"+tx.election.getIdentifier());
