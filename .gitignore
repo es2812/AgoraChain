@@ -1,0 +1,8 @@
+Documentación/*
+Diagrams/*.png.bak
+.vscode
+
+composer-env/agora-network/dist/*.card
+composer-env/agora-network/dist/node-report.*.txt
+composer-env/agora-network/dist/DevServer_connection.json
+composer-env/agora-network/dist/test_nostop.sh
