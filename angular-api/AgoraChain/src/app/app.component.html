@@ -1,0 +1,81 @@
+<!--
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <p class="network-name">agora-network@1.0.0.bna</p>
+        <p class="navbar-brand">AgoraChain</p>
+        <div class="identity">
+          <p class="identityText">Using identity: {{currentIdentity}}</p>
+          <a class="identityChange" href="/identity">Change</a>
+        </div>
+      </div>
+      <ul class="nav navbar-nav">
+        <li class="dropdown active">
+            <a class="dropdown-toggle" data-toggle="dropdown">Assets</a>
+            <ul class="dropdown-menu scrollable-menu">
+              
+              <li><a [routerLink]="['/Election']">Election</a></li>
+              
+              <li><a [routerLink]="['/Vote']">Vote</a></li>
+              
+              <li><a [routerLink]="['/Envelope']">Envelope</a></li>
+              
+              <li><a [routerLink]="['/Restriction']">Restriction</a></li>
+              
+            </ul>
+        </li>
+        <li class="dropdown active">
+          <a class="dropdown-toggle" data-toggle="dropdown">Participants</a>
+          <ul class="dropdown-menu scrollable-menu">
+            
+            <li><a [routerLink]="['/Citizen']">Citizen</a></li>
+            
+            <li><a [routerLink]="['/Politician']">Politician</a></li>
+            
+            <li><a [routerLink]="['/Legislator']">Legislator</a></li>
+            
+          </ul>
+      </li>
+      <li class="dropdown active">
+        <a class="dropdown-toggle" data-toggle="dropdown">Transactions</a>
+        <ul class="dropdown-menu scrollable-menu">
+          
+          <li><a [routerLink]="['/TX_Trust']">TX_Trust</a></li>
+          
+          <li><a [routerLink]="['/TX_AddRestriction']">TX_AddRestriction</a></li>
+          
+          <li><a [routerLink]="['/TX_RemoveRestriction']">TX_RemoveRestriction</a></li>
+          
+          <li><a [routerLink]="['/TX_Nulltrust']">TX_Nulltrust</a></li>
+          
+          <li><a [routerLink]="['/TX_CreateElection']">TX_CreateElection</a></li>
+          
+          <li><a [routerLink]="['/TX_OpenElection']">TX_OpenElection</a></li>
+          
+          <li><a [routerLink]="['/TX_CloseElection']">TX_CloseElection</a></li>
+          
+          <li><a [routerLink]="['/TX_PublicVote']">TX_PublicVote</a></li>
+          
+          <li><a [routerLink]="['/TX_PrepareEnvelope']">TX_PrepareEnvelope</a></li>
+          
+          <li><a [routerLink]="['/TX_SecretVote']">TX_SecretVote</a></li>
+          
+        </ul>
+    </li>
+      </ul>
+    </div>
+  </nav>
+  
+  <router-outlet></router-outlet>
