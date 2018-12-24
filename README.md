@@ -4,28 +4,18 @@ A blockchain voting system based on liquid democracy developed with Hyperledger 
 
 ## Running the project
 
-As of this moment, this project runs on hyperledger fabric, using the set of `composer-cli` commands for deployment.
+As of this moment, this project runs on hyperledger fabric, using the set of `composer-cli` commands for deployment and with an in-development angular API as an easier way to operate over the network with an identity.
 
-There's currently two ways of running the project:
-
-### On the cloud (recommended). 
-
-[The cloud version of composer-playground](https://composer-playground.mybluemix.net/) can be used to import the latest `.bna` file. This file can be found under [composer-env/agora-network/dist](https://github.com/es2812/AgoraChain/tree/master/composer-env/agora-network/dist).
-
-An effort is made to keep this image up-to-date with the files in the repository, but it can be generated using the `createFile.sh` script (under that same directory). See the next point for requisites and instructions to generate the `.bna` file.
-
-After importing the `.bna` file you can create ID cards for each participant created and use those ID cards to interact with the network.
-
-### Locally.
-
-Follow these steps:
+The recommended way of running the project is:
 
 1. Follow the [Installing the development environment tutorial](https://hyperledger.github.io/composer/latest/installing/development-tools.html) in the Hyperledger Composer website.
-2. [`deploy.sh`](https://github.com/es2812/AgoraChain/tree/master/composer-env/agora-network/dist/deploy.sh) generates a `.bna` file according to the network definition, boots up the Fabric network and installs the chaincode, and creates a few test participants and their ID cards, importing them. You must specify a version, check the field 'version' in [`package.json`](https://github.com/es2812/AgoraChain/tree/master/composer-env/agora-network/package.json) and specify a **higher** version than the one found in that file.
-4. The command `composer-playground` starts a local version of the playground in the browser.
-5. If you prefer you can issue transactions and create participants using `composer-cli` commands. The file [`test.sh`](https://github.com/es2812/AgoraChain/tree/master/composer-env/agora-network/dist/test.sh) contains a few examples of this.
+2. [`deploy.sh`](https://github.com/es2812/AgoraChain/tree/master/composer-env/agora-network/dist/deploy.sh) generates a `.bna` file according to the network definition, boots up the Fabric network and installs the chaincode, and creates a few test participants and their ID cards. You must specify a version (1.0.0 recommended).
+3. [`startRESTServer.sh`](https://github.com/es2812/AgoraChain/tree/master/composer-env/agora-network/dist/startRESTServer.sh) deploys a rest server through which it's possible to connect to the network vía curl (or as is recommended, thorugh the angular API).
+4. Navigate to the [`angular-api/AgoraChain`](https://github.com/es2812/AgoraChain/tree/master/angular-api/AgoraChain/) folder and execute the command `npm start` to deploy the Angular API (usually on `localhost:4200`).
+5. The Angular API requires you to Log In with Github (this will be changed at some point to a more universal OAuth service) to allow you access to the identity manager.
+6. Within the identity manager you can import one of the cards created in step 2, which correspond to each of the participants currently existing in the network. Each identity will give you a set of allowed actions over the network.
 
-You can undeploy and kill the network with the [`stop.sh`](https://github.com/es2812/AgoraChain/tree/master/composer-env/agora-network/dist/stop.sh) script
+You can undeploy and kill the network with the [`stop.sh`](https://github.com/es2812/AgoraChain/tree/master/composer-env/agora-network/dist/stop.sh) script and kill the REST and Angular servers simply using Ctrl+C on the respective terminals.
 
 ## Proposed Project Milestones
 
