@@ -94,7 +94,7 @@ export class IdentityComponent implements OnInit {
             ()=> {
                 localStorage.setItem('currentIdentity',selected.name);
                 window.location.reload();
-                this.router.navigateByUrl('/Citizen');
+                this.router.navigateByUrl('/');
             }
         )
         .catch((error) => {

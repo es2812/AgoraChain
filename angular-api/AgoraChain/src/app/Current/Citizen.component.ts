@@ -14,20 +14,21 @@
 
 import { Component, OnInit, Input } from '@angular/core';
 import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
-import { CitizenService } from './Citizen.service';
+import { CurrentService } from './Current.service';
+import { IdentityService } from '../identity/identity.service';
 import 'rxjs/add/operator/toPromise';
+import { Citizen } from 'app/org.agora.net';
 
 @Component({
   selector: 'app-citizen',
   templateUrl: './Citizen.component.html',
-  styleUrls: ['./Citizen.component.css'],
-  providers: [CitizenService]
+  styleUrls: ['./Current.component.css'],
+  providers: [CurrentService]
 })
-export class CitizenComponent implements OnInit {
+export class CurrentCitizenComponent implements OnInit {
 
   myForm: FormGroup;
 
-  private allParticipants;
   private participant;
   private currentId;
   private errorMessage;
@@ -38,7 +39,7 @@ export class CitizenComponent implements OnInit {
   lastname = new FormControl('', Validators.required);
 
 
-  constructor(public serviceCitizen: CitizenService, fb: FormBuilder) {
+  constructor(private identityService:IdentityService, private serviceCitizen: CurrentService, fb: FormBuilder) {
     this.myForm = fb.group({
       representation: this.representation,
       id: this.id,
@@ -48,19 +49,24 @@ export class CitizenComponent implements OnInit {
   };
 
   ngOnInit(): void {
-    this.loadAll();
+    this.load();
   }
 
-  loadAll(): Promise<any> {
-    const tempList = [];
-    return this.serviceCitizen.getAll()
+  load(): Promise<any> {
+    return this.identityService.getCurrentParticipant()
     .toPromise()
     .then((result) => {
       this.errorMessage = null;
-      result.forEach(participant => {
-        tempList.push(participant);
+      return this.serviceCitizen.getParticipant(result).toPromise()
+      .then((result)=>{this.participant = result})
+      .catch((error) => {
+        if (error === 'Server error') {
+          this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
+        } else if (error === '404 - Not Found') {
+          this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
+          this.errorMessage = error;
+        }
       });
-      this.allParticipants = tempList;
     })
     .catch((error) => {
       if (error === 'Server error') {
@@ -97,45 +103,7 @@ export class CitizenComponent implements OnInit {
     return this[name].value.indexOf(value) !== -1;
   }
 
-  addParticipant(form: any): Promise<any> {
-    this.participant = {
-      $class: 'org.agora.net.Citizen',
-      'representation': this.representation.value,
-      'id': this.id.value,
-      'name': this.name.value,
-      'lastname': this.lastname.value
-    };
-
-    this.myForm.setValue({
-      'representation': null,
-      'id': null,
-      'name': null,
-      'lastname': null
-    });
-
-    return this.serviceCitizen.addParticipant(this.participant)
-    .toPromise()
-    .then(() => {
-      this.errorMessage = null;
-      this.myForm.setValue({
-        'representation': null,
-        'id': null,
-        'name': null,
-        'lastname': null
-      });
-      this.loadAll(); 
-    })
-    .catch((error) => {
-      if (error === 'Server error') {
-        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else {
-        this.errorMessage = error;
-      }
-    });
-  }
-
-
-   updateParticipant(form: any): Promise<any> {
+  updateParticipant(form: any): Promise<any> {
     this.participant = {
       $class: 'org.agora.net.Citizen',
       'representation': this.representation.value,
@@ -143,31 +111,11 @@ export class CitizenComponent implements OnInit {
       'lastname': this.lastname.value
     };
 
-    return this.serviceCitizen.updateParticipant(form.get('id').value, this.participant)
+    return this.serviceCitizen.updateParticipant('Citizen',form.get('id').value, this.participant)
     .toPromise()
     .then(() => {
       this.errorMessage = null;
-      this.loadAll();
-    })
-    .catch((error) => {
-      if (error === 'Server error') {
-        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else if (error === '404 - Not Found') {
-        this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
-      } else {
-        this.errorMessage = error;
-      }
-    });
-  }
-
-
-  deleteParticipant(): Promise<any> {
-
-    return this.serviceCitizen.deleteParticipant(this.currentId)
-    .toPromise()
-    .then(() => {
-      this.errorMessage = null;
-      this.loadAll();
+      this.load();
     })
     .catch((error) => {
       if (error === 'Server error') {
@@ -186,7 +134,7 @@ export class CitizenComponent implements OnInit {
 
   getForm(id: any): Promise<any> {
 
-    return this.serviceCitizen.getparticipant(id)
+    return this.serviceCitizen.getParticipant('org.agora.net.Citizen#'+id)
     .toPromise()
     .then((result) => {
       this.errorMessage = null;
@@ -196,9 +144,9 @@ export class CitizenComponent implements OnInit {
         'name': null,
         'lastname': null
       };
-
-      if (result.representation) {
-        formObject.representation = result.representation;
+      let citizen = result as Citizen;
+      if (citizen.representation) {
+        formObject.representation = citizen.representation;
       } else {
         formObject.representation = null;
       }

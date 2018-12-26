@@ -28,7 +28,11 @@ import { VoteComponent } from './Vote/Vote.component';
 import { EnvelopeComponent } from './Envelope/Envelope.component';
 import { RestrictionComponent } from './Restriction/Restriction.component';
 
-import { CitizenComponent } from './Citizen/Citizen.component';
+import { CurrentCitizenComponent } from './Current/Citizen.component';
+import { CurrentPoliticianComponent } from './Current/Politician.component';
+import { CurrentLegislatorComponent } from './Current/Legislator.component';
+
+
 import { PoliticianComponent } from './Politician/Politician.component';
 import { LegislatorComponent } from './Legislator/Legislator.component';
 
@@ -53,7 +57,9 @@ import { IdentityService } from './identity/identity.service';
     VoteComponent,
     EnvelopeComponent,
     RestrictionComponent,
-    CitizenComponent,
+    CurrentCitizenComponent,
+    CurrentPoliticianComponent,
+    CurrentLegislatorComponent,
     PoliticianComponent,
     LegislatorComponent,
     TX_TrustComponent,

@@ -30,6 +30,8 @@ export class AppComponent implements OnInit {
   currentIdentity:string;
   currentParticipant:Person;
   errorMessage:string;
+  currentType:string;
+  participantLink:string;
 
   constructor(private identityService:IdentityService, private dataService: DataService<Person>){}
 
@@ -61,9 +63,16 @@ export class AppComponent implements OnInit {
       (data)=>{
         let fs = data.split('.')[3].split('#');
         let ns = fs[0];
+
+        this.currentType = ns;
         let id = fs[1];
+
         return this.dataService.getSingle(ns,id).toPromise()
-        .then( (p) => {this.currentParticipant = p})
+        .then( (p) => 
+        {
+          this.currentParticipant = p;
+        }
+        )
         .catch((error) => {
           if (error === 'Server error') {
             this.errorMessage = 'Could not connect to REST server. Please check your configuration details';

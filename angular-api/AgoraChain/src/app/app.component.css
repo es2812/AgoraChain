@@ -65,6 +65,9 @@
     font-size: 14px;
 }
 .participantText {
+    color: #000;
+    font-size:16px;
+    letter-spacing: 0.28px;
     text-align: right;
 }
 

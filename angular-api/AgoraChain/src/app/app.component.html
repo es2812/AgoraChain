@@ -17,9 +17,15 @@
         <p class="network-name">agora-network@1.0.0.bna</p>
         <p class="navbar-brand">AgoraChain</p>
         <div class="identity">
-          <p class="identityText">Using identity: {{currentIdentity}}</p>
-          <p class="participantText">Participant: {{currentParticipant.name}} {{currentParticipant.lastname}}</p>
-          <a class="identityChange" href="/identity">Change</a>
+          <p *ngIf="currentIdentity" class="identityText">Using identity: {{currentIdentity}}</p>
+          
+          <a *ngIf="currentParticipant && currentType=='Citizen'" class="participantText" [routerLink]="['/CurrentCitizen']">Participant: {{currentParticipant.name}} {{currentParticipant.lastname}}</a>
+
+          <a *ngIf="currentParticipant && currentType=='Politician'" class="participantText" [routerLink]="['/CurrentPolitician']">Participant: {{currentParticipant.name}} {{currentParticipant.lastname}}</a>
+
+          <a *ngIf="currentParticipant && currentType=='Legislator'" class="participantText" [routerLink]="['/CurrentLegislator']">Participant: {{currentParticipant.name}} {{currentParticipant.lastname}}</a>
+
+          <a class="identityChange" [routerLink]="['/identity']">Change</a>
         </div>
       </div>
       <ul class="nav navbar-nav">
@@ -40,9 +46,7 @@
         <li class="dropdown active">
           <a class="dropdown-toggle" data-toggle="dropdown">Participants</a>
           <ul class="dropdown-menu scrollable-menu">
-            
-            <li><a [routerLink]="['/Citizen']">Citizen</a></li>
-            
+
             <li><a [routerLink]="['/Politician']">Politician</a></li>
             
             <li><a [routerLink]="['/Legislator']">Legislator</a></li>

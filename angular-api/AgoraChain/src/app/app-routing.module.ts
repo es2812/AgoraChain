@@ -23,7 +23,10 @@ import { VoteComponent } from './Vote/Vote.component';
 import { EnvelopeComponent } from './Envelope/Envelope.component';
 import { RestrictionComponent } from './Restriction/Restriction.component';
 
-import { CitizenComponent } from './Citizen/Citizen.component';
+import { CurrentCitizenComponent } from './Current/Citizen.component';
+import { CurrentPoliticianComponent } from './Current/Politician.component';
+import { CurrentLegislatorComponent } from './Current/Legislator.component';
+
 import { PoliticianComponent } from './Politician/Politician.component';
 import { LegislatorComponent } from './Legislator/Legislator.component';
 
@@ -45,7 +48,9 @@ const routes: Routes = [
   { path: 'Vote', component: VoteComponent },
   { path: 'Envelope', component: EnvelopeComponent },
   { path: 'Restriction', component: RestrictionComponent },
-  { path: 'Citizen', component: CitizenComponent },
+  { path: 'CurrentCitizen', component: CurrentCitizenComponent },
+  { path: 'CurrentPolitician', component: CurrentPoliticianComponent },
+  { path: 'CurrentLegislator', component: CurrentLegislatorComponent },
   { path: 'Politician', component: PoliticianComponent },
   { path: 'Legislator', component: LegislatorComponent },
   { path: 'TX_Trust', component: TX_TrustComponent },
