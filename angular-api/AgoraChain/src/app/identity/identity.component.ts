@@ -3,6 +3,8 @@ import { Component, OnInit } from '@angular/core';
 import { IdentityService } from './identity.service';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 import { Card } from '../card';
+import { Router } from '@angular/router';
+import { routerNgProbeToken } from '@angular/router/src/router_module';
 
 @Component({templateUrl: 'identity.component.html',
             styleUrls: ['identity.component.css']})
@@ -14,7 +16,7 @@ export class IdentityComponent implements OnInit {
     private errorMessage:string;
     allowImport:boolean = false;
 
-    constructor(private identityService:IdentityService, private formBuilder: FormBuilder) {
+    constructor(private identityService:IdentityService, private formBuilder: FormBuilder, private router: Router) {
         this.allCards = [];
     }
 
@@ -84,20 +86,24 @@ export class IdentityComponent implements OnInit {
         window.location.reload();
     }
 
-    useIdentity() {
+    useIdentity(): Promise<any> {
         let selected = this.allCards.filter(c=>c.default==true)[0];
 
-        this.identityService.useIdentity(selected).toPromise().catch((error) => {
+        return this.identityService.useIdentity(selected).toPromise()
+        .then(
+            ()=> {
+                localStorage.setItem('currentIdentity',selected.name);
+                window.location.reload();
+                this.router.navigateByUrl('/Citizen');
+            }
+        )
+        .catch((error) => {
             if (error === 'Server error') {
               this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
             } else if (error === '404 - Not Found') {
               this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
               this.errorMessage = error;
             }
-          });;
-
-        localStorage.setItem('currentIdentity',selected.name);
-
-        window.location.reload();
+          });
     }
 }

@@ -1,6 +1,7 @@
 <div id=container>
     <h2>Use existing identity</h2>
     <div class='list-group'>
+        <p class="list-group-item" *ngIf="allCards.length == 0">No cards found</p>
         <a *ngFor="let card of allCards; trackBy: trackByCards" (click)="selectCard(card)" [class.active]="card.default == true" class="list-group-item">{{card.name}}</a>
     </div>    
     <div class="form-group">

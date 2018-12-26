@@ -64,6 +64,9 @@
     float: right;
     font-size: 14px;
 }
+.participantText {
+    text-align: right;
+}
 
 .navbar-nav > li {
     margin-right: 12px;

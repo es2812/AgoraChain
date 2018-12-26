@@ -16,8 +16,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, pipe } from 'rxjs';
 import { Card } from '../card';
-import { catchError } from 'rxjs/operators';
-import { of } from 'rxjs/observable/of';
 
 // Can be injected into a constructor
 @Injectable()
@@ -36,13 +34,19 @@ export class IdentityService {
         const formData = new FormData();
         formData.append('card',file);
         let requestURL = 'http://localhost:3000/api/wallet/import';
-        this.options = {withCredentials: true, headers: new HttpHeaders({})}
+        this.options = {withCredentials: true, headers: new HttpHeaders({})};
         return this.http.post(requestURL,formData,this.options);
     }
 
     useIdentity(card:Card): Observable<any>{
         let requestURL = 'http://localhost:3000/api/wallet/'+card.name+'/setDefault';
-        this.options = {withCredentials: true, headers: new HttpHeaders({'Content-Type':'application/json'})}
+        this.options = {withCredentials: true, headers: new HttpHeaders({'Content-Type':'application/json'})};
         return this.http.post(requestURL,card.card,this.options);
+    }
+
+    getCurrentParticipant(): Observable<any>{
+        let requestURL = 'http://localhost:3000/api/system/ping';
+        this.options = {withCredentials: true};
+        return this.http.get(requestURL,this.options).map((data)=>data['participant']);
     }
 }

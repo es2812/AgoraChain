@@ -12,25 +12,29 @@
  * limitations under the License.
  */
 
-import { Component, AfterViewInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { IdentityService } from './identity/identity.service'
 import $ from 'jquery';
 import { Card } from './card';
+import { DataService } from './data.service';
+import { Person } from './org.agora.net';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements AfterViewInit {
+export class AppComponent implements OnInit {
   title = 'app works!';
+
   currentIdentity:string;
+  currentParticipant:Person;
+  errorMessage:string;
 
-  constructor(private identityService:IdentityService){}
+  constructor(private identityService:IdentityService, private dataService: DataService<Person>){}
 
 
-  ngAfterViewInit() {
-    this.currentIdentity = localStorage.getItem("currentIdentity");
+  ngOnInit() {
     $('.nav a').on('click', function(){
       $('.nav').find('.active').removeClass('active');
       $(this).parent().addClass('active');
@@ -46,6 +50,36 @@ export class AppComponent implements AfterViewInit {
 
     $('.dropdown-menu li').on('click', function(){
       $(this).parent().parent().addClass('active');
+    });
+    this.currentIdentity = localStorage.getItem('currentIdentity');
+    this.getIdentity();
+  }
+
+  getIdentity():Promise<any>{
+    return this.identityService.getCurrentParticipant().toPromise()
+    .then(
+      (data)=>{
+        let fs = data.split('.')[3].split('#');
+        let ns = fs[0];
+        let id = fs[1];
+        return this.dataService.getSingle(ns,id).toPromise()
+        .then( (p) => {this.currentParticipant = p})
+        .catch((error) => {
+          if (error === 'Server error') {
+            this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
+          } else if (error === '404 - Not Found') {
+            this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
+            this.errorMessage = error;
+          }
+      })
+    })
+    .catch((error) => {
+      if (error === 'Server error') {
+        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
+      } else if (error === '404 - Not Found') {
+        this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
+        this.errorMessage = error;
+      }
     });
   }
 }
