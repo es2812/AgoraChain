@@ -35,16 +35,4 @@ export class LegislatorService {
     return this.dataService.getSingle(this.NAMESPACE, id);
   }
 
-  public addParticipant(itemToAdd: any): Observable<Legislator> {
-    return this.dataService.add(this.NAMESPACE, itemToAdd);
-  }
-
-  public updateParticipant(id: any, itemToUpdate: any): Observable<Legislator> {
-    return this.dataService.update(this.NAMESPACE, id, itemToUpdate);
-  }
-
-  public deleteParticipant(id: any): Observable<Legislator> {
-    return this.dataService.delete(this.NAMESPACE, id);
-  }
-
 }
