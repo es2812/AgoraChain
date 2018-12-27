@@ -18,6 +18,8 @@ import { TX_TrustService } from './TX_Trust.service';
 import 'rxjs/add/operator/toPromise';
 import { IdentityService } from 'app/identity/identity.service';
 import { Ng4LoadingSpinnerService } from 'ng4-loading-spinner';
+import { DataService } from 'app/data.service';
+import { Politician, Citizen } from 'app/org.agora.net';
 
 @Component({
   selector: 'app-tx_trust',
@@ -29,8 +31,8 @@ export class TX_TrustComponent implements OnInit {
 
   myForm: FormGroup;
 
-  private allTransactions;
   private currentTrustee;
+  private allPoliticians;
   private Transaction;
   private currentId;
   private errorMessage;
@@ -41,8 +43,8 @@ export class TX_TrustComponent implements OnInit {
   timestamp = new FormControl('', Validators.required);
 
 
-  constructor(private serviceIdentity: IdentityService, private serviceTX_Trust: TX_TrustService, fb: FormBuilder, 
-    private spinnerService: Ng4LoadingSpinnerService) {
+  constructor(private serviceIdentity: IdentityService, private serviceTX_Trust: TX_TrustService, private trustedService: DataService<Politician>, 
+    private trusteeService: DataService<Citizen>,fb: FormBuilder, private spinnerService: Ng4LoadingSpinnerService) {
     this.myForm = fb.group({
       trustee: this.trustee,
       trusted: this.trusted,
@@ -53,13 +55,17 @@ export class TX_TrustComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadTrustee();
-    this.loadAll();
+    this.loadPoliticians();
   }
 
   loadTrustee(): Promise<any> {
     return this.serviceIdentity.getCurrentParticipant().toPromise()
     .then((p)=>{
-      this.currentTrustee = p;
+      let fs = p.split('.')[3].split('#');
+      return this.trusteeService.getSingle(fs[0],fs[1]).toPromise()
+      .then((d)=> {
+        this.currentTrustee = d;
+      })
     })
     .catch((error) => {
       if (error === 'Server error') {
@@ -72,16 +78,16 @@ export class TX_TrustComponent implements OnInit {
     });
   }
 
-  loadAll(): Promise<any> {
+  loadPoliticians(): Promise<any> {
     const tempList = [];
-    return this.serviceTX_Trust.getAll()
-    .toPromise()
-    .then((result) => {
+    return this.trustedService.getAll('Politician').toPromise()
+    .then( (data) =>
+    {
       this.errorMessage = null;
-      result.forEach(transaction => {
-        tempList.push(transaction);
-      });
-      this.allTransactions = tempList;
+      data.forEach(p => {
+        tempList.push(p);
+      })
+      this.allPoliticians = tempList;
     })
     .catch((error) => {
       if (error === 'Server error') {
@@ -121,10 +127,14 @@ export class TX_TrustComponent implements OnInit {
 
   addTransaction(form: any): Promise<any> {
     this.spinnerService.show()
+    
+    let trusteeIdentification = "org.agora.net.Citizen".concat("#",this.currentTrustee.id);
+    let trustedIdentification = "org.agora.net.Politician".concat("#",this.trusted.value);
+    
     this.Transaction = {
       $class: 'org.agora.net.TX_Trust',
-      'trustee': this.trustee.value,
-      'trusted': this.trusted.value,
+      'trustee': trusteeIdentification,
+      'trusted': trustedIdentification,
       'transactionId': this.transactionId.value,
       'timestamp': this.timestamp.value
     };
@@ -156,49 +166,6 @@ export class TX_TrustComponent implements OnInit {
       }
     });
   }
-
-  updateTransaction(form: any): Promise<any> {
-    this.Transaction = {
-      $class: 'org.agora.net.TX_Trust',
-      'trustee': this.trustee.value,
-      'trusted': this.trusted.value,
-      'timestamp': this.timestamp.value
-    };
-
-    return this.serviceTX_Trust.updateTransaction(form.get('transactionId').value, this.Transaction)
-    .toPromise()
-    .then(() => {
-      this.errorMessage = null;
-    })
-    .catch((error) => {
-      if (error === 'Server error') {
-        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else if (error === '404 - Not Found') {
-      this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
-      } else {
-        this.errorMessage = error;
-      }
-    });
-  }
-
-  deleteTransaction(): Promise<any> {
-
-    return this.serviceTX_Trust.deleteTransaction(this.currentId)
-    .toPromise()
-    .then(() => {
-      this.errorMessage = null;
-    })
-    .catch((error) => {
-      if (error === 'Server error') {
-        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else if (error === '404 - Not Found') {
-        this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
-      } else {
-        this.errorMessage = error;
-      }
-    });
-  }
-
   setId(id: any): void {
     this.currentId = id;
   }
@@ -256,8 +223,8 @@ export class TX_TrustComponent implements OnInit {
 
   resetForm(): void {
     this.myForm.setValue({
-      'trustee': this.currentTrustee,
-      'trusted': null,
+      'trustee': this.currentTrustee.name.concat(" ",this.currentTrustee.lastname),
+      'trusted': this.allPoliticians[0].id,
       'transactionId': null,
       'timestamp': null
     });

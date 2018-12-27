@@ -17,18 +17,22 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="addTransactionModalLabel">Create Transaction</h4>
+        <h4 class="modal-title" id="addTransactionModalLabel">Trust Transaction</h4>
         <p class="modal-intro">Enter the required values below.</p>
       </div>
       <form [formGroup]="myForm">
         <div class="modal-body">
               <div class="form-group text-left">
-                <label for="trustee">trustee</label>
-                    <input [ngModel]="trustee" formControlName="trustee" class="form-control"/>
+                <label for="trustee">Trustee. Automatically set to current identity.</label>
+                    <input [ngModel]="trustee.name" formControlName="trustee" class="form-control"/>
               </div>
               <div class="form-group text-left">
-                <label for="trusted">trusted</label>
-                    <textarea formControlName="trusted" class="form-control" rows="3"></textarea>
+                <label for="trusted">Politician to trust.</label>
+                    <select formControlName="trusted" class="form-control">
+                      <option *ngFor="let politician of allPoliticians" [value]="politician.id">
+                        {{politician.name}} {{politician.lastname}}
+                      </option>
+                    </select>
               </div>
         </div>
         <div class="modal-footer">
@@ -42,50 +46,15 @@
 
 
 <div class="container col-md-6">
-<!-- 
-  <mat-card *ngIf="loading" 
-    style="display: flex; justify-content: center; align-items: center">
-    <mat-progress-spinner 
-      color="primary" 
-      mode="indeterminate">
-    </mat-progress-spinner>
-  </mat-card> -->
-
     <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
         <strong>Error:</strong> {{errorMessage}}
     </div>
 
   <div class="row">
-    <div class="col-md-12">
-        <h1 class="transaction-title" id='transactionName'>TX_Trust</h1>
-    </div>
-  </div>
-  <br>
+      <h1 class="transaction-title" id='transactionName'>Trust transaction</h1>
   <div class="row">
-    <div class="col-md-12">
-      <div class="row">
-        <div class="col-md-12">
-          When invoked, this transaction will have the following attributes:
-          <br>
-          <ul>
-            
-              
-                <li><span class="attribute"><b>trustee</b></span></li>
-              
-            
-              
-                <li><span class="attribute"><b>trusted</b></span></li>
-              
-            
-              
-            
-              
-            
-          </ul>
-        </div>
-      </div>
-      <button (click)="resetForm();" type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTransactionModal">Invoke</button>
-    </div>
+      <p class="description">This transaction allows you to add or change a <a [routerLink]="['/Politician']">Politician</a> as your representation for all subsequent elections.</p>
   </div>
+  <button (click)="resetForm();" type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTransactionModal">Invoke</button>
 </div>
 

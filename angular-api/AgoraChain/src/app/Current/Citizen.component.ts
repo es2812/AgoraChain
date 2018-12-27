@@ -17,7 +17,8 @@ import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms'
 import { CurrentService } from './Current.service';
 import { IdentityService } from '../identity/identity.service';
 import 'rxjs/add/operator/toPromise';
-import { Citizen } from 'app/org.agora.net';
+import { Citizen, Politician } from 'app/org.agora.net';
+import { DataService } from 'app/data.service';
 
 @Component({
   selector: 'app-citizen',
@@ -30,6 +31,7 @@ export class CurrentCitizenComponent implements OnInit {
   myForm: FormGroup;
 
   private participant;
+  private politicianTrusted;
   private currentId;
   private errorMessage;
 
@@ -39,7 +41,7 @@ export class CurrentCitizenComponent implements OnInit {
   lastname = new FormControl('', Validators.required);
 
 
-  constructor(private identityService:IdentityService, private serviceCitizen: CurrentService, fb: FormBuilder) {
+  constructor(private identityService:IdentityService, private serviceCitizen: CurrentService, private servicePolitician:DataService<Politician>, fb: FormBuilder) {
     this.myForm = fb.group({
       representation: this.representation,
       id: this.id,
@@ -58,7 +60,14 @@ export class CurrentCitizenComponent implements OnInit {
     .then((result) => {
       this.errorMessage = null;
       return this.serviceCitizen.getParticipant(result).toPromise()
-      .then((result)=>{this.participant = result})
+      .then((result)=>{
+        this.participant = result;
+        if(this.participant.representation){
+          let fs = this.participant.representation.split('.')[3].split('#');
+          return this.servicePolitician.getSingle(fs[0],fs[1]).toPromise()
+          .then((p)=>this.politicianTrusted = p)
+        }
+      })
       .catch((error) => {
         if (error === 'Server error') {
           this.errorMessage = 'Could not connect to REST server. Please check your configuration details';

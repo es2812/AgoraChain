@@ -23,7 +23,7 @@
           <div class="modal-body">
             
               <div class="form-group text-left">
-                <label for="id">id</label>
+                <label for="id">ID</label>
   
                 
                   <input [ngModel]="id" formControlName="id" class="form-control" disabled="disabled">  
@@ -32,7 +32,7 @@
               </div>
             
               <div class="form-group text-left">
-                <label for="name">name</label>
+                <label for="name">Name</label>
   
                 
                   <input [ngModel]="name"formControlName="name" type="text" class="form-control">
@@ -41,14 +41,12 @@
               </div>
             
               <div class="form-group text-left">
-                <label for="lastname">lastname</label>
+                <label for="lastname">Last Name</label>
   
                 
                   <input [ngModel]="lastname"formControlName="lastname" type="text" class="form-control">
-                
   
               </div>
-            
   
   
           </div>
@@ -101,8 +99,8 @@
               
               <td class="participant-properties">{{participant.lastname}}</td>
 
-              <td *ngIf="participant.representation" class="participant-properties">{{participant.representation}}</td>
-              <td *ngIf="!participant.representation" class="participant-properties" style="color:red">No representation</td>
+              <td *ngIf="politicianTrusted" class="participant-properties">{{politicianTrusted.name}} {{politicianTrusted.lastname}}</td>
+              <td *ngIf="!politicianTrusted" class="participant-properties" style="color:red">No representation</td>
               
               <td>
                 <button (click)="getForm(participant.id);" type="button" class="btn btn-update" data-toggle="modal" data-target="#updateParticipantModal">
@@ -117,6 +115,7 @@
                  </g>
                  </svg>
                 </button>
+                <button type="button" class="btn btn-update" [routerLink]="['/TX_Trust']" data-dismiss="modal">Change Representation</button>
               </td>
             </tr>
           </tbody>

@@ -13,9 +13,12 @@
  */
 .container {
     margin-left: 72px;
-    margin-right: 32px;
-    background-color: #F4F4F4;
+    margin-right: 100px;
     border-radius: 5px;
+}
+
+.description {
+    margin-left: 100px;
 }
 
 .btn-primary {
@@ -29,7 +32,7 @@
     height: 40px;
     width: 153px;
     float: right;
-    margin-top: 5%;
+    margin-top: 3%;
 }
 
 .table > thead > tr > th {
