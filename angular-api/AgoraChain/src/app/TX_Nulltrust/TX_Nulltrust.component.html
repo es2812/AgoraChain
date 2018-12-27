@@ -57,32 +57,13 @@
     </div>
 
   <div class="row">
-    <div class="col-md-12">
-        <h1 class="transaction-title" id='transactionName'>TX_Nulltrust</h1>
-    </div>
+    <h1 class="transaction-title" id='transactionName'>Null Trust transaction</h1>
   </div>
   <br>
   <div class="row">
-    <div class="col-md-12">
-      <div class="row">
-        <div class="col-md-12">
-          When invoked, this transaction will have the following attributes:
-          <br>
-          <ul>
-            
-              
-                <li><span class="attribute"><b>representedToNull</b></span></li>
-              
-            
-              
-            
-              
-            
-          </ul>
-        </div>
-      </div>
-      <button (click)="resetForm();" type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTransactionModal">Invoke</button>
-    </div>
+          <p class="description">This transaction removes your trust in your current representation.</p>
   </div>
+  <button (click)="resetForm();addTransaction(myForm);" type="button" class="btn btn-primary">Invoke</button>
+
 </div>
 

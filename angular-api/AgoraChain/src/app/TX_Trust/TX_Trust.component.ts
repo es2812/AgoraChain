@@ -24,7 +24,7 @@ import { Politician, Citizen } from 'app/org.agora.net';
 @Component({
   selector: 'app-tx_trust',
   templateUrl: './TX_Trust.component.html',
-  styleUrls: ['./TX_Trust.component.css'],
+  styleUrls: ['../TX.css'],
   providers: [TX_TrustService]
 })
 export class TX_TrustComponent implements OnInit {

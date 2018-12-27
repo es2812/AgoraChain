@@ -95,14 +95,7 @@ label {
     width: 76px;
     height: 40px;
 }
-.btn-danger{
-    color: #ffffff;
-    background-color: #844AE4;
-    border-color: #844AE4;
-    border-radius: 4px;
-    width: 76px;
-    height: 40px;
-}
+
 .btn-danger:focus{
     background-color: #4D21A8;
     border-color: #4D21A8;
