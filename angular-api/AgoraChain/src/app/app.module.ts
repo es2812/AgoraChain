@@ -17,7 +17,7 @@ import { NgModule } from '@angular/core';
 import { HttpModule } from '@angular/http';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatProgressSpinner } from '@angular/material';
+import { Ng4LoadingSpinnerModule } from 'ng4-loading-spinner';
 import { AppRoutingModule } from './app-routing.module';
 import { DataService } from './data.service';
 import { AppComponent } from './app.component';
@@ -78,10 +78,10 @@ import { IdentityService } from './identity/identity.service';
     BrowserModule,
     FormsModule,
     ReactiveFormsModule,
+    Ng4LoadingSpinnerModule.forRoot(),
     HttpModule,
     HttpClientModule,
-    AppRoutingModule,
-    MatProgressSpinner
+    AppRoutingModule
   ],
   providers: [
     DataService,

@@ -4,7 +4,6 @@ import { IdentityService } from './identity.service';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 import { Card } from '../card';
 import { Router } from '@angular/router';
-import { routerNgProbeToken } from '@angular/router/src/router_module';
 
 @Component({templateUrl: 'identity.component.html',
             styleUrls: ['identity.component.css']})
@@ -82,7 +81,7 @@ export class IdentityComponent implements OnInit {
               this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
               this.errorMessage = error;
             }
-          });;
+          });
         window.location.reload();
     }
 
@@ -93,7 +92,6 @@ export class IdentityComponent implements OnInit {
         .then(
             ()=> {
                 window.location.reload();
-                this.router.navigateByUrl('/identity');
             }
         )
         .catch((error) => {

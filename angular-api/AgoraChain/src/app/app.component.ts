@@ -15,7 +15,6 @@
 import { Component, OnInit } from '@angular/core';
 import { IdentityService } from './identity/identity.service'
 import $ from 'jquery';
-import { Card } from './card';
 import { DataService } from './data.service';
 import { Person } from './org.agora.net';
 

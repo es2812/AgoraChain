@@ -17,6 +17,7 @@ import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms'
 import { TX_TrustService } from './TX_Trust.service';
 import 'rxjs/add/operator/toPromise';
 import { IdentityService } from 'app/identity/identity.service';
+import { Ng4LoadingSpinnerService } from 'ng4-loading-spinner';
 
 @Component({
   selector: 'app-tx_trust',
@@ -34,15 +35,14 @@ export class TX_TrustComponent implements OnInit {
   private currentId;
   private errorMessage;
 
-  private loading:boolean = false;
-
   trustee = new FormControl({value:'', disabled: true}, Validators.required);
   trusted = new FormControl('', Validators.required);
   transactionId = new FormControl('', Validators.required);
   timestamp = new FormControl('', Validators.required);
 
 
-  constructor(private serviceIdentity: IdentityService, private serviceTX_Trust: TX_TrustService, fb: FormBuilder) {
+  constructor(private serviceIdentity: IdentityService, private serviceTX_Trust: TX_TrustService, fb: FormBuilder, 
+    private spinnerService: Ng4LoadingSpinnerService) {
     this.myForm = fb.group({
       trustee: this.trustee,
       trusted: this.trusted,
@@ -120,7 +120,7 @@ export class TX_TrustComponent implements OnInit {
   }
 
   addTransaction(form: any): Promise<any> {
-    this.loading = true;
+    this.spinnerService.show()
     this.Transaction = {
       $class: 'org.agora.net.TX_Trust',
       'trustee': this.trustee.value,
@@ -146,7 +146,7 @@ export class TX_TrustComponent implements OnInit {
         'transactionId': null,
         'timestamp': null
       });
-      this.loading = false;
+      this.spinnerService.hide()
     })
     .catch((error) => {
       if (error === 'Server error') {
