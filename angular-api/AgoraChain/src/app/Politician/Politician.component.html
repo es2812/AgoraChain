@@ -17,10 +17,8 @@
       </div>
     
     <div class="row">
-      <div class="col-md-9">
+      <div>
           <h1 class="participant-title" id='participantName'>Politicians in the system</h1>
-      </div>
-      <div class="col-md-3">
       </div>
     </div>
     <br>
@@ -30,27 +28,26 @@
           <thead class="thead">
             <tr class="thead-cols">
               
-                  <th class="info">info</th>
+                  <th class="info">ID</th>
               
-                  <th class="info">id</th>
+                  <th class="info">Name</th>
               
-                  <th class="info">name</th>
-              
-                  <th class="info">lastname</th>
+                  <th class="info">Last Name</th>
+
+                  <th class="info">Info</th>
               
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let participant of allParticipants">
-  
-              
-                  <td class="participant-properties">{{participant.info}}</td>
-              
+                
                   <td class="participant-properties">{{participant.id}}</td>
               
                   <td class="participant-properties">{{participant.name}}</td>
               
                   <td class="participant-properties">{{participant.lastname}}</td>
+
+                  <td class="participant-properties">{{participant.info}}</td>
                   
             </tr>
           </tbody>

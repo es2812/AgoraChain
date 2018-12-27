@@ -11,6 +11,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
+
 <div class="modal fade" id="addTransactionModal" tabindex="-1" role="dialog" aria-labelledby="addTransactionModalLabel">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -21,36 +22,14 @@
       </div>
       <form [formGroup]="myForm">
         <div class="modal-body">
-
-
-          
-
-            
               <div class="form-group text-left">
                 <label for="trustee">trustee</label>
-                
-                    <textarea formControlName="trustee" class="form-control" rows="3"></textarea>
-                
+                    <input [ngModel]="trustee" formControlName="trustee" class="form-control"/>
               </div>
-            
-          
-
-            
               <div class="form-group text-left">
                 <label for="trusted">trusted</label>
-                
                     <textarea formControlName="trusted" class="form-control" rows="3"></textarea>
-                
               </div>
-            
-          
-
-            
-          
-
-            
-          
-
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
@@ -61,7 +40,17 @@
   </div>
 </div>
 
+
 <div class="container col-md-6">
+<!-- 
+  <mat-card *ngIf="loading" 
+    style="display: flex; justify-content: center; align-items: center">
+    <mat-progress-spinner 
+      color="primary" 
+      mode="indeterminate">
+    </mat-progress-spinner>
+  </mat-card> -->
+
     <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
         <strong>Error:</strong> {{errorMessage}}
     </div>

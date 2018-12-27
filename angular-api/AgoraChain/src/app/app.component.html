@@ -17,15 +17,17 @@
         <p class="network-name">agora-network@1.0.0.bna</p>
         <p class="navbar-brand">AgoraChain</p>
         <div class="identity">
-          <p *ngIf="currentIdentity" class="identityText">Using identity: {{currentIdentity}}</p>
-          
-          <a *ngIf="currentParticipant && currentType=='Citizen'" class="participantText" [routerLink]="['/CurrentCitizen']">Participant: {{currentParticipant.name}} {{currentParticipant.lastname}}</a>
+          <div class="row">
+            <a *ngIf="currentParticipant && currentType=='Citizen'" class="participantText" [routerLink]="['/CurrentCitizen']">Participant: {{currentParticipant.name}} {{currentParticipant.lastname}}</a>
 
-          <a *ngIf="currentParticipant && currentType=='Politician'" class="participantText" [routerLink]="['/CurrentPolitician']">Participant: {{currentParticipant.name}} {{currentParticipant.lastname}}</a>
+            <a *ngIf="currentParticipant && currentType=='Politician'" class="participantText" [routerLink]="['/CurrentPolitician']">Participant: {{currentParticipant.name}} {{currentParticipant.lastname}}</a>
 
-          <a *ngIf="currentParticipant && currentType=='Legislator'" class="participantText" [routerLink]="['/CurrentLegislator']">Participant: {{currentParticipant.name}} {{currentParticipant.lastname}}</a>
-
-          <a class="identityChange" [routerLink]="['/identity']">Change</a>
+            <a *ngIf="currentParticipant && currentType=='Legislator'" class="participantText" [routerLink]="['/CurrentLegislator']">Participant: {{currentParticipant.name}} {{currentParticipant.lastname}}</a>
+          </div>
+          <div class="row">
+            <a class="identityChange" *ngIf="!currentParticipant" [routerLink]="['/identity']">Set identity</a>
+            <a class="identityChange" *ngIf="currentParticipant" [routerLink]="['/identity']">Change</a>
+          </div>
         </div>
       </div>
       <ul class="nav navbar-nav">

@@ -17,6 +17,7 @@ import { NgModule } from '@angular/core';
 import { HttpModule } from '@angular/http';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatProgressSpinner } from '@angular/material';
 import { AppRoutingModule } from './app-routing.module';
 import { DataService } from './data.service';
 import { AppComponent } from './app.component';
@@ -79,7 +80,8 @@ import { IdentityService } from './identity/identity.service';
     ReactiveFormsModule,
     HttpModule,
     HttpClientModule,
-    AppRoutingModule
+    AppRoutingModule,
+    MatProgressSpinner
   ],
   providers: [
     DataService,

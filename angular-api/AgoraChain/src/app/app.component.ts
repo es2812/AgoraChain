@@ -53,7 +53,6 @@ export class AppComponent implements OnInit {
     $('.dropdown-menu li').on('click', function(){
       $(this).parent().parent().addClass('active');
     });
-    this.currentIdentity = localStorage.getItem('currentIdentity');
     this.getIdentity();
   }
 

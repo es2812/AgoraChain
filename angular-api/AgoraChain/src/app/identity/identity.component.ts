@@ -92,9 +92,8 @@ export class IdentityComponent implements OnInit {
         return this.identityService.useIdentity(selected).toPromise()
         .then(
             ()=> {
-                localStorage.setItem('currentIdentity',selected.name);
                 window.location.reload();
-                this.router.navigateByUrl('/');
+                this.router.navigateByUrl('/identity');
             }
         )
         .catch((error) => {

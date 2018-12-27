@@ -16,6 +16,7 @@ import { Component, OnInit, Input } from '@angular/core';
 import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
 import { TX_TrustService } from './TX_Trust.service';
 import 'rxjs/add/operator/toPromise';
+import { IdentityService } from 'app/identity/identity.service';
 
 @Component({
   selector: 'app-tx_trust',
@@ -28,17 +29,20 @@ export class TX_TrustComponent implements OnInit {
   myForm: FormGroup;
 
   private allTransactions;
+  private currentTrustee;
   private Transaction;
   private currentId;
   private errorMessage;
 
-  trustee = new FormControl('', Validators.required);
+  private loading:boolean = false;
+
+  trustee = new FormControl({value:'', disabled: true}, Validators.required);
   trusted = new FormControl('', Validators.required);
   transactionId = new FormControl('', Validators.required);
   timestamp = new FormControl('', Validators.required);
 
 
-  constructor(private serviceTX_Trust: TX_TrustService, fb: FormBuilder) {
+  constructor(private serviceIdentity: IdentityService, private serviceTX_Trust: TX_TrustService, fb: FormBuilder) {
     this.myForm = fb.group({
       trustee: this.trustee,
       trusted: this.trusted,
@@ -48,7 +52,24 @@ export class TX_TrustComponent implements OnInit {
   };
 
   ngOnInit(): void {
+    this.loadTrustee();
     this.loadAll();
+  }
+
+  loadTrustee(): Promise<any> {
+    return this.serviceIdentity.getCurrentParticipant().toPromise()
+    .then((p)=>{
+      this.currentTrustee = p;
+    })
+    .catch((error) => {
+      if (error === 'Server error') {
+        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
+      } else if (error === '404 - Not Found') {
+        this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
+      } else {
+        this.errorMessage = error;
+      }
+    });
   }
 
   loadAll(): Promise<any> {
@@ -99,6 +120,7 @@ export class TX_TrustComponent implements OnInit {
   }
 
   addTransaction(form: any): Promise<any> {
+    this.loading = true;
     this.Transaction = {
       $class: 'org.agora.net.TX_Trust',
       'trustee': this.trustee.value,
@@ -124,6 +146,7 @@ export class TX_TrustComponent implements OnInit {
         'transactionId': null,
         'timestamp': null
       });
+      this.loading = false;
     })
     .catch((error) => {
       if (error === 'Server error') {
@@ -233,7 +256,7 @@ export class TX_TrustComponent implements OnInit {
 
   resetForm(): void {
     this.myForm.setValue({
-      'trustee': null,
+      'trustee': this.currentTrustee,
       'trusted': null,
       'transactionId': null,
       'timestamp': null
