@@ -69,6 +69,7 @@ export class AppComponent implements OnInit {
         .then( (p) => 
         {
           this.currentParticipant = p;
+          localStorage.setItem('currentType',this.currentType);
         }
         )
         .catch((error) => {

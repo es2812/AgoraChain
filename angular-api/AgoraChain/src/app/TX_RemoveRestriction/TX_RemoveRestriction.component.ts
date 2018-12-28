@@ -16,18 +16,21 @@ import { Component, OnInit, Input } from '@angular/core';
 import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
 import { TX_RemoveRestrictionService } from './TX_RemoveRestriction.service';
 import 'rxjs/add/operator/toPromise';
+import { NgxSpinnerService } from 'ngx-spinner';
+import { DataService } from 'app/data.service';
+import { Restriction } from 'app/org.agora.net';
 
 @Component({
   selector: 'app-tx_removerestriction',
   templateUrl: './TX_RemoveRestriction.component.html',
-  styleUrls: ['./TX_RemoveRestriction.component.css'],
+  styleUrls: ['../TX.css'],
   providers: [TX_RemoveRestrictionService]
 })
 export class TX_RemoveRestrictionComponent implements OnInit {
 
   myForm: FormGroup;
 
-  private allTransactions;
+  private allRestrictions;
   private Transaction;
   private currentId;
   private errorMessage;
@@ -37,7 +40,7 @@ export class TX_RemoveRestrictionComponent implements OnInit {
   timestamp = new FormControl('', Validators.required);
 
 
-  constructor(private serviceTX_RemoveRestriction: TX_RemoveRestrictionService, fb: FormBuilder) {
+  constructor(private serviceTX_RemoveRestriction: TX_RemoveRestrictionService, fb: FormBuilder, private spinnerService:NgxSpinnerService, private serviceRestriction: DataService<Restriction>) {
     this.myForm = fb.group({
       restriction: this.restriction,
       transactionId: this.transactionId,
@@ -46,19 +49,21 @@ export class TX_RemoveRestrictionComponent implements OnInit {
   };
 
   ngOnInit(): void {
-    this.loadAll();
+    this.loadRestrictions();
   }
 
-  loadAll(): Promise<any> {
+  loadRestrictions(): Promise<any> {
+    this.spinnerService.show();
     const tempList = [];
-    return this.serviceTX_RemoveRestriction.getAll()
+    return this.serviceRestriction.getAll('Restriction')
     .toPromise()
     .then((result) => {
       this.errorMessage = null;
-      result.forEach(transaction => {
-        tempList.push(transaction);
+      result.forEach(r => {
+        tempList.push(r);
       });
-      this.allTransactions = tempList;
+      this.allRestrictions = tempList;
+      this.spinnerService.hide();
     })
     .catch((error) => {
       if (error === 'Server error') {
@@ -97,9 +102,10 @@ export class TX_RemoveRestrictionComponent implements OnInit {
   }
 
   addTransaction(form: any): Promise<any> {
+    let restrictionIdentifier = "org.agora.net.Restriction#".concat(this.restriction.value);
     this.Transaction = {
       $class: 'org.agora.net.TX_RemoveRestriction',
-      'restriction': this.restriction.value,
+      'restriction': restrictionIdentifier,
       'transactionId': this.transactionId.value,
       'timestamp': this.timestamp.value
     };
@@ -123,47 +129,6 @@ export class TX_RemoveRestrictionComponent implements OnInit {
     .catch((error) => {
       if (error === 'Server error') {
         this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else {
-        this.errorMessage = error;
-      }
-    });
-  }
-
-  updateTransaction(form: any): Promise<any> {
-    this.Transaction = {
-      $class: 'org.agora.net.TX_RemoveRestriction',
-      'restriction': this.restriction.value,
-      'timestamp': this.timestamp.value
-    };
-
-    return this.serviceTX_RemoveRestriction.updateTransaction(form.get('transactionId').value, this.Transaction)
-    .toPromise()
-    .then(() => {
-      this.errorMessage = null;
-    })
-    .catch((error) => {
-      if (error === 'Server error') {
-        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else if (error === '404 - Not Found') {
-      this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
-      } else {
-        this.errorMessage = error;
-      }
-    });
-  }
-
-  deleteTransaction(): Promise<any> {
-
-    return this.serviceTX_RemoveRestriction.deleteTransaction(this.currentId)
-    .toPromise()
-    .then(() => {
-      this.errorMessage = null;
-    })
-    .catch((error) => {
-      if (error === 'Server error') {
-        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else if (error === '404 - Not Found') {
-        this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
       } else {
         this.errorMessage = error;
       }
@@ -220,7 +185,7 @@ export class TX_RemoveRestrictionComponent implements OnInit {
 
   resetForm(): void {
     this.myForm.setValue({
-      'restriction': null,
+      'restriction': this.allRestrictions[0].restrictionID,
       'transactionId': null,
       'timestamp': null
     });

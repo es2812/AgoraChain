@@ -14,9 +14,12 @@
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+import { AuthGuard } from './auth.guard';
+import { IdentityGuard } from './identity.guard';
 
 import { HomeComponent } from './home/home.component';
 import { IdentityComponent } from './identity/identity.component';
+import { SuccessComponent } from './home/success.component';
 
 import { ElectionComponent } from './Election/Election.component';
 import { VoteComponent } from './Vote/Vote.component';
@@ -42,33 +45,35 @@ import { TX_PrepareEnvelopeComponent } from './TX_PrepareEnvelope/TX_PrepareEnve
 import { TX_SecretVoteComponent } from './TX_SecretVote/TX_SecretVote.component';
 
 const routes: Routes = [
-  { path: '', component: HomeComponent },
-  { path: 'identity', component: IdentityComponent},
-  { path: 'Election', component: ElectionComponent },
-  { path: 'Vote', component: VoteComponent },
-  { path: 'Envelope', component: EnvelopeComponent },
-  { path: 'Restriction', component: RestrictionComponent },
-  { path: 'CurrentCitizen', component: CurrentCitizenComponent },
-  { path: 'CurrentPolitician', component: CurrentPoliticianComponent },
-  { path: 'CurrentLegislator', component: CurrentLegislatorComponent },
-  { path: 'Politician', component: PoliticianComponent },
-  { path: 'Legislator', component: LegislatorComponent },
-  { path: 'TX_Trust', component: TX_TrustComponent },
-  { path: 'TX_AddRestriction', component: TX_AddRestrictionComponent },
-  { path: 'TX_RemoveRestriction', component: TX_RemoveRestrictionComponent },
-  { path: 'TX_Nulltrust', component: TX_NulltrustComponent },
-  { path: 'TX_CreateElection', component: TX_CreateElectionComponent },
-  { path: 'TX_OpenElection', component: TX_OpenElectionComponent },
-  { path: 'TX_CloseElection', component: TX_CloseElectionComponent },
-  { path: 'TX_PublicVote', component: TX_PublicVoteComponent },
-  { path: 'TX_PrepareEnvelope', component: TX_PrepareEnvelopeComponent },
-  { path: 'TX_SecretVote', component: TX_SecretVoteComponent },
+  { path: '', component: HomeComponent},
+  { path: 'login', component: HomeComponent},
+  { path: 'success', component: SuccessComponent},
+  { path: 'identity', component: IdentityComponent, canActivate: [AuthGuard]},
+  { path: 'Election', component: ElectionComponent, canActivate: [AuthGuard, IdentityGuard]  },
+  { path: 'Vote', component: VoteComponent, canActivate: [AuthGuard, IdentityGuard]  },
+  { path: 'Envelope', component: EnvelopeComponent, canActivate: [AuthGuard, IdentityGuard]  },
+  { path: 'Restriction', component: RestrictionComponent, canActivate: [AuthGuard, IdentityGuard] },
+  { path: 'CurrentCitizen', component: CurrentCitizenComponent, canActivate: [AuthGuard, IdentityGuard] },
+  { path: 'CurrentPolitician', component: CurrentPoliticianComponent, canActivate: [AuthGuard, IdentityGuard] },
+  { path: 'CurrentLegislator', component: CurrentLegislatorComponent, canActivate: [AuthGuard, IdentityGuard]  },
+  { path: 'Politician', component: PoliticianComponent, canActivate: [AuthGuard, IdentityGuard]  },
+  { path: 'Legislator', component: LegislatorComponent, canActivate: [AuthGuard, IdentityGuard]  },
+  { path: 'TX_Trust', component: TX_TrustComponent, canActivate: [AuthGuard, IdentityGuard]  },
+  { path: 'TX_AddRestriction', component: TX_AddRestrictionComponent, canActivate: [AuthGuard, IdentityGuard]  },
+  { path: 'TX_RemoveRestriction', component: TX_RemoveRestrictionComponent, canActivate: [AuthGuard, IdentityGuard] },
+  { path: 'TX_Nulltrust', component: TX_NulltrustComponent, canActivate: [AuthGuard, IdentityGuard]  },
+  { path: 'TX_CreateElection', component: TX_CreateElectionComponent, canActivate: [AuthGuard, IdentityGuard]  },
+  { path: 'TX_OpenElection', component: TX_OpenElectionComponent, canActivate: [AuthGuard, IdentityGuard]  },
+  { path: 'TX_CloseElection', component: TX_CloseElectionComponent, canActivate: [AuthGuard, IdentityGuard]  },
+  { path: 'TX_PublicVote', component: TX_PublicVoteComponent, canActivate: [AuthGuard, IdentityGuard]  },
+  { path: 'TX_PrepareEnvelope', component: TX_PrepareEnvelopeComponent, canActivate: [AuthGuard, IdentityGuard]  },
+  { path: 'TX_SecretVote', component: TX_SecretVoteComponent, canActivate: [AuthGuard, IdentityGuard]  },
   { path: '**', redirectTo: '' }
 ];
 
 @NgModule({
  imports: [RouterModule.forRoot(routes)],
  exports: [RouterModule],
- providers: []
+ providers: [AuthGuard, IdentityGuard]
 })
 export class AppRoutingModule { }

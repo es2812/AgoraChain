@@ -21,26 +21,16 @@
       </div>
       <form [formGroup]="myForm">
         <div class="modal-body">
-
-
-          
-
-            
               <div class="form-group text-left">
                 <label for="restriction">restriction</label>
                 
-                    <textarea formControlName="restriction" class="form-control" rows="3"></textarea>
+                <select formControlName="restriction" class="form-control">
+                  <option *ngFor="let restriction of allRestrictions" [value]="restriction.restrictionID">
+                    Option <strong>{{restriction.choice}}</strong> in category <strong>{{restriction.category}}</strong>
+                  </option>
+                </select>
                 
               </div>
-            
-          
-
-            
-          
-
-            
-          
-
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>

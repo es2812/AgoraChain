@@ -23,6 +23,7 @@ import { DataService } from './data.service';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
 import { IdentityComponent } from './identity/identity.component'
+import { SuccessComponent } from './home/success.component';
 
 import { ElectionComponent } from './Election/Election.component';
 import { VoteComponent } from './Vote/Vote.component';
@@ -53,6 +54,7 @@ import { IdentityService } from './identity/identity.service';
   declarations: [
     AppComponent,
     HomeComponent,
+    SuccessComponent,
     IdentityComponent,
     ElectionComponent,
     VoteComponent,

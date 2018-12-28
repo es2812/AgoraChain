@@ -12,16 +12,22 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-home',
+  selector: 'app-success',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
-export class HomeComponent {
+export class SuccessComponent implements OnInit{
 
-  constructor () {
+  constructor (private router: Router) {
+  }
+
+  ngOnInit(){
+      localStorage.setItem('currentUser','yes');
+      this.router.navigate(['/identity']);
   }
   
 }
