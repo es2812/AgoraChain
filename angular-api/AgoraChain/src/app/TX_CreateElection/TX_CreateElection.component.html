@@ -21,30 +21,13 @@
       </div>
       <form [formGroup]="myForm">
         <div class="modal-body">
-
-
-          
-
             
               <div class="form-group text-left">
-                <label for="electionID">electionID</label>
+                <label for="description">Descripción</label>
                 
-                  <input formControlName="electionID" type="text" class="form-control">
-                
-              </div>
-            
-          
-
-            
-              <div class="form-group text-left">
-                <label for="description">description</label>
-                
-                  <input formControlName="description" type="text" class="form-control">
+                  <textarea autosize [minRows]="2" formControlName="description" class="form-control" ></textarea>
                 
               </div>
-            
-          
-
             
               <div class="form-group text-left">
                 <label for="options">options</label>
@@ -53,9 +36,6 @@
                 
               </div>
             
-          
-
-            
               <div class="form-group text-left">
                 <label for="category">category</label>
                 
@@ -63,23 +43,12 @@
                 
               </div>
             
-          
-
-            
               <div class="form-group text-left">
                 <label for="owner">owner</label>
                 
-                    <textarea formControlName="owner" class="form-control" rows="3"></textarea>
+                    <input formControlName="owner" type="text" class="form-control">
                 
               </div>
-            
-          
-
-            
-          
-
-            
-          
 
         </div>
         <div class="modal-footer">

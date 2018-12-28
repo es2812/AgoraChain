@@ -18,6 +18,7 @@ import { HttpModule } from '@angular/http';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgxSpinnerModule } from 'ngx-spinner';
+import { AutosizeModule } from 'ngx-autosize';
 import { AppRoutingModule } from './app-routing.module';
 import { DataService } from './data.service';
 import { AppComponent } from './app.component';
@@ -81,6 +82,7 @@ import { IdentityService } from './identity/identity.service';
     FormsModule,
     ReactiveFormsModule,
     NgxSpinnerModule,
+    AutosizeModule,
     HttpModule,
     HttpClientModule,
     AppRoutingModule

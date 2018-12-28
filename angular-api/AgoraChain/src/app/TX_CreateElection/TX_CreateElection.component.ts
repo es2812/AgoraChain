@@ -20,7 +20,7 @@ import 'rxjs/add/operator/toPromise';
 @Component({
   selector: 'app-tx_createelection',
   templateUrl: './TX_CreateElection.component.html',
-  styleUrls: ['./TX_CreateElection.component.css'],
+  styleUrls: ['../TX.css'],
   providers: [TX_CreateElectionService]
 })
 export class TX_CreateElectionComponent implements OnInit {

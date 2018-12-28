@@ -62,10 +62,13 @@
     background: #F4F4F4;
     border-radius: 5px;
     border-bottom: 1px solid #F4F4F4;
+    padding-left: 5%;
 }
 .modal-body{
-    background: #F4F4F4;
+    background: #f4f4f4;
     border-radius: 5px;
+    padding-left: 10%;
+    padding-right: 10%;
 }
 .modal-footer{
     background: #F4F4F4;
@@ -74,7 +77,6 @@
 }
 .form-control{
     color: #393939;
-    height: 42px;
     border: 1px solid #ffffff;
     box-shadow: inset 0 0px 0px rgba(0,0,0,.075); 
     border-radius: 4px;
@@ -182,6 +184,10 @@ label {
 .invokeTransactionBtn {
     float: right;
     margin: 32px;
+}
+
+.form-control {
+    border-bottom-color:#6C4CC4;
 }
 
 /***.transaction-properties:hover, .transaction-properties:hover span{  
