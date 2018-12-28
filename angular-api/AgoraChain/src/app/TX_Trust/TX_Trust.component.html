@@ -23,10 +23,6 @@
       <form [formGroup]="myForm">
         <div class="modal-body">
               <div class="form-group text-left">
-                <label for="trustee">Trustee. Automatically set to current identity.</label>
-                    <input [ngModel]="trustee.name" formControlName="trustee" class="form-control"/>
-              </div>
-              <div class="form-group text-left">
                 <label for="trusted">Politician to trust.</label>
                     <select formControlName="trusted" class="form-control">
                       <option *ngFor="let politician of allPoliticians" [value]="politician.id">

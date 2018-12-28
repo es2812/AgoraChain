@@ -17,7 +17,7 @@ import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms'
 import { TX_TrustService } from './TX_Trust.service';
 import 'rxjs/add/operator/toPromise';
 import { IdentityService } from 'app/identity/identity.service';
-import { Ng4LoadingSpinnerService } from 'ng4-loading-spinner';
+import { NgxSpinnerService } from 'ngx-spinner';
 import { DataService } from 'app/data.service';
 import { Politician, Citizen } from 'app/org.agora.net';
 
@@ -44,7 +44,7 @@ export class TX_TrustComponent implements OnInit {
 
 
   constructor(private serviceIdentity: IdentityService, private serviceTX_Trust: TX_TrustService, private trustedService: DataService<Politician>, 
-    private trusteeService: DataService<Citizen>,fb: FormBuilder, private spinnerService: Ng4LoadingSpinnerService) {
+    fb: FormBuilder, private spinnerService: NgxSpinnerService) {
     this.myForm = fb.group({
       trustee: this.trustee,
       trusted: this.trusted,
@@ -61,11 +61,7 @@ export class TX_TrustComponent implements OnInit {
   loadTrustee(): Promise<any> {
     return this.serviceIdentity.getCurrentParticipant().toPromise()
     .then((p)=>{
-      let fs = p.split('.')[3].split('#');
-      return this.trusteeService.getSingle(fs[0],fs[1]).toPromise()
-      .then((d)=> {
-        this.currentTrustee = d;
-      })
+      this.currentTrustee = p;
     })
     .catch((error) => {
       if (error === 'Server error') {
@@ -128,12 +124,11 @@ export class TX_TrustComponent implements OnInit {
   addTransaction(form: any): Promise<any> {
     this.spinnerService.show()
     
-    let trusteeIdentification = "org.agora.net.Citizen".concat("#",this.currentTrustee.id);
     let trustedIdentification = "org.agora.net.Politician".concat("#",this.trusted.value);
     
     this.Transaction = {
       $class: 'org.agora.net.TX_Trust',
-      'trustee': trusteeIdentification,
+      'trustee': this.currentTrustee,
       'trusted': trustedIdentification,
       'transactionId': this.transactionId.value,
       'timestamp': this.timestamp.value
@@ -223,7 +218,7 @@ export class TX_TrustComponent implements OnInit {
 
   resetForm(): void {
     this.myForm.setValue({
-      'trustee': this.currentTrustee.name.concat(" ",this.currentTrustee.lastname),
+      'trustee': this.currentTrustee,
       'trusted': this.allPoliticians[0].id,
       'transactionId': null,
       'timestamp': null

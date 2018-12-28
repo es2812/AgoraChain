@@ -17,7 +17,7 @@ import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms'
 import { TX_NulltrustService } from './TX_Nulltrust.service';
 import 'rxjs/add/operator/toPromise';
 import { IdentityService } from 'app/identity/identity.service';
-import { Ng4LoadingSpinnerService } from 'ng4-loading-spinner';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 @Component({
   selector: 'app-tx_nulltrust',
@@ -39,7 +39,7 @@ export class TX_NulltrustComponent implements OnInit {
   timestamp = new FormControl('', Validators.required);
 
 
-  constructor(private serviceTX_Nulltrust: TX_NulltrustService, private loadService: Ng4LoadingSpinnerService, private identityService:IdentityService, fb: FormBuilder) {
+  constructor(private serviceTX_Nulltrust: TX_NulltrustService, private loadService: NgxSpinnerService, private identityService:IdentityService, fb: FormBuilder) {
     this.myForm = fb.group({
       representedToNull: this.representedToNull,
       transactionId: this.transactionId,

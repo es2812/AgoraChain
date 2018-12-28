@@ -16,31 +16,36 @@ import { Component, OnInit, Input } from '@angular/core';
 import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
 import { TX_AddRestrictionService } from './TX_AddRestriction.service';
 import 'rxjs/add/operator/toPromise';
+import { Restriction, Citizen } from 'app/org.agora.net';
+import { DataService } from 'app/data.service';
+import { IdentityService } from 'app/identity/identity.service';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 @Component({
   selector: 'app-tx_addrestriction',
   templateUrl: './TX_AddRestriction.component.html',
-  styleUrls: ['./TX_AddRestriction.component.css'],
+  styleUrls: ['../TX.css'],
   providers: [TX_AddRestrictionService]
 })
 export class TX_AddRestrictionComponent implements OnInit {
 
   myForm: FormGroup;
 
-  private allTransactions;
+  private currentTrustee;
   private Transaction;
   private currentId;
   private errorMessage;
+  private uniqueID;
 
-  restrictionID = new FormControl('', Validators.required);
+  restrictionID = new FormControl({value:'', disabled:true}, Validators.required);
   category = new FormControl('', Validators.required);
   choice = new FormControl('', Validators.required);
-  trustee = new FormControl('', Validators.required);
+  trustee = new FormControl({value:'', disabled:true}, Validators.required);
   transactionId = new FormControl('', Validators.required);
   timestamp = new FormControl('', Validators.required);
 
 
-  constructor(private serviceTX_AddRestriction: TX_AddRestrictionService, fb: FormBuilder) {
+  constructor(private serviceTX_AddRestriction: TX_AddRestrictionService, private serviceIdentity:IdentityService, private serviceRestrictions: DataService<Restriction>, private spinnerService: NgxSpinnerService, fb: FormBuilder) {
     this.myForm = fb.group({
       restrictionID: this.restrictionID,
       category: this.category,
@@ -52,19 +57,41 @@ export class TX_AddRestrictionComponent implements OnInit {
   };
 
   ngOnInit(): void {
-    this.loadAll();
+    this.loadRepresented();
   }
 
-  loadAll(): Promise<any> {
+  loadRepresented(): Promise<any>{
+    this.spinnerService.show();
+    return this.serviceIdentity.getCurrentParticipant().toPromise()
+    .then((p)=>{
+      this.currentTrustee = p;
+      this.spinnerService.hide();
+    })
+    .catch((error) => {
+      if (error === 'Server error') {
+        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
+      } else if (error === '404 - Not Found') {
+        this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
+      } else {
+        this.errorMessage = error;
+      }
+    });
+  }
+
+  getUniqueID(): Promise<any> {
+    this.spinnerService.show();
     const tempList = [];
-    return this.serviceTX_AddRestriction.getAll()
+    return this.serviceRestrictions.getAll('Restriction')
     .toPromise()
     .then((result) => {
       this.errorMessage = null;
       result.forEach(transaction => {
         tempList.push(transaction);
       });
-      this.allTransactions = tempList;
+      //we use as deterministic ID the length+1
+      this.uniqueID = tempList.length+1;   
+      this.resetForm();
+      this.spinnerService.hide();
     })
     .catch((error) => {
       if (error === 'Server error') {
@@ -103,6 +130,7 @@ export class TX_AddRestrictionComponent implements OnInit {
   }
 
   addTransaction(form: any): Promise<any> {
+    this.spinnerService.show();
     this.Transaction = {
       $class: 'org.agora.net.TX_AddRestriction',
       'restrictionID': this.restrictionID.value,
@@ -134,6 +162,7 @@ export class TX_AddRestrictionComponent implements OnInit {
         'transactionId': null,
         'timestamp': null
       });
+      this.spinnerService.hide()
     })
     .catch((error) => {
       if (error === 'Server error') {
@@ -143,51 +172,6 @@ export class TX_AddRestrictionComponent implements OnInit {
       }
     });
   }
-
-  updateTransaction(form: any): Promise<any> {
-    this.Transaction = {
-      $class: 'org.agora.net.TX_AddRestriction',
-      'restrictionID': this.restrictionID.value,
-      'category': this.category.value,
-      'choice': this.choice.value,
-      'trustee': this.trustee.value,
-      'timestamp': this.timestamp.value
-    };
-
-    return this.serviceTX_AddRestriction.updateTransaction(form.get('transactionId').value, this.Transaction)
-    .toPromise()
-    .then(() => {
-      this.errorMessage = null;
-    })
-    .catch((error) => {
-      if (error === 'Server error') {
-        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else if (error === '404 - Not Found') {
-      this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
-      } else {
-        this.errorMessage = error;
-      }
-    });
-  }
-
-  deleteTransaction(): Promise<any> {
-
-    return this.serviceTX_AddRestriction.deleteTransaction(this.currentId)
-    .toPromise()
-    .then(() => {
-      this.errorMessage = null;
-    })
-    .catch((error) => {
-      if (error === 'Server error') {
-        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else if (error === '404 - Not Found') {
-        this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
-      } else {
-        this.errorMessage = error;
-      }
-    });
-  }
-
   setId(id: any): void {
     this.currentId = id;
   }
@@ -259,10 +243,10 @@ export class TX_AddRestrictionComponent implements OnInit {
 
   resetForm(): void {
     this.myForm.setValue({
-      'restrictionID': null,
+      'restrictionID': this.uniqueID,
       'category': null,
       'choice': null,
-      'trustee': null,
+      'trustee': this.currentTrustee,
       'transactionId': null,
       'timestamp': null
     });
