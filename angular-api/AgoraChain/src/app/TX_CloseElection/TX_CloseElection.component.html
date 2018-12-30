@@ -56,7 +56,7 @@
     <div class="row">
         <p class="description">This transaction allows you to close an <a [routerLink]="['/Election']">Election</a> you created, thus calculating and publishing the results.</p>
     </div>
-    <button (click)="resetForm();" type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTransactionModal">Invoke</button>
+    <button (click)="loadCloseElections();resetForm();" type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTransactionModal">Invoke</button>
   </div>
   
   

@@ -56,6 +56,6 @@
   <div class="row">
       <p class="description">This transaction allows you to open an <a [routerLink]="['/Election']">Election</a> you created, thus allowing participants to vote on it.</p>
   </div>
-  <button (click)="resetForm();" type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTransactionModal">Invoke</button>
+  <button (click)="loadOpenElections(); resetForm();" type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTransactionModal">Invoke</button>
 </div>
 

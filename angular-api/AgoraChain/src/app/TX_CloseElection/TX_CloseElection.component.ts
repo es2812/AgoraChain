@@ -167,6 +167,7 @@ export class TX_CloseElectionComponent implements OnInit {
   }
 
   resetForm(): void {
+    this.activeIndex = 0;
     this.myForm.setValue({
       'election': null,
       'transactionId': null,
