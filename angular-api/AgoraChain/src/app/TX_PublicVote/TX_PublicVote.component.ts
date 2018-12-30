@@ -110,9 +110,7 @@ export class TX_PublicVoteComponent implements OnInit {
   
   selectElection(i): void{
     this.activeIndex = i;
-    console.log(this.openElections[i]);
     this.activeChoices = this.openElections[i].options;
-    console.log(this.activeChoices);
   }
 
   selectWritein(): void {

@@ -16,8 +16,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="addTransactionModalLabel">Create Transaction</h4>
-        <p class="modal-intro">Enter the required values below.</p>
+        <h4 class="modal-title" id="addTransactionModalLabel">Public Vote</h4>
       </div>
       <form [formGroup]="myForm">
         <div class="modal-body">
@@ -26,7 +25,7 @@
             <div class="form-group text-left">
                 <label for="election">Election to vote in:</label>
                 <ul class='list-group'>
-                    <li class="list-group-item" *ngIf="openElections.length == 0">No elections found</li>
+                    <li class="list-group-item" *ngIf="openElections.length == 0">No open elections found</li>
                     <li *ngFor="let election of openElections; let i = index" (click)="selectElection(i)" [class.active]="i == activeIndex" class="list-group-item">
                         
                       <p><strong>Category:</strong></p> 

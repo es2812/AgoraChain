@@ -24,7 +24,7 @@
               <div class="form-group text-left">
                   <label for="election">Election:</label>
                   <ul class='list-group'>
-                      <li class="list-group-item" *ngIf="allElections.length == 0">No elections found</li>
+                      <li class="list-group-item" *ngIf="allElections.length == 0">No open elections without envelope found</li>
                       <li *ngFor="let election of allElections; let i = index" (click)="selectElection(i)" [class.active]="i == activeIndex" class="list-group-item">
                           
                         <p><strong>Category:</strong></p> 

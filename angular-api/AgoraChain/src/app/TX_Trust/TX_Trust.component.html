@@ -18,13 +18,13 @@
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title" id="addTransactionModalLabel">Trust Transaction</h4>
-        <p class="modal-intro">Enter the required values below.</p>
       </div>
       <form [formGroup]="myForm">
         <div class="modal-body">
               <div class="form-group text-left">
                 <label for="trusted">Politician to trust.</label>
-                    <select formControlName="trusted" class="form-control">
+                    <li class="list-group-item" *ngIf="allPoliticians.length == 0">No politicians found</li>
+                    <select *ngIf="allPoliticians.length>0" formControlName="trusted" class="form-control">
                       <option *ngFor="let politician of allPoliticians" [value]="politician.id">
                         {{politician.name}} {{politician.lastname}}
                       </option>
@@ -51,6 +51,6 @@
   <div class="row">
       <p class="description">This transaction allows you to add or change a <a [routerLink]="['/Politician']">Politician</a> as your representation for all subsequent elections.</p>
   </div>
-  <button (click)="resetForm();" type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTransactionModal">Invoke</button>
+  <button (click)="loadPoliticians();" type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTransactionModal">Invoke</button>
 </div>
 

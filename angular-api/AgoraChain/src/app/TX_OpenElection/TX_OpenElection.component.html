@@ -17,14 +17,13 @@
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title" id="addTransactionModalLabel">Open Election</h4>
-        <p class="modal-intro">Select the election you want to open.</p>
       </div>
       <form [formGroup]="myForm">
         <div class="modal-body">
               <div class="form-group text-left">
-                <label for="election">Election to open</label>
+                <label for="election">Election to open:</label>
                 <ul class='list-group'>
-                    <li class="list-group-item" *ngIf="allElections.length == 0">No elections found</li>
+                    <li class="list-group-item" *ngIf="allElections.length == 0">No closed elections found</li>
                     <li *ngFor="let election of allElections; let i = index" (click)="selectElection(i)" [class.active]="i == activeIndex" class="list-group-item">
                         
                       <p><strong>Category:</strong></p> 

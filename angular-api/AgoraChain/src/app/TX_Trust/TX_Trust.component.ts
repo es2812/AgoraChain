@@ -32,7 +32,7 @@ export class TX_TrustComponent implements OnInit {
   myForm: FormGroup;
 
   private currentTrustee;
-  private allPoliticians;
+  private allPoliticians = [];
   private Transaction;
   private currentId;
   private errorMessage;
@@ -59,9 +59,11 @@ export class TX_TrustComponent implements OnInit {
   }
 
   loadTrustee(): Promise<any> {
+    this.spinnerService.show();
     return this.serviceIdentity.getCurrentParticipant().toPromise()
     .then((p)=>{
       this.currentTrustee = p;
+      this.spinnerService.hide();
     })
     .catch((error) => {
       if (error === 'Server error') {
@@ -71,10 +73,12 @@ export class TX_TrustComponent implements OnInit {
       } else {
         this.errorMessage = error;
       }
+      this.spinnerService.hide();
     });
   }
 
   loadPoliticians(): Promise<any> {
+    this.spinnerService.show();
     const tempList = [];
     return this.trustedService.getAll('Politician').toPromise()
     .then( (data) =>
@@ -84,6 +88,8 @@ export class TX_TrustComponent implements OnInit {
         tempList.push(p);
       })
       this.allPoliticians = tempList;
+      this.resetForm();
+      this.spinnerService.hide();
     })
     .catch((error) => {
       if (error === 'Server error') {
@@ -93,11 +99,11 @@ export class TX_TrustComponent implements OnInit {
       } else {
         this.errorMessage = error;
       }
+      this.spinnerService.hide();
     });
   }
   addTransaction(form: any): Promise<any> {
     this.spinnerService.show()
-    
     let trustedIdentification = "org.agora.net.Politician".concat("#",this.trusted.value);
     
     this.Transaction = {
@@ -133,67 +139,18 @@ export class TX_TrustComponent implements OnInit {
       } else {
         this.errorMessage = error;
       }
-    });
-  }
-  setId(id: any): void {
-    this.currentId = id;
-  }
-
-  getForm(id: any): Promise<any> {
-
-    return this.serviceTX_Trust.getTransaction(id)
-    .toPromise()
-    .then((result) => {
-      this.errorMessage = null;
-      const formObject = {
-        'trustee': null,
-        'trusted': null,
-        'transactionId': null,
-        'timestamp': null
-      };
-
-      if (result.trustee) {
-        formObject.trustee = result.trustee;
-      } else {
-        formObject.trustee = null;
-      }
-
-      if (result.trusted) {
-        formObject.trusted = result.trusted;
-      } else {
-        formObject.trusted = null;
-      }
-
-      if (result.transactionId) {
-        formObject.transactionId = result.transactionId;
-      } else {
-        formObject.transactionId = null;
-      }
-
-      if (result.timestamp) {
-        formObject.timestamp = result.timestamp;
-      } else {
-        formObject.timestamp = null;
-      }
-
-      this.myForm.setValue(formObject);
-
-    })
-    .catch((error) => {
-      if (error === 'Server error') {
-        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else if (error === '404 - Not Found') {
-      this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
-      } else {
-        this.errorMessage = error;
-      }
+      this.spinnerService.hide();
     });
   }
 
   resetForm(): void {
+    let trusted = '';
+    if(this.allPoliticians.length > 0){
+      trusted = this.allPoliticians[0].id;
+    }
     this.myForm.setValue({
       'trustee': this.currentTrustee,
-      'trusted': this.allPoliticians[0].id,
+      'trusted': trusted,
       'transactionId': null,
       'timestamp': null
     });

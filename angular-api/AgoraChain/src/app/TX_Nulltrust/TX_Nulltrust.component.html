@@ -11,46 +11,6 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
-<div class="modal fade" id="addTransactionModal" tabindex="-1" role="dialog" aria-labelledby="addTransactionModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="addTransactionModalLabel">Create Transaction</h4>
-        <p class="modal-intro">Enter the required values below.</p>
-      </div>
-      <form [formGroup]="myForm">
-        <div class="modal-body">
-
-
-          
-
-            
-              <div class="form-group text-left">
-                <label for="representedToNull">representedToNull</label>
-                
-                    <textarea formControlName="representedToNull" class="form-control" rows="3"></textarea>
-                
-              </div>
-            
-          
-
-            
-          
-
-            
-          
-
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-            <button (click)="addTransaction(myForm);" type="submit" class="btn btn-success" data-dismiss="modal">Confirm</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
 <div class="container col-md-6">
     <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
         <strong>Error:</strong> {{errorMessage}}
