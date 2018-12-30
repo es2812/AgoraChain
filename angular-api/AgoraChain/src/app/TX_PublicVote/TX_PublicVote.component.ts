@@ -15,20 +15,28 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
 import { TX_PublicVoteService } from './TX_PublicVote.service';
+import $ from 'jquery';
 import 'rxjs/add/operator/toPromise';
+import { DataService } from 'app/data.service';
+import { Election } from 'app/org.agora.net';
+import { NgxSpinnerService } from 'ngx-spinner';
+import { IdentityService } from 'app/identity/identity.service';
 
 @Component({
   selector: 'app-tx_publicvote',
   templateUrl: './TX_PublicVote.component.html',
-  styleUrls: ['./TX_PublicVote.component.css'],
+  styleUrls: ['../TX.css','./TX_PublicVote.component.css'],
   providers: [TX_PublicVoteService]
 })
 export class TX_PublicVoteComponent implements OnInit {
 
   myForm: FormGroup;
 
-  private allTransactions;
+  private openElections = [];
+  private activeIndex = 0;
+  private activeChoices = [];
   private Transaction;
+  private currentParticipant;
   private currentId;
   private errorMessage;
 
@@ -39,7 +47,7 @@ export class TX_PublicVoteComponent implements OnInit {
   timestamp = new FormControl('', Validators.required);
 
 
-  constructor(private serviceTX_PublicVote: TX_PublicVoteService, fb: FormBuilder) {
+  constructor(private serviceTX_PublicVote: TX_PublicVoteService, fb: FormBuilder, private serviceElection: DataService<Election>, private serviceSpinner: NgxSpinnerService, private serviceIdentity: IdentityService) {
     this.myForm = fb.group({
       choice: this.choice,
       election: this.election,
@@ -50,19 +58,23 @@ export class TX_PublicVoteComponent implements OnInit {
   };
 
   ngOnInit(): void {
-    this.loadAll();
+    this.loadElections();
+    this.loadParticipant();
   }
 
-  loadAll(): Promise<any> {
+  loadElections(): Promise<any> {
+    this.serviceSpinner.show();
     const tempList = [];
-    return this.serviceTX_PublicVote.getAll()
+    return this.serviceElection.getAll('Election')
     .toPromise()
     .then((result) => {
       this.errorMessage = null;
-      result.forEach(transaction => {
-        tempList.push(transaction);
-      });
-      this.allTransactions = tempList;
+      result.filter((r)=>r.closed==false).forEach((d)=>tempList.push(d));
+      this.openElections = tempList;
+      if(this.openElections.length > 0){
+        this.selectElection(0);
+      }
+      this.serviceSpinner.hide();
     })
     .catch((error) => {
       if (error === 'Server error') {
@@ -75,37 +87,57 @@ export class TX_PublicVoteComponent implements OnInit {
     });
   }
 
-	/**
-   * Event handler for changing the checked state of a checkbox (handles array enumeration values)
-   * @param {String} name - the name of the transaction field to update
-   * @param {any} value - the enumeration value for which to toggle the checked state
-   */
-  changeArrayValue(name: string, value: any): void {
-    const index = this[name].value.indexOf(value);
-    if (index === -1) {
-      this[name].value.push(value);
-    } else {
-      this[name].value.splice(index, 1);
-    }
+  loadParticipant(): Promise<any> {
+    this.serviceSpinner.show();
+    const tempList = [];
+    return this.serviceIdentity.getCurrentParticipant()
+    .toPromise()
+    .then((result) => {
+      this.errorMessage = null;
+      this.currentParticipant = result;
+      this.serviceSpinner.hide();
+    })
+    .catch((error) => {
+      if (error === 'Server error') {
+        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
+      } else if (error === '404 - Not Found') {
+        this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
+      } else {
+        this.errorMessage = error;
+      }
+    });
+  }
+  
+  selectElection(i): void{
+    this.activeIndex = i;
+    console.log(this.openElections[i]);
+    this.activeChoices = this.openElections[i].options;
+    console.log(this.activeChoices);
   }
 
-	/**
-	 * Checkbox helper, determining whether an enumeration value should be selected or not (for array enumeration values
-   * only). This is used for checkboxes in the transaction updateDialog.
-   * @param {String} name - the name of the transaction field to check
-   * @param {any} value - the enumeration value to check for
-   * @return {Boolean} whether the specified transaction field contains the provided value
-   */
-  hasArrayValue(name: string, value: any): boolean {
-    return this[name].value.indexOf(value) !== -1;
+  selectWritein(): void {
+    $( "#writeinInput" ).prop("disabled",false);
+  }
+
+  deselectWritein(): void {
+    $( "#writeinInput" ).prop("disabled",true);
   }
 
   addTransaction(form: any): Promise<any> {
+    this.serviceSpinner.show();
+    let electionIdentifier = "org.agora.net.Election#".concat(this.openElections[this.activeIndex].electionID);
+    let choice = "";
+    if($( "#writeinRadio" ).prop("checked")){
+      choice = $( "input[name='writein']" )[0].value;
+    }
+    else if($( "input[name='choice']:checked" ).length > 0){
+      choice = $( "input[name='choice']:checked" ).val();
+    }
     this.Transaction = {
       $class: 'org.agora.net.TX_PublicVote',
-      'choice': this.choice.value,
-      'election': this.election.value,
-      'voter': this.voter.value,
+      'choice': choice,
+      'election': electionIdentifier,
+      'voter': this.currentParticipant,
       'transactionId': this.transactionId.value,
       'timestamp': this.timestamp.value
     };
@@ -129,53 +161,11 @@ export class TX_PublicVoteComponent implements OnInit {
         'transactionId': null,
         'timestamp': null
       });
+      this.serviceSpinner.hide();
     })
     .catch((error) => {
       if (error === 'Server error') {
         this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else {
-        this.errorMessage = error;
-      }
-    });
-  }
-
-  updateTransaction(form: any): Promise<any> {
-    this.Transaction = {
-      $class: 'org.agora.net.TX_PublicVote',
-      'choice': this.choice.value,
-      'election': this.election.value,
-      'voter': this.voter.value,
-      'timestamp': this.timestamp.value
-    };
-
-    return this.serviceTX_PublicVote.updateTransaction(form.get('transactionId').value, this.Transaction)
-    .toPromise()
-    .then(() => {
-      this.errorMessage = null;
-    })
-    .catch((error) => {
-      if (error === 'Server error') {
-        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else if (error === '404 - Not Found') {
-      this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
-      } else {
-        this.errorMessage = error;
-      }
-    });
-  }
-
-  deleteTransaction(): Promise<any> {
-
-    return this.serviceTX_PublicVote.deleteTransaction(this.currentId)
-    .toPromise()
-    .then(() => {
-      this.errorMessage = null;
-    })
-    .catch((error) => {
-      if (error === 'Server error') {
-        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else if (error === '404 - Not Found') {
-        this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
       } else {
         this.errorMessage = error;
       }
@@ -245,6 +235,10 @@ export class TX_PublicVoteComponent implements OnInit {
   }
 
   resetForm(): void {
+    this.selectElection(0);
+    if($( "input[name='choice']:checked" ).length >0 ){
+      $( "input[name='choice']:checked" ).prop("checked",false);
+    }
     this.myForm.setValue({
       'choice': null,
       'election': null,

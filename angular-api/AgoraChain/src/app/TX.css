@@ -186,6 +186,15 @@ label {
     margin: 32px;
 }
 
+p {
+    white-space: pre-wrap;
+}
+
+
+:disabled {
+    cursor: not-allowed	!important;
+    color: #bdbcbc !important;
+}
 
 /***.transaction-properties:hover, .transaction-properties:hover span{  
 overflow: visible;
