@@ -15,52 +15,63 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
 import { TX_SecretVoteService } from './TX_SecretVote.service';
+import $ from 'jquery';
 import 'rxjs/add/operator/toPromise';
+import { DataService } from 'app/data.service';
+import { Election, Envelope } from 'app/org.agora.net';
+import { NgxSpinnerService } from 'ngx-spinner';
+import { IdentityService } from 'app/identity/identity.service';
 
 @Component({
-  selector: 'app-tx_secretvote',
+  selector: 'app-tx_publicvote',
   templateUrl: './TX_SecretVote.component.html',
-  styleUrls: ['./TX_SecretVote.component.css'],
+  styleUrls: ['../TX.css','./TX_SecretVote.component.css'],
   providers: [TX_SecretVoteService]
 })
 export class TX_SecretVoteComponent implements OnInit {
 
-  myForm: FormGroup;
+  private electionsEnvelopes = [];
+  private allEnvelopes = [];
+  private activeIndex = 0;
+  private activeChoices = [];
 
-  private allTransactions;
   private Transaction;
   private currentId;
   private errorMessage;
 
-  choice = new FormControl('', Validators.required);
-  envelope = new FormControl('', Validators.required);
-  transactionId = new FormControl('', Validators.required);
-  timestamp = new FormControl('', Validators.required);
-
-
-  constructor(private serviceTX_SecretVote: TX_SecretVoteService, fb: FormBuilder) {
-    this.myForm = fb.group({
-      choice: this.choice,
-      envelope: this.envelope,
-      transactionId: this.transactionId,
-      timestamp: this.timestamp
-    });
+  constructor(private serviceTX_SecretVote: TX_SecretVoteService, private serviceElection: DataService<Election>, private serviceSpinner: NgxSpinnerService, private serviceEnvelope: DataService<Envelope>) {
   };
 
   ngOnInit(): void {
-    this.loadAll();
+    this.loadElections();
   }
 
-  loadAll(): Promise<any> {
+  loadElections(): Promise<any> {
+    this.serviceSpinner.show();
     const tempList = [];
-    return this.serviceTX_SecretVote.getAll()
+    return this.serviceEnvelope.getAll('Envelope')
     .toPromise()
     .then((result) => {
       this.errorMessage = null;
-      result.forEach(transaction => {
-        tempList.push(transaction);
-      });
-      this.allTransactions = tempList;
+      result.forEach((d)=>tempList.push(d));
+      this.allEnvelopes = tempList;
+      if(this.allEnvelopes.length > 0){
+        const electionIDs = this.allEnvelopes.map((e)=>e.election.toString().split('#')[1]);
+        return this.serviceElection.getAll('Election').toPromise()
+        .then((e)=>{
+          this.electionsEnvelopes = e.filter((el)=>(el.closed==false)&&(electionIDs.indexOf(el.electionID)!=-1));
+          let validElectionsIDs = this.electionsEnvelopes.map((e)=>e.electionID);
+          this.allEnvelopes = this.allEnvelopes.filter((en)=>validElectionsIDs.indexOf((en.election.toString().split('#')[1])!=-1));
+
+          if(this.electionsEnvelopes.length > 0){
+            this.selectEnvelope(0);
+          }
+          this.serviceSpinner.hide();
+        })
+      }
+      else {
+        this.serviceSpinner.hide();
+      }
     })
     .catch((error) => {
       if (error === 'Server error') {
@@ -73,57 +84,44 @@ export class TX_SecretVoteComponent implements OnInit {
     });
   }
 
-	/**
-   * Event handler for changing the checked state of a checkbox (handles array enumeration values)
-   * @param {String} name - the name of the transaction field to update
-   * @param {any} value - the enumeration value for which to toggle the checked state
-   */
-  changeArrayValue(name: string, value: any): void {
-    const index = this[name].value.indexOf(value);
-    if (index === -1) {
-      this[name].value.push(value);
-    } else {
-      this[name].value.splice(index, 1);
-    }
+  
+  selectEnvelope(i): void{
+    this.activeIndex = i;
+    this.activeChoices = this.electionsEnvelopes[i].options;
   }
 
-	/**
-	 * Checkbox helper, determining whether an enumeration value should be selected or not (for array enumeration values
-   * only). This is used for checkboxes in the transaction updateDialog.
-   * @param {String} name - the name of the transaction field to check
-   * @param {any} value - the enumeration value to check for
-   * @return {Boolean} whether the specified transaction field contains the provided value
-   */
-  hasArrayValue(name: string, value: any): boolean {
-    return this[name].value.indexOf(value) !== -1;
+  selectWritein(): void {
+    $( "#writeinInput" ).prop("disabled",false);
+  }
+
+  deselectWritein(): void {
+    $( "#writeinInput" ).prop("disabled",true);
   }
 
   addTransaction(form: any): Promise<any> {
+    this.serviceSpinner.show();
+    let envelopeIdentifier = "org.agora.net.Envelope#".concat(this.allEnvelopes[this.activeIndex].envelopeID);
+    let choice = "";
+    if($( "#writeinRadio" ).prop("checked")){
+      choice = $( "input[name='writein']" )[0].value;
+    }
+    else if($( "input[name='choice']:checked" ).length > 0){
+      choice = $( "input[name='choice']:checked" ).val();
+    }
     this.Transaction = {
       $class: 'org.agora.net.TX_SecretVote',
-      'choice': this.choice.value,
-      'envelope': this.envelope.value,
-      'transactionId': this.transactionId.value,
-      'timestamp': this.timestamp.value
-    };
-
-    this.myForm.setValue({
-      'choice': null,
-      'envelope': null,
+      'choice': choice,
+      'envelope': envelopeIdentifier,
       'transactionId': null,
       'timestamp': null
-    });
+    };
 
     return this.serviceTX_SecretVote.addTransaction(this.Transaction)
     .toPromise()
     .then(() => {
       this.errorMessage = null;
-      this.myForm.setValue({
-        'choice': null,
-        'envelope': null,
-        'transactionId': null,
-        'timestamp': null
-      });
+      this.resetForm();
+      this.serviceSpinner.hide();
     })
     .catch((error) => {
       if (error === 'Server error') {
@@ -131,48 +129,7 @@ export class TX_SecretVoteComponent implements OnInit {
       } else {
         this.errorMessage = error;
       }
-    });
-  }
-
-  updateTransaction(form: any): Promise<any> {
-    this.Transaction = {
-      $class: 'org.agora.net.TX_SecretVote',
-      'choice': this.choice.value,
-      'envelope': this.envelope.value,
-      'timestamp': this.timestamp.value
-    };
-
-    return this.serviceTX_SecretVote.updateTransaction(form.get('transactionId').value, this.Transaction)
-    .toPromise()
-    .then(() => {
-      this.errorMessage = null;
-    })
-    .catch((error) => {
-      if (error === 'Server error') {
-        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else if (error === '404 - Not Found') {
-      this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
-      } else {
-        this.errorMessage = error;
-      }
-    });
-  }
-
-  deleteTransaction(): Promise<any> {
-
-    return this.serviceTX_SecretVote.deleteTransaction(this.currentId)
-    .toPromise()
-    .then(() => {
-      this.errorMessage = null;
-    })
-    .catch((error) => {
-      if (error === 'Server error') {
-        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else if (error === '404 - Not Found') {
-        this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
-      } else {
-        this.errorMessage = error;
-      }
+      this.serviceSpinner.hide();
     });
   }
 
@@ -180,63 +137,10 @@ export class TX_SecretVoteComponent implements OnInit {
     this.currentId = id;
   }
 
-  getForm(id: any): Promise<any> {
-
-    return this.serviceTX_SecretVote.getTransaction(id)
-    .toPromise()
-    .then((result) => {
-      this.errorMessage = null;
-      const formObject = {
-        'choice': null,
-        'envelope': null,
-        'transactionId': null,
-        'timestamp': null
-      };
-
-      if (result.choice) {
-        formObject.choice = result.choice;
-      } else {
-        formObject.choice = null;
-      }
-
-      if (result.envelope) {
-        formObject.envelope = result.envelope;
-      } else {
-        formObject.envelope = null;
-      }
-
-      if (result.transactionId) {
-        formObject.transactionId = result.transactionId;
-      } else {
-        formObject.transactionId = null;
-      }
-
-      if (result.timestamp) {
-        formObject.timestamp = result.timestamp;
-      } else {
-        formObject.timestamp = null;
-      }
-
-      this.myForm.setValue(formObject);
-
-    })
-    .catch((error) => {
-      if (error === 'Server error') {
-        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else if (error === '404 - Not Found') {
-      this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
-      } else {
-        this.errorMessage = error;
-      }
-    });
-  }
-
   resetForm(): void {
-    this.myForm.setValue({
-      'choice': null,
-      'envelope': null,
-      'transactionId': null,
-      'timestamp': null
-    });
+    this.selectEnvelope(0);
+    if($( "input[name='choice']:checked" ).length >0 ){
+      $( "input[name='choice']:checked" ).prop("checked",false);
+    }
   }
 }
