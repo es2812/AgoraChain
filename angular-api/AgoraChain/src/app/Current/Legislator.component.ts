@@ -21,7 +21,7 @@ import { IdentityService } from 'app/identity/identity.service';
 @Component({
   selector: 'app-legislator',
   templateUrl: './Legislator.component.html',
-  styleUrls: ['./Current.component.css'],
+  styleUrls: ['../TX.css','./Current.component.css'],
   providers: [CurrentService]
 })
 export class CurrentLegislatorComponent implements OnInit {

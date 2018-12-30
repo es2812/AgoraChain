@@ -13,14 +13,18 @@
  */
 
 import { Component, OnInit, Input } from '@angular/core';
-import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
+import { FormGroup, FormControl, Validators, FormBuilder, FormArray } from '@angular/forms';
 import { TX_CreateElectionService } from './TX_CreateElection.service';
 import 'rxjs/add/operator/toPromise';
+import { IdentityService } from 'app/identity/identity.service';
+import { DataService } from 'app/data.service';
+import { Election } from 'app/org.agora.net';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 @Component({
   selector: 'app-tx_createelection',
   templateUrl: './TX_CreateElection.component.html',
-  styleUrls: ['../TX.css'],
+  styleUrls: ['../TX.css','./TX_CreateElection.component.css'],
   providers: [TX_CreateElectionService]
 })
 export class TX_CreateElectionComponent implements OnInit {
@@ -31,30 +35,76 @@ export class TX_CreateElectionComponent implements OnInit {
   private Transaction;
   private currentId;
   private errorMessage;
+  private currentLegislator;
+  private uniqueID;
 
   electionID = new FormControl('', Validators.required);
   description = new FormControl('', Validators.required);
-  options = new FormControl('', Validators.required);
+  options = new FormArray([
+    new FormControl('', Validators.required)]);
   category = new FormControl('', Validators.required);
   owner = new FormControl('', Validators.required);
   transactionId = new FormControl('', Validators.required);
   timestamp = new FormControl('', Validators.required);
 
 
-  constructor(private serviceTX_CreateElection: TX_CreateElectionService, fb: FormBuilder) {
+  constructor(private serviceTX_CreateElection: TX_CreateElectionService, private fb: FormBuilder, private serviceIdentity: IdentityService,
+    private serviceElection: DataService<Election>, private spinnerService: NgxSpinnerService) {
     this.myForm = fb.group({
       electionID: this.electionID,
       description: this.description,
-      options: this.options,
+      options: this.fb.array([ this.createOption() ]),
       category: this.category,
       owner: this.owner,
       transactionId: this.transactionId,
       timestamp: this.timestamp
     });
+    
   };
 
   ngOnInit(): void {
+    this.spinnerService.show();
+    this.loadOwner();
     this.loadAll();
+  }
+
+  getUniqueID(): Promise<any> {
+    this.spinnerService.show();
+    return this.serviceElection.getAll('Election').toPromise()
+    .then((result)=> {
+      this.errorMessage = null;
+      
+      //we use as deterministic ID the length+1
+      this.uniqueID = result.length+1;
+      this.spinnerService.hide();
+      this.resetForm();
+    })
+    .catch((error) => {
+      if (error === 'Server error') {
+        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
+      } else if (error === '404 - Not Found') {
+        this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
+      } else {
+        this.errorMessage = error;
+      }
+    });
+  }
+
+  loadOwner(): Promise<any> {
+    return this.serviceIdentity.getCurrentParticipant().toPromise()
+    .then((p)=>{
+      this.currentLegislator = p;
+      this.spinnerService.hide();
+    })
+    .catch((error) => {
+      if (error === 'Server error') {
+        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
+      } else if (error === '404 - Not Found') {
+        this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
+      } else {
+        this.errorMessage = error;
+      }
+    });
   }
 
   loadAll(): Promise<any> {
@@ -79,66 +129,45 @@ export class TX_CreateElectionComponent implements OnInit {
     });
   }
 
-	/**
-   * Event handler for changing the checked state of a checkbox (handles array enumeration values)
-   * @param {String} name - the name of the transaction field to update
-   * @param {any} value - the enumeration value for which to toggle the checked state
-   */
-  changeArrayValue(name: string, value: any): void {
-    const index = this[name].value.indexOf(value);
-    if (index === -1) {
-      this[name].value.push(value);
-    } else {
-      this[name].value.splice(index, 1);
-    }
+  createOption(): FormGroup {
+    return this.fb.group({
+      name: ''
+    })
   }
 
-	/**
-	 * Checkbox helper, determining whether an enumeration value should be selected or not (for array enumeration values
-   * only). This is used for checkboxes in the transaction updateDialog.
-   * @param {String} name - the name of the transaction field to check
-   * @param {any} value - the enumeration value to check for
-   * @return {Boolean} whether the specified transaction field contains the provided value
-   */
-  hasArrayValue(name: string, value: any): boolean {
-    return this[name].value.indexOf(value) !== -1;
+  addOption(): void {
+    this.options = this.myForm.get('options') as FormArray;
+    this.options.push(this.createOption())
+  }
+
+  removeOption(): void {
+    this.options = this.myForm.get('options') as FormArray;
+    this.options.removeAt(-1);
   }
 
   addTransaction(form: any): Promise<any> {
+    this.spinnerService.show();
+    let optionsList = [];
+    this.myForm.get('options').value.forEach(dat=>{optionsList.push(dat.name)});
+    
     this.Transaction = {
       $class: 'org.agora.net.TX_CreateElection',
-      'electionID': this.electionID.value,
+      'electionID': this.uniqueID,
       'description': this.description.value,
-      'options': this.options.value,
+      'options': optionsList,
       'category': this.category.value,
-      'owner': this.owner.value,
+      'owner': this.currentLegislator,
       'transactionId': this.transactionId.value,
       'timestamp': this.timestamp.value
     };
 
-    this.myForm.setValue({
-      'electionID': null,
-      'description': null,
-      'options': null,
-      'category': null,
-      'owner': null,
-      'transactionId': null,
-      'timestamp': null
-    });
+    this.resetForm();
 
     return this.serviceTX_CreateElection.addTransaction(this.Transaction)
     .toPromise()
     .then(() => {
       this.errorMessage = null;
-      this.myForm.setValue({
-        'electionID': null,
-        'description': null,
-        'options': null,
-        'category': null,
-        'owner': null,
-        'transactionId': null,
-        'timestamp': null
-      });
+      this.spinnerService.hide();
     })
     .catch((error) => {
       if (error === 'Server error') {
@@ -147,59 +176,9 @@ export class TX_CreateElectionComponent implements OnInit {
         this.errorMessage = error;
       }
     });
-  }
-
-  updateTransaction(form: any): Promise<any> {
-    this.Transaction = {
-      $class: 'org.agora.net.TX_CreateElection',
-      'electionID': this.electionID.value,
-      'description': this.description.value,
-      'options': this.options.value,
-      'category': this.category.value,
-      'owner': this.owner.value,
-      'timestamp': this.timestamp.value
-    };
-
-    return this.serviceTX_CreateElection.updateTransaction(form.get('transactionId').value, this.Transaction)
-    .toPromise()
-    .then(() => {
-      this.errorMessage = null;
-    })
-    .catch((error) => {
-      if (error === 'Server error') {
-        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else if (error === '404 - Not Found') {
-      this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
-      } else {
-        this.errorMessage = error;
-      }
-    });
-  }
-
-  deleteTransaction(): Promise<any> {
-
-    return this.serviceTX_CreateElection.deleteTransaction(this.currentId)
-    .toPromise()
-    .then(() => {
-      this.errorMessage = null;
-    })
-    .catch((error) => {
-      if (error === 'Server error') {
-        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else if (error === '404 - Not Found') {
-        this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
-      } else {
-        this.errorMessage = error;
-      }
-    });
-  }
-
-  setId(id: any): void {
-    this.currentId = id;
   }
 
   getForm(id: any): Promise<any> {
-
     return this.serviceTX_CreateElection.getTransaction(id)
     .toPromise()
     .then((result) => {
@@ -225,7 +204,6 @@ export class TX_CreateElectionComponent implements OnInit {
       } else {
         formObject.description = null;
       }
-
       if (result.options) {
         formObject.options = result.options;
       } else {
@@ -271,14 +249,9 @@ export class TX_CreateElectionComponent implements OnInit {
   }
 
   resetForm(): void {
-    this.myForm.setValue({
-      'electionID': null,
-      'description': null,
-      'options': null,
-      'category': null,
-      'owner': null,
-      'transactionId': null,
-      'timestamp': null
-    });
+    this.myForm.reset();
+    while(this.myForm.get('options').value.length > 1){
+      this.removeOption()
+    }
   }
 }

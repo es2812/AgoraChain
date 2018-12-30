@@ -23,7 +23,7 @@ import { DataService } from 'app/data.service';
 @Component({
   selector: 'app-citizen',
   templateUrl: './Citizen.component.html',
-  styleUrls: ['./Current.component.css'],
+  styleUrls: ['../TX.css','./Current.component.css'],
   providers: [CurrentService]
 })
 export class CurrentCitizenComponent implements OnInit {

@@ -16,37 +16,37 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="addTransactionModalLabel">Create Transaction</h4>
+        <h4 class="modal-title" id="addTransactionModalLabel">Create Election</h4>
         <p class="modal-intro">Enter the required values below.</p>
       </div>
       <form [formGroup]="myForm">
         <div class="modal-body">
             
               <div class="form-group text-left">
-                <label for="description">Descripción</label>
+                <label for="description">Description</label>
                 
-                  <textarea autosize [minRows]="2" formControlName="description" class="form-control" ></textarea>
-                
-              </div>
-            
-              <div class="form-group text-left">
-                <label for="options">options</label>
-                
-                  <input formControlName="options" type="text" class="form-control">
+                  <textarea autosize [minRows]="1" formControlName="description" class="form-control" ></textarea>
                 
               </div>
             
               <div class="form-group text-left">
-                <label for="category">category</label>
+                <label for="options">Options</label>
+                
+                <div formArrayName="options" *ngFor="let item of myForm.get('options').controls; let i = index">
+                  <div [formGroupName]="i">
+                    <input formControlName="name" type="text" class="form-control arrayItem arrayInput">
+                    <div class="arrayBtns" *ngIf="i==myForm.get('options').value.length-1">
+                      <button (click)="addOption()" type="button" class="btn btn-success arrayItem arrayBtn"><span class="glyphicon glyphicon-plus"></span></button>
+                      <button *ngIf="(myForm.get('options').value.length>1)" (click)="removeOption()" type="button" class="btn btn-danger arrayItem  arrayBtn"><span class="glyphicon glyphicon-minus"></span></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            
+              <div class="form-group text-left">
+                <label for="category">Category</label>
                 
                   <input formControlName="category" type="text" class="form-control">
-                
-              </div>
-            
-              <div class="form-group text-left">
-                <label for="owner">owner</label>
-                
-                    <input formControlName="owner" type="text" class="form-control">
                 
               </div>
 
@@ -64,50 +64,13 @@
     <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
         <strong>Error:</strong> {{errorMessage}}
     </div>
-
+  
   <div class="row">
-    <div class="col-md-12">
-        <h1 class="transaction-title" id='transactionName'>TX_CreateElection</h1>
-    </div>
-  </div>
-  <br>
+      <h1 class="transaction-title" id='transactionName'>Create Election transaction</h1>
   <div class="row">
-    <div class="col-md-12">
-      <div class="row">
-        <div class="col-md-12">
-          When invoked, this transaction will have the following attributes:
-          <br>
-          <ul>
-            
-              
-                <li><span class="attribute"><b>electionID</b></span></li>
-              
-            
-              
-                <li><span class="attribute"><b>description</b></span></li>
-              
-            
-              
-                <li><span class="attribute"><b>options</b></span></li>
-              
-            
-              
-                <li><span class="attribute"><b>category</b></span></li>
-              
-            
-              
-                <li><span class="attribute"><b>owner</b></span></li>
-              
-            
-              
-            
-              
-            
-          </ul>
-        </div>
-      </div>
-      <button (click)="resetForm();" type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTransactionModal">Invoke</button>
-    </div>
+      <p class="description">This transaction allows you to create a new Election.</p>
   </div>
+    <button (click)="getUniqueID();" type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTransactionModal">Invoke</button>
 </div>
+  
 

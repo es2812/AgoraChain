@@ -70,8 +70,8 @@
 }
 .form-control{
     color: #393939;
-    height: 42px;
     border: 1px solid #ffffff;
+    border-bottom-color:#6C4CC4;
     box-shadow: inset 0 0px 0px rgba(0,0,0,.075); 
     border-radius: 4px;
     resize: none;

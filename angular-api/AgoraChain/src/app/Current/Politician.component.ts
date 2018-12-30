@@ -22,7 +22,7 @@ import { IdentityService } from 'app/identity/identity.service';
 @Component({
   selector: 'app-politician',
   templateUrl: './Politician.component.html',
-  styleUrls: ['./Current.component.css'],
+  styleUrls: ['../TX.css','./Current.component.css'],
   providers: [CurrentService]
 })
 export class CurrentPoliticianComponent implements OnInit {
