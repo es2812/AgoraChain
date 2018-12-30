@@ -16,18 +16,26 @@ import { Component, OnInit, Input } from '@angular/core';
 import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
 import { TX_PrepareEnvelopeService } from './TX_PrepareEnvelope.service';
 import 'rxjs/add/operator/toPromise';
+import { DataService } from 'app/data.service';
+import { Election, Envelope } from 'app/org.agora.net';
+import { NgxSpinnerService } from 'ngx-spinner';
+import { IdentityService } from 'app/identity/identity.service';
 
 @Component({
   selector: 'app-tx_prepareenvelope',
   templateUrl: './TX_PrepareEnvelope.component.html',
-  styleUrls: ['./TX_PrepareEnvelope.component.css'],
+  styleUrls: ['../TX.css','./TX_PrepareEnvelope.component.css'],
   providers: [TX_PrepareEnvelopeService]
 })
 export class TX_PrepareEnvelopeComponent implements OnInit {
 
   myForm: FormGroup;
 
-  private allTransactions;
+  private allElections = [];
+  private uniqueID;
+  private currentParticipant;
+  private activeIndex = 0;
+
   private Transaction;
   private currentId;
   private errorMessage;
@@ -39,7 +47,7 @@ export class TX_PrepareEnvelopeComponent implements OnInit {
   timestamp = new FormControl('', Validators.required);
 
 
-  constructor(private serviceTX_PrepareEnvelope: TX_PrepareEnvelopeService, fb: FormBuilder) {
+  constructor(private serviceTX_PrepareEnvelope: TX_PrepareEnvelopeService, fb: FormBuilder, private serviceElection: DataService<Election>, private serviceSpinner: NgxSpinnerService, private serviceIdentity:IdentityService, private serviceEnvelope: DataService<Envelope>) {
     this.myForm = fb.group({
       envelopeID: this.envelopeID,
       voter: this.voter,
@@ -50,19 +58,30 @@ export class TX_PrepareEnvelopeComponent implements OnInit {
   };
 
   ngOnInit(): void {
-    this.loadAll();
+    this.getCurrentParticipant();
   }
 
-  loadAll(): Promise<any> {
+  loadElections(): Promise<any> {
+    this.serviceSpinner.show();
     const tempList = [];
-    return this.serviceTX_PrepareEnvelope.getAll()
+    return this.serviceElection.getAll('Election')
     .toPromise()
     .then((result) => {
       this.errorMessage = null;
       result.forEach(transaction => {
         tempList.push(transaction);
       });
-      this.allTransactions = tempList;
+      this.allElections = tempList;
+      //we should get rid of elections whose votes exist
+      return this.serviceEnvelope.getAll('Envelope').toPromise()
+      .then((envs)=>
+      {
+        let electionsWithEnvelopes = envs.map(e=>e.election.toString().split('#')[1]);
+        console.log(electionsWithEnvelopes)
+        this.allElections = this.allElections.filter((e)=> (e.closed == false) && (electionsWithEnvelopes.indexOf(e.electionID)==-1));
+        console.log(this.allElections);
+        this.serviceSpinner.hide(); 
+      })
     })
     .catch((error) => {
       if (error === 'Server error') {
@@ -75,37 +94,57 @@ export class TX_PrepareEnvelopeComponent implements OnInit {
     });
   }
 
-	/**
-   * Event handler for changing the checked state of a checkbox (handles array enumeration values)
-   * @param {String} name - the name of the transaction field to update
-   * @param {any} value - the enumeration value for which to toggle the checked state
-   */
-  changeArrayValue(name: string, value: any): void {
-    const index = this[name].value.indexOf(value);
-    if (index === -1) {
-      this[name].value.push(value);
-    } else {
-      this[name].value.splice(index, 1);
-    }
+  getCurrentParticipant(): Promise<any> {
+    this.serviceSpinner.show();
+    return this.serviceIdentity.getCurrentParticipant().toPromise()
+    .then((result)=>{
+      this.errorMessage = null;
+      this.currentParticipant = result;
+      this.serviceSpinner.hide();
+    })
+    .catch((error) => {
+      if (error === 'Server error') {
+        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
+      } else if (error === '404 - Not Found') {
+        this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
+      } else {
+        this.errorMessage = error;
+      }
+    });
   }
 
-	/**
-	 * Checkbox helper, determining whether an enumeration value should be selected or not (for array enumeration values
-   * only). This is used for checkboxes in the transaction updateDialog.
-   * @param {String} name - the name of the transaction field to check
-   * @param {any} value - the enumeration value to check for
-   * @return {Boolean} whether the specified transaction field contains the provided value
-   */
-  hasArrayValue(name: string, value: any): boolean {
-    return this[name].value.indexOf(value) !== -1;
+  getUniqueID(): Promise<any> {
+    this.serviceSpinner.show();
+    return this.serviceEnvelope.getAll('Envelope')
+    .toPromise()
+    .then((result) => {
+      this.errorMessage = null;
+      this.uniqueID = result.length + 1;
+      this.serviceSpinner.hide();
+    })
+    .catch((error) => {
+      if (error === 'Server error') {
+        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
+      } else if (error === '404 - Not Found') {
+        this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
+      } else {
+        this.errorMessage = error;
+      }
+    });
+  }
+
+  selectElection(i):void{
+    this.activeIndex = i;
   }
 
   addTransaction(form: any): Promise<any> {
+    this.serviceSpinner.show();
+    let selectedElection = "org.agora.net.Election#".concat(this.allElections[this.activeIndex].electionID);
     this.Transaction = {
       $class: 'org.agora.net.TX_PrepareEnvelope',
-      'envelopeID': this.envelopeID.value,
-      'voter': this.voter.value,
-      'election': this.election.value,
+      'envelopeID': this.uniqueID,
+      'voter': this.currentParticipant,
+      'election': selectedElection,
       'transactionId': this.transactionId.value,
       'timestamp': this.timestamp.value
     };
@@ -129,6 +168,7 @@ export class TX_PrepareEnvelopeComponent implements OnInit {
         'transactionId': null,
         'timestamp': null
       });
+      this.serviceSpinner.hide();
     })
     .catch((error) => {
       if (error === 'Server error') {
@@ -245,6 +285,7 @@ export class TX_PrepareEnvelopeComponent implements OnInit {
   }
 
   resetForm(): void {
+    this.activeIndex = 0;
     this.myForm.setValue({
       'envelopeID': null,
       'voter': null,
