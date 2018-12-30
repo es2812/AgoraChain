@@ -17,14 +17,15 @@
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title" id="addTransactionModalLabel">Create Transaction</h4>
-        <p class="modal-intro">Enter the required values below.</p>
       </div>
       <form [formGroup]="myForm">
         <div class="modal-body">
               <div class="form-group text-left">
-                <label for="restriction">restriction</label>
+                <label for="restriction">Restriction to remove:</label>
                 
-                <select formControlName="restriction" class="form-control">
+                <li class="list-group-item" *ngIf="allRestrictions.length == 0">No restrictions found</li>
+
+                <select formControlName="restriction" class="form-control" *ngIf="allRestrictions.length > 0">
                   <option *ngFor="let restriction of allRestrictions" [value]="restriction.restrictionID">
                     Option <strong>{{restriction.choice}}</strong> in category <strong>{{restriction.category}}</strong>
                   </option>
@@ -34,7 +35,7 @@
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-            <button (click)="addTransaction(myForm);" type="submit" class="btn btn-success" data-dismiss="modal">Confirm</button>
+            <button (click)="addTransaction(myForm);" type="submit" class="btn btn-success" data-dismiss="modal" [disabled]="allRestrictions.length == 0">Confirm</button>
         </div>
       </form>
     </div>
@@ -45,34 +46,12 @@
     <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
         <strong>Error:</strong> {{errorMessage}}
     </div>
-
+  
   <div class="row">
-    <div class="col-md-12">
-        <h1 class="transaction-title" id='transactionName'>TX_RemoveRestriction</h1>
-    </div>
-  </div>
-  <br>
+      <h1 class="transaction-title" id='transactionName'>Remove Restriction transaction</h1>
   <div class="row">
-    <div class="col-md-12">
-      <div class="row">
-        <div class="col-md-12">
-          When invoked, this transaction will have the following attributes:
-          <br>
-          <ul>
-            
-              
-                <li><span class="attribute"><b>restriction</b></span></li>
-              
-            
-              
-            
-              
-            
-          </ul>
-        </div>
-      </div>
-      <button (click)="resetForm();" type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTransactionModal">Invoke</button>
-    </div>
+      <p class="description">This transaction allows you to remove restrictions to your current or future representations.</p>
+    <button (click)="loadRestrictions();" type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTransactionModal">Invoke</button>
   </div>
-</div>
+  
 

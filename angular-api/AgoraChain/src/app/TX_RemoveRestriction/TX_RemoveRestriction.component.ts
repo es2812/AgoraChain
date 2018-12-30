@@ -30,7 +30,7 @@ export class TX_RemoveRestrictionComponent implements OnInit {
 
   myForm: FormGroup;
 
-  private allRestrictions;
+  private allRestrictions = [];
   private Transaction;
   private currentId;
   private errorMessage;
@@ -49,7 +49,6 @@ export class TX_RemoveRestrictionComponent implements OnInit {
   };
 
   ngOnInit(): void {
-    this.loadRestrictions();
   }
 
   loadRestrictions(): Promise<any> {
@@ -64,6 +63,7 @@ export class TX_RemoveRestrictionComponent implements OnInit {
       });
       this.allRestrictions = tempList;
       this.spinnerService.hide();
+      this.resetForm();
     })
     .catch((error) => {
       if (error === 'Server error') {
@@ -102,6 +102,7 @@ export class TX_RemoveRestrictionComponent implements OnInit {
   }
 
   addTransaction(form: any): Promise<any> {
+    this.spinnerService.show();
     let restrictionIdentifier = "org.agora.net.Restriction#".concat(this.restriction.value);
     this.Transaction = {
       $class: 'org.agora.net.TX_RemoveRestriction',
@@ -125,6 +126,7 @@ export class TX_RemoveRestrictionComponent implements OnInit {
         'transactionId': null,
         'timestamp': null
       });
+      this.spinnerService.hide();
     })
     .catch((error) => {
       if (error === 'Server error') {
@@ -184,8 +186,12 @@ export class TX_RemoveRestrictionComponent implements OnInit {
   }
 
   resetForm(): void {
+    let id = "";
+    if(this.allRestrictions.length>0){
+      id = this.allRestrictions[0].restrictionID;
+    }
     this.myForm.setValue({
-      'restriction': this.allRestrictions[0].restrictionID,
+      'restriction': id,
       'transactionId': null,
       'timestamp': null
     });

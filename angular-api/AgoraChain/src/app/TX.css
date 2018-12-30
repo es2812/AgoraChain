@@ -125,6 +125,10 @@ label {
     background-color: #4D21A8;
     border-color: #4D21A8;
 }
+.btn-success:hover{
+    background-color: #4D21A8;
+    border-color: #4D21A8;
+}
 .btn-default:focus{
     background-color: #fff;
     border-color: #4d21a8;  
@@ -194,6 +198,12 @@ p {
 :disabled {
     cursor: not-allowed	!important;
     color: #bdbcbc !important;
+}
+
+
+.list-group-item {
+    cursor: pointer;
+    border: 1px solid #bdbcbc;
 }
 
 /***.transaction-properties:hover, .transaction-properties:hover span{  
