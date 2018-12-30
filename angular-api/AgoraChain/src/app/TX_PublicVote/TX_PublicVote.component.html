@@ -66,40 +66,10 @@
     </div>
 
   <div class="row">
-    <div class="col-md-12">
-        <h1 class="transaction-title" id='transactionName'>TX_PublicVote</h1>
-    </div>
-  </div>
-  <br>
+      <h1 class="transaction-title" id='transactionName'>Public Vote transaction</h1>
   <div class="row">
-    <div class="col-md-12">
-      <div class="row">
-        <div class="col-md-12">
-          When invoked, this transaction will have the following attributes:
-          <br>
-          <ul>
-            
-              
-                <li><span class="attribute"><b>choice</b></span></li>
-              
-            
-              
-                <li><span class="attribute"><b>election</b></span></li>
-              
-            
-              
-                <li><span class="attribute"><b>voter</b></span></li>
-              
-            
-              
-            
-              
-            
-          </ul>
-        </div>
-      </div>
-      <button (click)="resetForm();" type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTransactionModal">Invoke</button>
-    </div>
+      <p class="description">This transaction allows you to vote (or change your vote) on an open <a [routerLink]="['/Election']">Election</a>.</p>
   </div>
+  <button (click)="resetForm();" type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTransactionModal">Invoke</button>
 </div>
 
