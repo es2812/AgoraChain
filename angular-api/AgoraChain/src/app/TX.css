@@ -83,6 +83,9 @@
     border-radius: 4px;
     resize: none;
 }
+.form-group{
+    margin-top: 15px;
+}
 label {
     color: #545454;
 }
@@ -204,6 +207,12 @@ p {
 .list-group-item {
     cursor: pointer;
     border: 1px solid #bdbcbc;
+}
+
+.validation-info {
+    color: #545454;
+    font-size: 10px;
+    text-align:right;
 }
 
 /***.transaction-properties:hover, .transaction-properties:hover span{  
