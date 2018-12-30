@@ -12,77 +12,51 @@
  limitations under the License.
 -->
 <div class="modal fade" id="addTransactionModal" tabindex="-1" role="dialog" aria-labelledby="addTransactionModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="addTransactionModalLabel">Create Transaction</h4>
-        <p class="modal-intro">Enter the required values below.</p>
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="addTransactionModalLabel">Close Election</h4>
+          <p class="modal-intro">Select the election you want to close.</p>
+        </div>
+        <form [formGroup]="myForm">
+          <div class="modal-body">
+                <div class="form-group text-left">
+                  <label for="election">Election to close</label>
+                  <ul class='list-group'>
+                      <li class="list-group-item" *ngIf="allElections.length == 0">No elections found</li>
+                      <li *ngFor="let election of allElections; let i = index" (click)="selectElection(i)" [class.active]="i == activeIndex" class="list-group-item">
+                          
+                        <p><strong>Category:</strong></p> 
+                        <p>{{election.category}}</p>
+                        <br>
+                        <p><strong>Description:</strong></p>
+                        <p>{{election.description}}</p>
+                        
+                      </li>
+                  </ul>    
+                </div>
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+              <button (click)="addTransaction(myForm);" type="submit" class="btn btn-success" data-dismiss="modal">Confirm</button>
+          </div>
+        </form>
       </div>
-      <form [formGroup]="myForm">
-        <div class="modal-body">
-
-
-          
-
-            
-              <div class="form-group text-left">
-                <label for="election">election</label>
-                
-                    <textarea formControlName="election" class="form-control" rows="3"></textarea>
-                
-              </div>
-            
-          
-
-            
-          
-
-            
-          
-
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-            <button (click)="addTransaction(myForm);" type="submit" class="btn btn-success" data-dismiss="modal">Confirm</button>
-        </div>
-      </form>
     </div>
   </div>
-</div>
-
-<div class="container col-md-6">
-    <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
-        <strong>Error:</strong> {{errorMessage}}
-    </div>
-
-  <div class="row">
-    <div class="col-md-12">
-        <h1 class="transaction-title" id='transactionName'>TX_CloseElection</h1>
-    </div>
-  </div>
-  <br>
-  <div class="row">
-    <div class="col-md-12">
-      <div class="row">
-        <div class="col-md-12">
-          When invoked, this transaction will have the following attributes:
-          <br>
-          <ul>
-            
-              
-                <li><span class="attribute"><b>election</b></span></li>
-              
-            
-              
-            
-              
-            
-          </ul>
-        </div>
+  
+  <div class="container col-md-6">
+      <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+          <strong>Error:</strong> {{errorMessage}}
       </div>
-      <button (click)="resetForm();" type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTransactionModal">Invoke</button>
+  
+    <div class="row">
+        <h1 class="transaction-title" id='transactionName'>Close Election transaction</h1>
+    <div class="row">
+        <p class="description">This transaction allows you to close an <a [routerLink]="['/Election']">Election</a> you created, thus calculating and publishing the results.</p>
     </div>
+    <button (click)="resetForm();" type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTransactionModal">Invoke</button>
   </div>
-</div>
-
+  
+  

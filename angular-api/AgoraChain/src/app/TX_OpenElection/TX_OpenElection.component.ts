@@ -68,7 +68,7 @@ export class TX_OpenElectionComponent implements OnInit {
           tempList.push(transaction);
         });
         this.allElections = tempList.filter((e)=>(e.owner == "resource:".concat(p)) && (e.closed == true));
-        console.log(this.allElections);
+        
         this.spinnerService.hide();
       })})
     .catch((error) => {
