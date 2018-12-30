@@ -67,8 +67,8 @@
 .modal-body{
     background: #f4f4f4;
     border-radius: 5px;
-    padding-left: 10%;
-    padding-right: 10%;
+    padding-left: 5%;
+    padding-right: 5%;
 }
 .modal-footer{
     background: #F4F4F4;
@@ -83,15 +83,12 @@
     border-radius: 4px;
     resize: none;
 }
-textarea {
-    height: auto !important;
-}
 label {
     color: #545454;
 }
 .modal-content{
-    margin-top: 15%;
-    margin-bottom: 15%;
+    margin-top: 5%;
+    margin-bottom: 5%;
     box-shadow: 0 0px 0px;
     border: 0px;
 
@@ -117,17 +114,17 @@ label {
     border-color: #4D21A8;
 } */
 .btn-success {
-    /* color: #ffffff;
+    color: #ffffff;
     background-color: #844AE4;
-    border-color: #844AE4; */
+    border-color: #844AE4;
     border-radius: 4px;
     width: 76px;
     height: 40px;
 }
-/* .btn-success:focus{
+.btn-success:focus{
     background-color: #4D21A8;
     border-color: #4D21A8;
-} */
+}
 .btn-default:focus{
     background-color: #fff;
     border-color: #4d21a8;  

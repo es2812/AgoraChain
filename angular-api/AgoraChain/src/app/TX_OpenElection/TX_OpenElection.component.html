@@ -16,31 +16,26 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="addTransactionModalLabel">Create Transaction</h4>
-        <p class="modal-intro">Enter the required values below.</p>
+        <h4 class="modal-title" id="addTransactionModalLabel">Open Election</h4>
+        <p class="modal-intro">Select the election you want to open.</p>
       </div>
       <form [formGroup]="myForm">
         <div class="modal-body">
-
-
-          
-
-            
               <div class="form-group text-left">
-                <label for="election">election</label>
-                
-                    <textarea formControlName="election" class="form-control" rows="3"></textarea>
-                
+                <label for="election">Election to open</label>
+                <ul class='list-group'>
+                    <li class="list-group-item" *ngIf="allElections.length == 0">No elections found</li>
+                    <li *ngFor="let election of allElections; let i = index" (click)="selectElection(i)" [class.active]="i == activeIndex" class="list-group-item">
+                        
+                      <p><strong>Category:</strong></p> 
+                      <p>{{election.category}}</p>
+                      <br>
+                      <p><strong>Description:</strong></p>
+                      <p>{{election.description}}</p>
+                      
+                    </li>
+                </ul>    
               </div>
-            
-          
-
-            
-          
-
-            
-          
-
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
@@ -57,32 +52,10 @@
     </div>
 
   <div class="row">
-    <div class="col-md-12">
-        <h1 class="transaction-title" id='transactionName'>TX_OpenElection</h1>
-    </div>
-  </div>
-  <br>
+      <h1 class="transaction-title" id='transactionName'>Open Election transaction</h1>
   <div class="row">
-    <div class="col-md-12">
-      <div class="row">
-        <div class="col-md-12">
-          When invoked, this transaction will have the following attributes:
-          <br>
-          <ul>
-            
-              
-                <li><span class="attribute"><b>election</b></span></li>
-              
-            
-              
-            
-              
-            
-          </ul>
-        </div>
-      </div>
-      <button (click)="resetForm();" type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTransactionModal">Invoke</button>
-    </div>
+      <p class="description">This transaction allows you to open an <a [routerLink]="['/Election']">Election</a> you created, thus allowing participants to vote on it.</p>
   </div>
+  <button (click)="resetForm();" type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTransactionModal">Invoke</button>
 </div>
 

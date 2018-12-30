@@ -111,7 +111,7 @@
     border: none;
     padding: 0px;
     box-shadow: 1px 1px 2px 0 rgba(0,0,0,0.10);
-    max-height: 0;
+    /* max-height: 0; */
     display: block;
     overflow: hidden;
     visibility: hidden;
@@ -164,5 +164,5 @@
 .scrollable-menu {
     height: auto;
     max-height: 200px;
-    overflow-x: hidden;
+    overflow-x: scroll;
 }

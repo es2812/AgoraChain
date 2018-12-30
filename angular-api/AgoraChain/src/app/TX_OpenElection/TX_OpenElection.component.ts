@@ -16,28 +16,34 @@ import { Component, OnInit, Input } from '@angular/core';
 import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
 import { TX_OpenElectionService } from './TX_OpenElection.service';
 import 'rxjs/add/operator/toPromise';
+import { NgxSpinnerService } from 'ngx-spinner';
+import { DataService } from 'app/data.service';
+import { Election } from 'app/org.agora.net';
+import { IdentityService } from 'app/identity/identity.service';
 
 @Component({
   selector: 'app-tx_openelection',
   templateUrl: './TX_OpenElection.component.html',
-  styleUrls: ['./TX_OpenElection.component.css'],
+  styleUrls: ['../TX.css','./TX_OpenElection.component.css'],
   providers: [TX_OpenElectionService]
 })
 export class TX_OpenElectionComponent implements OnInit {
 
   myForm: FormGroup;
 
-  private allTransactions;
+  private allElections = [];
+  private activeIndex = 0;
   private Transaction;
   private currentId;
   private errorMessage;
+  private currentLegislator;
 
   election = new FormControl('', Validators.required);
   transactionId = new FormControl('', Validators.required);
   timestamp = new FormControl('', Validators.required);
 
 
-  constructor(private serviceTX_OpenElection: TX_OpenElectionService, fb: FormBuilder) {
+  constructor(private serviceTX_OpenElection: TX_OpenElectionService, fb: FormBuilder, private spinnerService: NgxSpinnerService, private serviceElection: DataService<Election>, private serviceIdentity:IdentityService) {
     this.myForm = fb.group({
       election: this.election,
       transactionId: this.transactionId,
@@ -46,20 +52,25 @@ export class TX_OpenElectionComponent implements OnInit {
   };
 
   ngOnInit(): void {
-    this.loadAll();
+    this.loadOpenElections();
   }
 
-  loadAll(): Promise<any> {
+  loadOpenElections(): Promise<any> {
+    this.spinnerService.show();
     const tempList = [];
-    return this.serviceTX_OpenElection.getAll()
-    .toPromise()
-    .then((result) => {
-      this.errorMessage = null;
-      result.forEach(transaction => {
-        tempList.push(transaction);
-      });
-      this.allTransactions = tempList;
-    })
+    return this.serviceIdentity.getCurrentParticipant().toPromise()
+    .then((p)=>{
+      return this.serviceElection.getAll('Election')
+      .toPromise()
+      .then((result) => {
+        this.errorMessage = null;
+        result.forEach(transaction => {
+          tempList.push(transaction);
+        });
+        this.allElections = tempList.filter((e)=>(e.owner == "resource:".concat(p)) && (e.closed == true));
+        console.log(this.allElections);
+        this.spinnerService.hide();
+      })})
     .catch((error) => {
       if (error === 'Server error') {
         this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
@@ -71,35 +82,16 @@ export class TX_OpenElectionComponent implements OnInit {
     });
   }
 
-	/**
-   * Event handler for changing the checked state of a checkbox (handles array enumeration values)
-   * @param {String} name - the name of the transaction field to update
-   * @param {any} value - the enumeration value for which to toggle the checked state
-   */
-  changeArrayValue(name: string, value: any): void {
-    const index = this[name].value.indexOf(value);
-    if (index === -1) {
-      this[name].value.push(value);
-    } else {
-      this[name].value.splice(index, 1);
-    }
-  }
-
-	/**
-	 * Checkbox helper, determining whether an enumeration value should be selected or not (for array enumeration values
-   * only). This is used for checkboxes in the transaction updateDialog.
-   * @param {String} name - the name of the transaction field to check
-   * @param {any} value - the enumeration value to check for
-   * @return {Boolean} whether the specified transaction field contains the provided value
-   */
-  hasArrayValue(name: string, value: any): boolean {
-    return this[name].value.indexOf(value) !== -1;
+  selectElection(i) {
+    this.activeIndex = i;
   }
 
   addTransaction(form: any): Promise<any> {
+    this.spinnerService.show();
+    let selectedElection = this.allElections[this.activeIndex];
     this.Transaction = {
       $class: 'org.agora.net.TX_OpenElection',
-      'election': this.election.value,
+      'election': "org.agora.net.Election#".concat(selectedElection.electionID),
       'transactionId': this.transactionId.value,
       'timestamp': this.timestamp.value
     };
@@ -119,6 +111,7 @@ export class TX_OpenElectionComponent implements OnInit {
         'transactionId': null,
         'timestamp': null
       });
+      this.spinnerService.hide();
     })
     .catch((error) => {
       if (error === 'Server error') {
@@ -129,53 +122,8 @@ export class TX_OpenElectionComponent implements OnInit {
     });
   }
 
-  updateTransaction(form: any): Promise<any> {
-    this.Transaction = {
-      $class: 'org.agora.net.TX_OpenElection',
-      'election': this.election.value,
-      'timestamp': this.timestamp.value
-    };
-
-    return this.serviceTX_OpenElection.updateTransaction(form.get('transactionId').value, this.Transaction)
-    .toPromise()
-    .then(() => {
-      this.errorMessage = null;
-    })
-    .catch((error) => {
-      if (error === 'Server error') {
-        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else if (error === '404 - Not Found') {
-      this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
-      } else {
-        this.errorMessage = error;
-      }
-    });
-  }
-
-  deleteTransaction(): Promise<any> {
-
-    return this.serviceTX_OpenElection.deleteTransaction(this.currentId)
-    .toPromise()
-    .then(() => {
-      this.errorMessage = null;
-    })
-    .catch((error) => {
-      if (error === 'Server error') {
-        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else if (error === '404 - Not Found') {
-        this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
-      } else {
-        this.errorMessage = error;
-      }
-    });
-  }
-
-  setId(id: any): void {
-    this.currentId = id;
-  }
 
   getForm(id: any): Promise<any> {
-
     return this.serviceTX_OpenElection.getTransaction(id)
     .toPromise()
     .then((result) => {
