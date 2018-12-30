@@ -77,9 +77,7 @@ export class TX_PrepareEnvelopeComponent implements OnInit {
       .then((envs)=>
       {
         let electionsWithEnvelopes = envs.map(e=>e.election.toString().split('#')[1]);
-        console.log(electionsWithEnvelopes)
         this.allElections = this.allElections.filter((e)=> (e.closed == false) && (electionsWithEnvelopes.indexOf(e.electionID)==-1));
-        console.log(this.allElections);
         this.serviceSpinner.hide(); 
       })
     })
