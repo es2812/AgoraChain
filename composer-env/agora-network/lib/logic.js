@@ -87,7 +87,7 @@ async function removeRestrictionTransaction(tx) {
     let valid = await restrictionRegistry.exists(tx.restriction.getIdentifier());
 
     if(valid){
-        await restrictionRegistry.remove(restriction);
+        await restrictionRegistry.remove(tx.restriction);
     }
     else{
         throw new Error(tx.restriction+" doesn't exist.")
