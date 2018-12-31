@@ -36,9 +36,9 @@ p {
 }
 
 .container {
-    margin-left: 72px;
-    margin-right: 100px;
+    margin: 0 auto;
     border-radius: 5px;
+    width: 85%;
 }
 
 

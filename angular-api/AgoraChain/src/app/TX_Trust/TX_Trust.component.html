@@ -41,7 +41,7 @@
 </div>
 
 
-<div class="container col-md-6">
+<div class="container">
     <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
         <strong>Error:</strong> {{errorMessage}}
     </div>
@@ -52,5 +52,6 @@
       <p class="description">This transaction allows you to add or change a <a [routerLink]="['/Politician']">Politician</a> as your representation for all subsequent elections.</p>
   </div>
   <button (click)="loadPoliticians();" type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTransactionModal">Invoke</button>
+
 </div>
 
