@@ -11,12 +11,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-.container {
-    width: 100%;
-    padding-left: 72px;
-    padding-right: 72px;
-}
 
+.buttons{
+    float: right;
+}
 .btn-primary {
     background: #844AE4;
     border-radius: 4px;
@@ -96,35 +94,36 @@ label {
     height: 40px;
 }
 .btn-danger{
-    color: #ffffff;
+    /* color: #ffffff;
     background-color: #844AE4;
-    border-color: #844AE4;
+    border-color: #844AE4; */
     border-radius: 4px;
-    width: 76px;
+    /* width: 76px; */
     height: 40px;
 }
-.btn-danger:focus{
+/* .btn-danger:focus{
     background-color: #4D21A8;
     border-color: #4D21A8;
-}
+} */
 .btn-success {
-    color: #ffffff;
+    /* color: #ffffff;
     background-color: #844AE4;
-    border-color: #844AE4;
+    border-color: #844AE4; */
     border-radius: 4px;
-    width: 76px;
+    /* width: 76px; */
     height: 40px;
 }
-.btn-success:focus{
+/* .btn-success:focus{
     background-color: #4D21A8;
     border-color: #4D21A8;
-}
+} */
 .btn-default:focus{
     background-color: #fff;
     border-color: #4d21a8;  
     color: #4d21a8;      
 }
 .asset-title{
+    float: left;
     font-family: inherit;
     font-size: 24px;
     color: #4E4E4E;
