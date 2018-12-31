@@ -12,120 +12,124 @@
  limitations under the License.
 -->
 <div class="container">
-    <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
-        <strong>Error:</strong> {{errorMessage}}
-    </div>
+  <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+    <strong>Error:</strong> {{errorMessage}}
+  </div>
 
   <div class="row">
     <div>
-        <h1 class="asset-title" id="closedName">Closed elections in the system</h1>
+      <h1 class="asset-title" id="closedName">Closed elections in the system</h1>
     </div>
   </div>
   <br>
-<div *ngIf="closedElections.length == 0">
+  <div *ngIf="closedElections.length == 0">
     <h4>No closed elections found</h4>
-</div>
-<div id="closed" *ngIf="closedElections.length>0">
-  <div class="row">
-    <div class="col-md-12">
-      <table class="table table-responsive">
-        <thead class="thead general">
-          <tr class="thead-cols">
-            
-                <th class="info">Description</th>
-            
-                <th class="info">Category</th>
+  </div>
+  <div id="closed" *ngIf="closedElections.length>0">
+    <div class="row">
+      <div class="col-md-12">
+        <table class="table table-responsive">
+          <thead class="thead general">
+            <tr class="thead-cols">
 
-                <th class="info">Owner</th>
+              <th class="info">Description</th>
 
-                <th class="info">Results</th>
-            
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let election of closedElections">            
-                <td class="asset-properties"><p>{{election.description}}</p></td>
-            
-                <td class="asset-properties">{{election.category}}</td>
+              <th class="info">Category</th>
 
-                <td class="asset-properties">{{election.owner}}</td>
+              <th class="info">Owner</th>
 
-                <td class="asset-properties results">
-                  <table class="table table-responsive">
-                    <thead>
-                      <th class="info" scope="col">Option</th>
-                      <th class="info" scope="col">Number of votes</th>
-                    </thead>
-                    <tbody>
-                      <tr *ngFor="let option of election.options; let i = index">
-                        <th scope="row">{{option}}</th>
-                        <td>{{election.results[i]}}</td>
-                      </tr>
-                      <tr *ngFor="let writein of election.writeins; let i = index">
-                          <th scope="row" *ngIf="writein!=''">{{writein}}</th>
-                          <th scope="row" *ngIf="writein==''">Blank votes</th>
-                          <td>{{election.results[election.options.length+i]}}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </td>
+              <th class="info">Results</th>
 
-          </tr>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let election of closedElections">
+              <td class="asset-properties">
+                <p>{{election.description}}</p>
+              </td>
+
+              <td class="asset-properties">{{election.category}}</td>
+
+              <td class="asset-properties">{{election.owner.name}} {{election.owner.lastname}}</td>
+
+              <td class="asset-properties results">
+                <table class="table table-responsive">
+                  <thead>
+              <th class="info" scope="col">Option</th>
+              <th class="info" scope="col">Number of votes</th>
+              </thead>
+          <tbody>
+            <tr *ngFor="let option of election.options; let i = index">
+              <th scope="row">{{option}}</th>
+              <td>{{election.results[i]}}</td>
+            </tr>
+            <tr *ngFor="let writein of election.writeins; let i = index">
+              <th scope="row" *ngIf="writein!=''">{{writein}}</th>
+              <th scope="row" *ngIf="writein==''">Blank votes</th>
+              <td>{{election.results[election.options.length+i]}}</td>
+            </tr>
+          </tbody>
+        </table>
+        </td>
+
+        </tr>
         </tbody>
-      </table>
+        </table>
+      </div>
     </div>
   </div>
-</div>
-    <div class="row">
+  <div class="row">
     <div>
-        <h1 class="asset-title" id="openName">Open elections in the system</h1>
+      <h1 class="asset-title" id="openName">Open elections in the system</h1>
     </div>
   </div>
   <br>
 
-<div *ngIf="openElections.length == 0">
+  <div *ngIf="openElections.length == 0">
     <h4>No open elections found</h4>
-</div>
+  </div>
 
-<div class="open" *ngIf="openElections.length>0">
-  <div class="row">
-    <div class="col-md-12">
-      <table class="table table-responsive">
-        <thead class="thead general">
-          <tr class="thead-cols">
-            
-                <th class="info">Description</th>
-            
-                <th class="info">Category</th>
+  <div class="open" *ngIf="openElections.length>0">
+    <div class="row">
+      <div class="col-md-12">
+        <table class="table table-responsive">
+          <thead class="thead general">
+            <tr class="thead-cols">
 
-                <th class="info">Owner</th>
+              <th class="info">Description</th>
 
-                <th class="info">Options</th>
-            
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let election of openElections">            
-                <td class="asset-properties"><p>{{election.description}}</p></td>
-            
-                <td class="asset-properties">{{election.category}}</td>
+              <th class="info">Category</th>
 
-                <td class="asset-properties">{{election.owner}}</td>
+              <th class="info">Owner</th>
 
-                <td class="asset-properties options">
-                  <table class="table table-responsive">
-                    <tbody>
-                      <th scope="row" *ngFor="let option of election.options">
-                        {{option}}
-                      </th>
-                    </tbody>
-                  </table>
-                </td>
+              <th class="info">Options</th>
 
-          </tr>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let election of openElections">
+              <td class="asset-properties">
+                <p>{{election.description}}</p>
+              </td>
+
+              <td class="asset-properties">{{election.category}}</td>
+
+              <td class="asset-properties">{{election.owner.name}} {{election.owner.lastname}}</td>
+
+              <td class="asset-properties options">
+                <table class="table table-responsive">
+                  <tbody>
+              <th scope="row" *ngFor="let option of election.options">
+                {{option}}
+              </th>
+          </tbody>
+        </table>
+        </td>
+
+        </tr>
         </tbody>
-      </table>
-    </div>
+        </table>
+      </div>
     </div>
   </div>
 </div>

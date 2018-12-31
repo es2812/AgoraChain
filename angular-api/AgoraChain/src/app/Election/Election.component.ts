@@ -17,6 +17,8 @@ import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms'
 import { ElectionService } from './Election.service';
 import 'rxjs/add/operator/toPromise';
 import { NgxSpinnerService } from 'ngx-spinner';
+import { DataService } from 'app/data.service';
+import { Legislator } from 'app/org.agora.net';
 
 @Component({
   selector: 'app-election',
@@ -26,13 +28,13 @@ import { NgxSpinnerService } from 'ngx-spinner';
 })
 export class ElectionComponent implements OnInit {
 
-  private closedElections;
-  private openElections;
+  private closedElections = [];
+  private openElections = [];
   private asset;
   private currentId;
   private errorMessage;
 
-  constructor(public serviceElection: ElectionService, private serviceSpinner: NgxSpinnerService) {};
+  constructor(public serviceElection: ElectionService, private serviceSpinner: NgxSpinnerService, private serviceLegislator: DataService<Legislator>) {};
 
   ngOnInit(): void {
     this.loadAll();
@@ -49,9 +51,8 @@ export class ElectionComponent implements OnInit {
         tempList.push(asset);
       });
       this.closedElections = tempList.filter((e)=>e.closed);
-      console.log(this.closedElections);
       this.openElections = tempList.filter((e)=>!e.closed);
-      console.log(this.closedElections);
+      this.loadOwners();
       this.serviceSpinner.hide();
     })
     .catch((error) => {
@@ -64,5 +65,22 @@ export class ElectionComponent implements OnInit {
       }
       this.serviceSpinner.hide();
     });
+  }
+
+  loadOwners():Promise<any> {
+    this.serviceSpinner.show();
+    return this.serviceLegislator.getAll('Legislator')
+    .toPromise()
+    .then((el)=>{
+      this.closedElections.forEach((v)=>{
+        let ownerId = v.owner.toString().split('#')[1];
+        v.owner = el.filter((e)=> e.id == ownerId)[0];
+      })
+      this.openElections.forEach((v)=>{
+        let ownerId = v.owner.toString().split('#')[1];
+        v.owner = el.filter((e)=> e.id == ownerId)[0];
+      })
+      this.serviceSpinner.hide();
+    })
   }
 }
