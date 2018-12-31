@@ -18,12 +18,18 @@
   
   <div class="row">
     <div class="col-md-9">
-        <h1 class="asset-title" id='assetName'>Vote</h1>
+        <h1 class="asset-title" id='assetName'>Votes</h1>
     </div>
   </div>
   <br>
+  
   <div class="row">
-    <div class="col-md-12">
+
+    <div *ngIf="allAssets.length == 0">
+      <h4>No votes found</h4>
+    </div>
+
+    <div *ngIf= "allAssets.length > 0" class="col-md-12">
       <table class="table table-responsive">
         <thead class="thead">
           <tr class="thead-cols">
