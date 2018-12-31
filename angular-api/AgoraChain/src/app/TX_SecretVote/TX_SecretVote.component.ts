@@ -48,29 +48,29 @@ export class TX_SecretVoteComponent implements OnInit {
 
   loadElections(): Promise<any> {
     this.serviceSpinner.show();
-    const tempList = [];
-    return this.serviceEnvelope.getAll('Envelope')
-    .toPromise()
-    .then((result) => {
-      this.errorMessage = null;
-      result.forEach((d)=>tempList.push(d));
-      this.allEnvelopes = tempList;
-      if(this.allEnvelopes.length > 0){
-        const electionIDs = this.allEnvelopes.map((e)=>e.election.toString().split('#')[1]);
-        return this.serviceElection.getAll('Election').toPromise()
-        .then((e)=>{
-          this.electionsEnvelopes = e.filter((el)=>(el.closed==false)&&(electionIDs.indexOf(el.electionID)!=-1));
-          let validElectionsIDs = this.electionsEnvelopes.map((e)=>e.electionID);
-          this.allEnvelopes = this.allEnvelopes.filter((en)=>validElectionsIDs.indexOf((en.election.toString().split('#')[1])!=-1));
-          if(this.electionsEnvelopes.length > 0){
-            this.selectEnvelope(0);
-          }
-          this.serviceSpinner.hide();
-        })
-      }
-      else {
+    //we get all elections
+    return this.serviceElection.getAll('Election').toPromise()
+    .then((e)=>{
+      //we keep open elections
+      let openElections = e.filter((el)=>el.closed==false);
+      //we get all envelopes for participant
+      return this.serviceEnvelope.getAll('Envelope').toPromise()
+      .then((env)=>{
+        this.errorMessage = null;
+        let openElectionIdentifiers = openElections.map(e=>"resource:org.agora.net.Election#".concat(e.electionID));
+        
+        //we keep envelopes for open elections
+        this.allEnvelopes = env.filter((v)=>openElectionIdentifiers.indexOf(v.election.toString())!=-1);
+        let electionsInEnvelope = this.allEnvelopes.map((v)=>v.election.toString().split('#')[1]);
+        
+        //we keep elections with envelopes
+        this.electionsEnvelopes = openElections.filter((v)=> electionsInEnvelope.indexOf(v.electionID)!=-1);
+        
+        if(this.electionsEnvelopes.length > 0){
+          this.selectEnvelope(0);
+        }
         this.serviceSpinner.hide();
-      }
+      })
     })
     .catch((error) => {
       if (error === 'Server error') {
@@ -100,7 +100,9 @@ export class TX_SecretVoteComponent implements OnInit {
 
   addTransaction(): Promise<any> {
     this.serviceSpinner.show();
-    let envelopeIdentifier = "org.agora.net.Envelope#".concat(this.allEnvelopes[this.activeIndex].envelopeID);
+    let electionIdentifier = this.electionsEnvelopes.map(e=>"resource:org.agora.net.Election#".concat(e.electionID))[this.activeIndex];
+    let envelope = this.allEnvelopes.filter((env)=>env.election == electionIdentifier)[0];
+    let envelopeIdentifier = "org.agora.net.Envelope#".concat(envelope.envelopeID);
     let choice = "";
     if($( "#writeinRadio" ).prop("checked")){
       choice = $( "input[name='writein']" )[0].value;
