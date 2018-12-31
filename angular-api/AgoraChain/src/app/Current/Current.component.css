@@ -11,12 +11,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-.container {
-    width: 100%;
-    padding-left: 72px;
-    padding-right: 72px;
-}
-
 .btn-primary {
     background: #844AE4;
     border-radius: 4px;
@@ -74,8 +68,7 @@
     border-bottom-color:#6C4CC4;
     box-shadow: inset 0 0px 0px rgba(0,0,0,.075); 
     border-radius: 4px;
-    resize: none;
-
+    /* resize: none; */
 }
 label {
     color: #545454;
@@ -152,6 +145,27 @@ label {
 .plus-svg{
     color: #fff;
     fill: currentColor;
+}
+
+:disabled {
+    cursor: not-allowed	!important;
+}
+
+
+.list-group-item {
+    cursor: pointer;
+    border: 1px solid #bdbcbc;
+}
+
+.validation-info {
+    color: #545454;
+    font-size: 10px;
+    text-align:right;
+}
+
+textarea{
+    resize: vertical !important;
+    overflow-y: scroll !important;
 }
 
 /***.participant-properties:hover, .participant-properties:hover span{  

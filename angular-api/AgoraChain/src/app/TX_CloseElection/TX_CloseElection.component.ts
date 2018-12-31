@@ -23,7 +23,7 @@ import { IdentityService } from 'app/identity/identity.service';
 @Component({
   selector: 'app-tx_openelection',
   templateUrl: './TX_CloseElection.component.html',
-  styleUrls: ['../TX.css','./TX_CloseElection.component.css'],
+  styleUrls: ['../TX.css'],
   providers: [TX_CloseElectionService]
 })
 export class TX_CloseElectionComponent implements OnInit {

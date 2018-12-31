@@ -24,7 +24,7 @@ import { IdentityService } from 'app/identity/identity.service';
 @Component({
   selector: 'app-tx_openelection',
   templateUrl: './TX_OpenElection.component.html',
-  styleUrls: ['../TX.css','./TX_OpenElection.component.css'],
+  styleUrls: ['../TX.css'],
   providers: [TX_OpenElectionService]
 })
 export class TX_OpenElectionComponent implements OnInit {

@@ -19,11 +19,12 @@ import { IdentityService } from '../identity/identity.service';
 import 'rxjs/add/operator/toPromise';
 import { Citizen, Politician } from 'app/org.agora.net';
 import { DataService } from 'app/data.service';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 @Component({
   selector: 'app-citizen',
   templateUrl: './Citizen.component.html',
-  styleUrls: ['../TX.css','./Current.component.css'],
+  styleUrls: ['./Current.component.css'],
   providers: [CurrentService]
 })
 export class CurrentCitizenComponent implements OnInit {
@@ -36,12 +37,12 @@ export class CurrentCitizenComponent implements OnInit {
   private errorMessage;
 
   representation = new FormControl('', Validators.required);
-  id = new FormControl('', Validators.required);
+  id = new FormControl({value:'',disabled:true}, Validators.required);
   name = new FormControl('', Validators.required);
   lastname = new FormControl('', Validators.required);
 
 
-  constructor(private identityService:IdentityService, private serviceCitizen: CurrentService, private servicePolitician:DataService<Politician>, fb: FormBuilder) {
+  constructor(private identityService:IdentityService, private serviceCitizen: CurrentService, private servicePolitician:DataService<Politician>, fb: FormBuilder, private serviceSpinner: NgxSpinnerService) {
     this.myForm = fb.group({
       representation: this.representation,
       id: this.id,
@@ -55,6 +56,7 @@ export class CurrentCitizenComponent implements OnInit {
   }
 
   load(): Promise<any> {
+    this.serviceSpinner.show();
     return this.identityService.getCurrentParticipant()
     .toPromise()
     .then((result) => {
@@ -65,7 +67,13 @@ export class CurrentCitizenComponent implements OnInit {
         if(this.participant.representation){
           let fs = this.participant.representation.split('.')[3].split('#');
           return this.servicePolitician.getSingle(fs[0],fs[1]).toPromise()
-          .then((p)=>this.politicianTrusted = p)
+          .then((p)=>{
+            this.politicianTrusted = p;
+            this.serviceSpinner.hide();
+          })
+        }
+        else {
+          this.serviceSpinner.hide();
         }
       })
       .catch((error) => {
@@ -75,6 +83,7 @@ export class CurrentCitizenComponent implements OnInit {
           this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
           this.errorMessage = error;
         }
+        this.serviceSpinner.hide();
       });
     })
     .catch((error) => {
@@ -84,35 +93,13 @@ export class CurrentCitizenComponent implements OnInit {
         this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
         this.errorMessage = error;
       }
+
+      this.serviceSpinner.hide();
     });
   }
 
-	/**
-   * Event handler for changing the checked state of a checkbox (handles array enumeration values)
-   * @param {String} name - the name of the participant field to update
-   * @param {any} value - the enumeration value for which to toggle the checked state
-   */
-  changeArrayValue(name: string, value: any): void {
-    const index = this[name].value.indexOf(value);
-    if (index === -1) {
-      this[name].value.push(value);
-    } else {
-      this[name].value.splice(index, 1);
-    }
-  }
-
-	/**
-	 * Checkbox helper, determining whether an enumeration value should be selected or not (for array enumeration values
-   * only). This is used for checkboxes in the participant updateDialog.
-   * @param {String} name - the name of the participant field to check
-   * @param {any} value - the enumeration value to check for
-   * @return {Boolean} whether the specified participant field contains the provided value
-   */
-  hasArrayValue(name: string, value: any): boolean {
-    return this[name].value.indexOf(value) !== -1;
-  }
-
   updateParticipant(form: any): Promise<any> {
+    this.serviceSpinner.show();
     this.participant = {
       $class: 'org.agora.net.Citizen',
       'representation': this.representation.value,
@@ -124,6 +111,7 @@ export class CurrentCitizenComponent implements OnInit {
     .toPromise()
     .then(() => {
       this.errorMessage = null;
+      this.serviceSpinner.hide();
       this.load();
     })
     .catch((error) => {
@@ -134,15 +122,12 @@ export class CurrentCitizenComponent implements OnInit {
       } else {
         this.errorMessage = error;
       }
+      this.serviceSpinner.hide();
     });
   }
 
-  setId(id: any): void {
-    this.currentId = id;
-  }
-
   getForm(id: any): Promise<any> {
-
+    this.serviceSpinner.show();
     return this.serviceCitizen.getParticipant('org.agora.net.Citizen#'+id)
     .toPromise()
     .then((result) => {
@@ -179,6 +164,7 @@ export class CurrentCitizenComponent implements OnInit {
       }
 
       this.myForm.setValue(formObject);
+      this.serviceSpinner.hide();
     })
     .catch((error) => {
       if (error === 'Server error') {
@@ -188,16 +174,9 @@ export class CurrentCitizenComponent implements OnInit {
       } else {
         this.errorMessage = error;
       }
+      this.serviceSpinner.hide();
     });
 
   }
 
-  resetForm(): void {
-    this.myForm.setValue({
-      'representation': null,
-      'id': null,
-      'name': null,
-      'lastname': null
-    });
-  }
 }

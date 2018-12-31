@@ -18,11 +18,13 @@ import { CurrentService } from './Current.service';
 import 'rxjs/add/operator/toPromise';
 import { Politician } from 'app/org.agora.net';
 import { IdentityService } from 'app/identity/identity.service';
+import { NgxSpinnerService } from 'ngx-spinner';
+import $ from 'jquery';
 
 @Component({
   selector: 'app-politician',
   templateUrl: './Politician.component.html',
-  styleUrls: ['../TX.css','./Current.component.css'],
+  styleUrls: ['./Current.component.css'],
   providers: [CurrentService]
 })
 export class CurrentPoliticianComponent implements OnInit {
@@ -33,13 +35,13 @@ export class CurrentPoliticianComponent implements OnInit {
   private currentId;
   private errorMessage;
 
-  info = new FormControl('', Validators.required);
+  info = new FormControl('');
   id = new FormControl('', Validators.required);
   name = new FormControl('', Validators.required);
   lastname = new FormControl('', Validators.required);
 
 
-  constructor(private identityService: IdentityService, private servicePolitician: CurrentService, fb: FormBuilder) {
+  constructor(private identityService: IdentityService, private servicePolitician: CurrentService, fb: FormBuilder, private serviceSpinner: NgxSpinnerService) {
     this.myForm = fb.group({
       info: this.info,
       id: this.id,
@@ -53,12 +55,16 @@ export class CurrentPoliticianComponent implements OnInit {
   }
 
   load(): Promise<any> {
+    this.serviceSpinner.show();
     return this.identityService.getCurrentParticipant()
     .toPromise()
     .then((result) => {
       this.errorMessage = null;
       return this.servicePolitician.getParticipant(result).toPromise()
-      .then((result)=>{this.participant = result})
+      .then((result)=>{
+        this.participant = result;
+        this.serviceSpinner.hide();
+      })
       .catch((error) => {
         if (error === 'Server error') {
           this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
@@ -66,6 +72,8 @@ export class CurrentPoliticianComponent implements OnInit {
           this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
           this.errorMessage = error;
         }
+
+        this.serviceSpinner.hide();
       });
     })
     .catch((error) => {
@@ -75,35 +83,13 @@ export class CurrentPoliticianComponent implements OnInit {
         this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
         this.errorMessage = error;
       }
+
+      this.serviceSpinner.hide();
     });
   }
 
-	/**
-   * Event handler for changing the checked state of a checkbox (handles array enumeration values)
-   * @param {String} name - the name of the participant field to update
-   * @param {any} value - the enumeration value for which to toggle the checked state
-   */
-  changeArrayValue(name: string, value: any): void {
-    const index = this[name].value.indexOf(value);
-    if (index === -1) {
-      this[name].value.push(value);
-    } else {
-      this[name].value.splice(index, 1);
-    }
-  }
-
-	/**
-	 * Checkbox helper, determining whether an enumeration value should be selected or not (for array enumeration values
-   * only). This is used for checkboxes in the participant updateDialog.
-   * @param {String} name - the name of the participant field to check
-   * @param {any} value - the enumeration value to check for
-   * @return {Boolean} whether the specified participant field contains the provided value
-   */
-  hasArrayValue(name: string, value: any): boolean {
-    return this[name].value.indexOf(value) !== -1;
-  }
-
   updateParticipant(form: any): Promise<any> {
+    this.serviceSpinner.show();
     this.participant = {
       $class: 'org.agora.net.Politician',
       'info': this.info.value,
@@ -115,6 +101,8 @@ export class CurrentPoliticianComponent implements OnInit {
     .toPromise()
     .then(() => {
       this.errorMessage = null;
+
+      this.serviceSpinner.hide();
       this.load();
     })
     .catch((error) => {
@@ -125,15 +113,13 @@ export class CurrentPoliticianComponent implements OnInit {
       } else {
         this.errorMessage = error;
       }
+      this.serviceSpinner.hide();
     });
   }
 
-  setId(id: any): void {
-    this.currentId = id;
-  }
 
   getForm(id: any): Promise<any> {
-
+    this.serviceSpinner.show();
     return this.servicePolitician.getParticipant('org.agora.net.Politician#'+id)
     .toPromise()
     .then((result) => {
@@ -148,7 +134,7 @@ export class CurrentPoliticianComponent implements OnInit {
       if (politician.info) {
         formObject.info = politician.info;
       } else {
-        formObject.info = null;
+        formObject.info = '';
       }
 
       if (result.id) {
@@ -170,6 +156,7 @@ export class CurrentPoliticianComponent implements OnInit {
       }
 
       this.myForm.setValue(formObject);
+      this.serviceSpinner.hide();
     })
     .catch((error) => {
       if (error === 'Server error') {
@@ -179,16 +166,9 @@ export class CurrentPoliticianComponent implements OnInit {
       } else {
         this.errorMessage = error;
       }
+      this.serviceSpinner.hide();
     });
 
   }
 
-  resetForm(): void {
-    this.myForm.setValue({
-      'info': null,
-      'id': null,
-      'name': null,
-      'lastname': null
-    });
-  }
 }

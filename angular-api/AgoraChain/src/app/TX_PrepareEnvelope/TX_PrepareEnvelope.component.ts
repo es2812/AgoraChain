@@ -24,7 +24,7 @@ import { IdentityService } from 'app/identity/identity.service';
 @Component({
   selector: 'app-tx_prepareenvelope',
   templateUrl: './TX_PrepareEnvelope.component.html',
-  styleUrls: ['../TX.css','./TX_PrepareEnvelope.component.css'],
+  styleUrls: ['../TX.css'],
   providers: [TX_PrepareEnvelopeService]
 })
 export class TX_PrepareEnvelopeComponent implements OnInit {
