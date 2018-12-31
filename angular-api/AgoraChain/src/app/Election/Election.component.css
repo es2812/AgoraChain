@@ -11,11 +11,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-.container {
-    width: 100%;
-    padding-left: 72px;
-    padding-right: 72px;
-}
 
 .btn-primary {
     background: #844AE4;
@@ -31,13 +26,14 @@
     margin-top: 5%;
 }
 
-.table > thead > tr > th {
+.table-responsive > .general > tr > th {
     border-bottom: 1px solid #EAEAEA;
 }
 
-.table > thead > tr > th.info {
+.table-responsive > .general > tr > th.info {
     background: #FFF;
 }
+
 .modal-title {
     font-family: inherit;
     font-size: 24px;

@@ -67,7 +67,8 @@ export class ElectionComponent implements OnInit {
       result.forEach(asset => {
         tempList.push(asset);
       });
-      this.allAssets = tempList;
+      this.allAssets = tempList.filter((e)=>e.closed);
+      console.log(this.allAssets);
     })
     .catch((error) => {
       if (error === 'Server error') {
