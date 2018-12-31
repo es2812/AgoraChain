@@ -30,8 +30,6 @@ import { IdentityService } from 'app/identity/identity.service';
 })
 export class TX_PublicVoteComponent implements OnInit {
 
-  myForm: FormGroup;
-
   private openElections = [];
   private activeIndex = 0;
   private activeChoices = [];
@@ -40,22 +38,7 @@ export class TX_PublicVoteComponent implements OnInit {
   private currentId;
   private errorMessage;
 
-  choice = new FormControl('', Validators.required);
-  election = new FormControl('', Validators.required);
-  voter = new FormControl('', Validators.required);
-  transactionId = new FormControl('', Validators.required);
-  timestamp = new FormControl('', Validators.required);
-
-
-  constructor(private serviceTX_PublicVote: TX_PublicVoteService, fb: FormBuilder, private serviceElection: DataService<Election>, private serviceSpinner: NgxSpinnerService, private serviceIdentity: IdentityService) {
-    this.myForm = fb.group({
-      choice: this.choice,
-      election: this.election,
-      voter: this.voter,
-      transactionId: this.transactionId,
-      timestamp: this.timestamp
-    });
-  };
+  constructor(private serviceTX_PublicVote: TX_PublicVoteService, private serviceElection: DataService<Election>, private serviceSpinner: NgxSpinnerService, private serviceIdentity: IdentityService) {};
 
   ngOnInit(): void {
     this.loadElections();
@@ -84,6 +67,8 @@ export class TX_PublicVoteComponent implements OnInit {
       } else {
         this.errorMessage = error;
       }
+
+      this.serviceSpinner.hide();
     });
   }
 
@@ -105,6 +90,8 @@ export class TX_PublicVoteComponent implements OnInit {
       } else {
         this.errorMessage = error;
       }
+
+      this.serviceSpinner.hide();
     });
   }
   
@@ -121,7 +108,7 @@ export class TX_PublicVoteComponent implements OnInit {
     $( "#writeinInput" ).prop("disabled",true);
   }
 
-  addTransaction(form: any): Promise<any> {
+  addTransaction(): Promise<any> {
     this.serviceSpinner.show();
     let electionIdentifier = "org.agora.net.Election#".concat(this.openElections[this.activeIndex].electionID);
     let choice = "";
@@ -136,29 +123,15 @@ export class TX_PublicVoteComponent implements OnInit {
       'choice': choice,
       'election': electionIdentifier,
       'voter': this.currentParticipant,
-      'transactionId': this.transactionId.value,
-      'timestamp': this.timestamp.value
-    };
-
-    this.myForm.setValue({
-      'choice': null,
-      'election': null,
-      'voter': null,
       'transactionId': null,
       'timestamp': null
-    });
+    };
 
     return this.serviceTX_PublicVote.addTransaction(this.Transaction)
     .toPromise()
     .then(() => {
       this.errorMessage = null;
-      this.myForm.setValue({
-        'choice': null,
-        'election': null,
-        'voter': null,
-        'transactionId': null,
-        'timestamp': null
-      });
+      this.resetForm(),
       this.serviceSpinner.hide();
     })
     .catch((error) => {
@@ -167,82 +140,15 @@ export class TX_PublicVoteComponent implements OnInit {
       } else {
         this.errorMessage = error;
       }
-    });
-  }
 
-  setId(id: any): void {
-    this.currentId = id;
-  }
-
-  getForm(id: any): Promise<any> {
-
-    return this.serviceTX_PublicVote.getTransaction(id)
-    .toPromise()
-    .then((result) => {
-      this.errorMessage = null;
-      const formObject = {
-        'choice': null,
-        'election': null,
-        'voter': null,
-        'transactionId': null,
-        'timestamp': null
-      };
-
-      if (result.choice) {
-        formObject.choice = result.choice;
-      } else {
-        formObject.choice = null;
-      }
-
-      if (result.election) {
-        formObject.election = result.election;
-      } else {
-        formObject.election = null;
-      }
-
-      if (result.voter) {
-        formObject.voter = result.voter;
-      } else {
-        formObject.voter = null;
-      }
-
-      if (result.transactionId) {
-        formObject.transactionId = result.transactionId;
-      } else {
-        formObject.transactionId = null;
-      }
-
-      if (result.timestamp) {
-        formObject.timestamp = result.timestamp;
-      } else {
-        formObject.timestamp = null;
-      }
-
-      this.myForm.setValue(formObject);
-
-    })
-    .catch((error) => {
-      if (error === 'Server error') {
-        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else if (error === '404 - Not Found') {
-      this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
-      } else {
-        this.errorMessage = error;
-      }
+      this.serviceSpinner.hide();
     });
   }
 
   resetForm(): void {
     this.selectElection(0);
-    if($( "input[name='choice']:checked" ).length >0 ){
+    if($( "input[name='choice']:checked" ).length > 0 ){
       $( "input[name='choice']:checked" ).prop("checked",false);
     }
-    this.myForm.setValue({
-      'choice': null,
-      'election': null,
-      'voter': null,
-      'transactionId': null,
-      'timestamp': null
-    });
   }
 }

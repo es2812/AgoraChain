@@ -24,7 +24,11 @@
               <div class="form-group text-left">
                 <label for="description">Description</label>
                 
-                  <textarea autosize [minRows]="1" formControlName="description" class="form-control" ></textarea>
+                  <textarea autosize [minRows]="1" formControlName="description" class="form-control" required></textarea>
+                  <div *ngIf="description.invalid" class="validation-info">
+                    Required
+                  </div>
+
                 
               </div>
             
@@ -45,14 +49,17 @@
               <div class="form-group text-left">
                 <label for="category">Category</label>
                 
-                  <input formControlName="category" type="text" class="form-control">
+                  <input formControlName="category" type="text" class="form-control" required>
+                  <div *ngIf="category.invalid" class="validation-info">
+                    Required
+                  </div>
                 
               </div>
 
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-            <button (click)="addTransaction(myForm);" type="submit" class="btn btn-success" data-dismiss="modal">Confirm</button>
+            <button (click)="addTransaction(myForm);" type="submit" class="btn btn-success" data-dismiss="modal" [disabled]="category.invalid || description.invalid">Confirm</button>
         </div>
       </form>
     </div>

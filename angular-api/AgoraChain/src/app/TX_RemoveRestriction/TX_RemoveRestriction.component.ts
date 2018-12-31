@@ -36,15 +36,10 @@ export class TX_RemoveRestrictionComponent implements OnInit {
   private errorMessage;
 
   restriction = new FormControl('', Validators.required);
-  transactionId = new FormControl('', Validators.required);
-  timestamp = new FormControl('', Validators.required);
-
 
   constructor(private serviceTX_RemoveRestriction: TX_RemoveRestrictionService, fb: FormBuilder, private spinnerService:NgxSpinnerService, private serviceRestriction: DataService<Restriction>) {
     this.myForm = fb.group({
-      restriction: this.restriction,
-      transactionId: this.transactionId,
-      timestamp: this.timestamp
+      restriction: this.restriction
     });
   };
 
@@ -62,8 +57,8 @@ export class TX_RemoveRestrictionComponent implements OnInit {
         tempList.push(r);
       });
       this.allRestrictions = tempList;
-      this.spinnerService.hide();
       this.resetForm();
+      this.spinnerService.hide();
     })
     .catch((error) => {
       if (error === 'Server error') {
@@ -73,32 +68,8 @@ export class TX_RemoveRestrictionComponent implements OnInit {
       } else {
         this.errorMessage = error;
       }
+      this.spinnerService.hide();
     });
-  }
-
-	/**
-   * Event handler for changing the checked state of a checkbox (handles array enumeration values)
-   * @param {String} name - the name of the transaction field to update
-   * @param {any} value - the enumeration value for which to toggle the checked state
-   */
-  changeArrayValue(name: string, value: any): void {
-    const index = this[name].value.indexOf(value);
-    if (index === -1) {
-      this[name].value.push(value);
-    } else {
-      this[name].value.splice(index, 1);
-    }
-  }
-
-	/**
-	 * Checkbox helper, determining whether an enumeration value should be selected or not (for array enumeration values
-   * only). This is used for checkboxes in the transaction updateDialog.
-   * @param {String} name - the name of the transaction field to check
-   * @param {any} value - the enumeration value to check for
-   * @return {Boolean} whether the specified transaction field contains the provided value
-   */
-  hasArrayValue(name: string, value: any): boolean {
-    return this[name].value.indexOf(value) !== -1;
   }
 
   addTransaction(form: any): Promise<any> {
@@ -107,25 +78,15 @@ export class TX_RemoveRestrictionComponent implements OnInit {
     this.Transaction = {
       $class: 'org.agora.net.TX_RemoveRestriction',
       'restriction': restrictionIdentifier,
-      'transactionId': this.transactionId.value,
-      'timestamp': this.timestamp.value
-    };
-
-    this.myForm.setValue({
-      'restriction': null,
       'transactionId': null,
       'timestamp': null
-    });
+    };
 
     return this.serviceTX_RemoveRestriction.addTransaction(this.Transaction)
     .toPromise()
     .then(() => {
       this.errorMessage = null;
-      this.myForm.setValue({
-        'restriction': null,
-        'transactionId': null,
-        'timestamp': null
-      });
+      this.resetForm();
       this.spinnerService.hide();
     })
     .catch((error) => {
@@ -134,54 +95,7 @@ export class TX_RemoveRestrictionComponent implements OnInit {
       } else {
         this.errorMessage = error;
       }
-    });
-  }
-
-  setId(id: any): void {
-    this.currentId = id;
-  }
-
-  getForm(id: any): Promise<any> {
-
-    return this.serviceTX_RemoveRestriction.getTransaction(id)
-    .toPromise()
-    .then((result) => {
-      this.errorMessage = null;
-      const formObject = {
-        'restriction': null,
-        'transactionId': null,
-        'timestamp': null
-      };
-
-      if (result.restriction) {
-        formObject.restriction = result.restriction;
-      } else {
-        formObject.restriction = null;
-      }
-
-      if (result.transactionId) {
-        formObject.transactionId = result.transactionId;
-      } else {
-        formObject.transactionId = null;
-      }
-
-      if (result.timestamp) {
-        formObject.timestamp = result.timestamp;
-      } else {
-        formObject.timestamp = null;
-      }
-
-      this.myForm.setValue(formObject);
-
-    })
-    .catch((error) => {
-      if (error === 'Server error') {
-        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else if (error === '404 - Not Found') {
-      this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
-      } else {
-        this.errorMessage = error;
-      }
+      this.spinnerService.hide();
     });
   }
 
@@ -191,9 +105,7 @@ export class TX_RemoveRestrictionComponent implements OnInit {
       id = this.allRestrictions[0].restrictionID;
     }
     this.myForm.setValue({
-      'restriction': id,
-      'transactionId': null,
-      'timestamp': null
+      'restriction': id
     });
   }
 }

@@ -29,8 +29,6 @@ import { IdentityService } from 'app/identity/identity.service';
 })
 export class TX_PrepareEnvelopeComponent implements OnInit {
 
-  myForm: FormGroup;
-
   private allElections = [];
   private uniqueID;
   private currentParticipant;
@@ -40,22 +38,7 @@ export class TX_PrepareEnvelopeComponent implements OnInit {
   private currentId;
   private errorMessage;
 
-  envelopeID = new FormControl('', Validators.required);
-  voter = new FormControl('', Validators.required);
-  election = new FormControl('', Validators.required);
-  transactionId = new FormControl('', Validators.required);
-  timestamp = new FormControl('', Validators.required);
-
-
-  constructor(private serviceTX_PrepareEnvelope: TX_PrepareEnvelopeService, fb: FormBuilder, private serviceElection: DataService<Election>, private serviceSpinner: NgxSpinnerService, private serviceIdentity:IdentityService, private serviceEnvelope: DataService<Envelope>) {
-    this.myForm = fb.group({
-      envelopeID: this.envelopeID,
-      voter: this.voter,
-      election: this.election,
-      transactionId: this.transactionId,
-      timestamp: this.timestamp
-    });
-  };
+  constructor(private serviceTX_PrepareEnvelope: TX_PrepareEnvelopeService, private serviceElection: DataService<Election>, private serviceSpinner: NgxSpinnerService, private serviceIdentity:IdentityService, private serviceEnvelope: DataService<Envelope>) {};
 
   ngOnInit(): void {
     this.getCurrentParticipant();
@@ -89,6 +72,7 @@ export class TX_PrepareEnvelopeComponent implements OnInit {
       } else {
         this.errorMessage = error;
       }
+      this.serviceSpinner.hide(); 
     });
   }
 
@@ -108,6 +92,7 @@ export class TX_PrepareEnvelopeComponent implements OnInit {
       } else {
         this.errorMessage = error;
       }
+      this.serviceSpinner.hide(); 
     });
   }
 
@@ -128,6 +113,7 @@ export class TX_PrepareEnvelopeComponent implements OnInit {
       } else {
         this.errorMessage = error;
       }
+      this.serviceSpinner.hide(); 
     });
   }
 
@@ -135,7 +121,7 @@ export class TX_PrepareEnvelopeComponent implements OnInit {
     this.activeIndex = i;
   }
 
-  addTransaction(form: any): Promise<any> {
+  addTransaction(): Promise<any> {
     this.serviceSpinner.show();
     let selectedElection = "org.agora.net.Election#".concat(this.allElections[this.activeIndex].electionID);
     this.Transaction = {
@@ -143,29 +129,15 @@ export class TX_PrepareEnvelopeComponent implements OnInit {
       'envelopeID': this.uniqueID,
       'voter': this.currentParticipant,
       'election': selectedElection,
-      'transactionId': this.transactionId.value,
-      'timestamp': this.timestamp.value
-    };
-
-    this.myForm.setValue({
-      'envelopeID': null,
-      'voter': null,
-      'election': null,
       'transactionId': null,
       'timestamp': null
-    });
+    };
 
     return this.serviceTX_PrepareEnvelope.addTransaction(this.Transaction)
     .toPromise()
     .then(() => {
       this.errorMessage = null;
-      this.myForm.setValue({
-        'envelopeID': null,
-        'voter': null,
-        'election': null,
-        'transactionId': null,
-        'timestamp': null
-      });
+      this.resetForm()
       this.serviceSpinner.hide();
     })
     .catch((error) => {
@@ -174,122 +146,11 @@ export class TX_PrepareEnvelopeComponent implements OnInit {
       } else {
         this.errorMessage = error;
       }
-    });
-  }
-
-  updateTransaction(form: any): Promise<any> {
-    this.Transaction = {
-      $class: 'org.agora.net.TX_PrepareEnvelope',
-      'envelopeID': this.envelopeID.value,
-      'voter': this.voter.value,
-      'election': this.election.value,
-      'timestamp': this.timestamp.value
-    };
-
-    return this.serviceTX_PrepareEnvelope.updateTransaction(form.get('transactionId').value, this.Transaction)
-    .toPromise()
-    .then(() => {
-      this.errorMessage = null;
-    })
-    .catch((error) => {
-      if (error === 'Server error') {
-        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else if (error === '404 - Not Found') {
-      this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
-      } else {
-        this.errorMessage = error;
-      }
-    });
-  }
-
-  deleteTransaction(): Promise<any> {
-
-    return this.serviceTX_PrepareEnvelope.deleteTransaction(this.currentId)
-    .toPromise()
-    .then(() => {
-      this.errorMessage = null;
-    })
-    .catch((error) => {
-      if (error === 'Server error') {
-        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else if (error === '404 - Not Found') {
-        this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
-      } else {
-        this.errorMessage = error;
-      }
-    });
-  }
-
-  setId(id: any): void {
-    this.currentId = id;
-  }
-
-  getForm(id: any): Promise<any> {
-
-    return this.serviceTX_PrepareEnvelope.getTransaction(id)
-    .toPromise()
-    .then((result) => {
-      this.errorMessage = null;
-      const formObject = {
-        'envelopeID': null,
-        'voter': null,
-        'election': null,
-        'transactionId': null,
-        'timestamp': null
-      };
-
-      if (result.envelopeID) {
-        formObject.envelopeID = result.envelopeID;
-      } else {
-        formObject.envelopeID = null;
-      }
-
-      if (result.voter) {
-        formObject.voter = result.voter;
-      } else {
-        formObject.voter = null;
-      }
-
-      if (result.election) {
-        formObject.election = result.election;
-      } else {
-        formObject.election = null;
-      }
-
-      if (result.transactionId) {
-        formObject.transactionId = result.transactionId;
-      } else {
-        formObject.transactionId = null;
-      }
-
-      if (result.timestamp) {
-        formObject.timestamp = result.timestamp;
-      } else {
-        formObject.timestamp = null;
-      }
-
-      this.myForm.setValue(formObject);
-
-    })
-    .catch((error) => {
-      if (error === 'Server error') {
-        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else if (error === '404 - Not Found') {
-      this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
-      } else {
-        this.errorMessage = error;
-      }
+      this.serviceSpinner.hide(); 
     });
   }
 
   resetForm(): void {
-    this.activeIndex = 0;
-    this.myForm.setValue({
-      'envelopeID': null,
-      'voter': null,
-      'election': null,
-      'transactionId': null,
-      'timestamp': null
-    });
+    this.selectElection(0);
   }
 }

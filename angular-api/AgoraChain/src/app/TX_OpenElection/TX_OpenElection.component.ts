@@ -29,8 +29,6 @@ import { IdentityService } from 'app/identity/identity.service';
 })
 export class TX_OpenElectionComponent implements OnInit {
 
-  myForm: FormGroup;
-
   private allElections = [];
   private activeIndex = 0;
   private Transaction;
@@ -38,18 +36,7 @@ export class TX_OpenElectionComponent implements OnInit {
   private errorMessage;
   private currentLegislator;
 
-  election = new FormControl('', Validators.required);
-  transactionId = new FormControl('', Validators.required);
-  timestamp = new FormControl('', Validators.required);
-
-
-  constructor(private serviceTX_OpenElection: TX_OpenElectionService, fb: FormBuilder, private spinnerService: NgxSpinnerService, private serviceElection: DataService<Election>, private serviceIdentity:IdentityService) {
-    this.myForm = fb.group({
-      election: this.election,
-      transactionId: this.transactionId,
-      timestamp: this.timestamp
-    });
-  };
+  constructor(private serviceTX_OpenElection: TX_OpenElectionService, private spinnerService: NgxSpinnerService, private serviceElection: DataService<Election>, private serviceIdentity:IdentityService) {};
 
   ngOnInit(): void {
     this.loadOpenElections();
@@ -79,6 +66,7 @@ export class TX_OpenElectionComponent implements OnInit {
       } else {
         this.errorMessage = error;
       }
+      this.spinnerService.hide();
     });
   }
 
@@ -86,31 +74,21 @@ export class TX_OpenElectionComponent implements OnInit {
     this.activeIndex = i;
   }
 
-  addTransaction(form: any): Promise<any> {
+  addTransaction(): Promise<any> {
     this.spinnerService.show();
     let selectedElection = this.allElections[this.activeIndex];
     this.Transaction = {
       $class: 'org.agora.net.TX_OpenElection',
       'election': "org.agora.net.Election#".concat(selectedElection.electionID),
-      'transactionId': this.transactionId.value,
-      'timestamp': this.timestamp.value
-    };
-
-    this.myForm.setValue({
-      'election': null,
       'transactionId': null,
       'timestamp': null
-    });
+    };
 
     return this.serviceTX_OpenElection.addTransaction(this.Transaction)
     .toPromise()
     .then(() => {
       this.errorMessage = null;
-      this.myForm.setValue({
-        'election': null,
-        'transactionId': null,
-        'timestamp': null
-      });
+      this.resetForm();
       this.spinnerService.hide();
     })
     .catch((error) => {
@@ -119,59 +97,12 @@ export class TX_OpenElectionComponent implements OnInit {
       } else {
         this.errorMessage = error;
       }
-    });
-  }
 
-
-  getForm(id: any): Promise<any> {
-    return this.serviceTX_OpenElection.getTransaction(id)
-    .toPromise()
-    .then((result) => {
-      this.errorMessage = null;
-      const formObject = {
-        'election': null,
-        'transactionId': null,
-        'timestamp': null
-      };
-
-      if (result.election) {
-        formObject.election = result.election;
-      } else {
-        formObject.election = null;
-      }
-
-      if (result.transactionId) {
-        formObject.transactionId = result.transactionId;
-      } else {
-        formObject.transactionId = null;
-      }
-
-      if (result.timestamp) {
-        formObject.timestamp = result.timestamp;
-      } else {
-        formObject.timestamp = null;
-      }
-
-      this.myForm.setValue(formObject);
-
-    })
-    .catch((error) => {
-      if (error === 'Server error') {
-        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else if (error === '404 - Not Found') {
-      this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
-      } else {
-        this.errorMessage = error;
-      }
+      this.spinnerService.hide();
     });
   }
 
   resetForm(): void {
-    this.activeIndex = 0;
-    this.myForm.setValue({
-      'election': null,
-      'transactionId': null,
-      'timestamp': null
-    });
+    this.selectElection(0);
   }
 }

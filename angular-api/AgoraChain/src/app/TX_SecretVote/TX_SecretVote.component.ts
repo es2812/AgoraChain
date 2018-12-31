@@ -62,7 +62,6 @@ export class TX_SecretVoteComponent implements OnInit {
           this.electionsEnvelopes = e.filter((el)=>(el.closed==false)&&(electionIDs.indexOf(el.electionID)!=-1));
           let validElectionsIDs = this.electionsEnvelopes.map((e)=>e.electionID);
           this.allEnvelopes = this.allEnvelopes.filter((en)=>validElectionsIDs.indexOf((en.election.toString().split('#')[1])!=-1));
-
           if(this.electionsEnvelopes.length > 0){
             this.selectEnvelope(0);
           }
@@ -81,6 +80,7 @@ export class TX_SecretVoteComponent implements OnInit {
       } else {
         this.errorMessage = error;
       }
+      this.serviceSpinner.hide();
     });
   }
 
@@ -98,7 +98,7 @@ export class TX_SecretVoteComponent implements OnInit {
     $( "#writeinInput" ).prop("disabled",true);
   }
 
-  addTransaction(form: any): Promise<any> {
+  addTransaction(): Promise<any> {
     this.serviceSpinner.show();
     let envelopeIdentifier = "org.agora.net.Envelope#".concat(this.allEnvelopes[this.activeIndex].envelopeID);
     let choice = "";
@@ -131,10 +131,6 @@ export class TX_SecretVoteComponent implements OnInit {
       }
       this.serviceSpinner.hide();
     });
-  }
-
-  setId(id: any): void {
-    this.currentId = id;
   }
 
   resetForm(): void {

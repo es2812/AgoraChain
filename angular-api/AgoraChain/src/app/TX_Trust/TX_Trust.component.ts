@@ -37,19 +37,13 @@ export class TX_TrustComponent implements OnInit {
   private currentId;
   private errorMessage;
 
-  trustee = new FormControl({value:'', disabled: true}, Validators.required);
   trusted = new FormControl('', Validators.required);
-  transactionId = new FormControl('', Validators.required);
-  timestamp = new FormControl('', Validators.required);
 
 
   constructor(private serviceIdentity: IdentityService, private serviceTX_Trust: TX_TrustService, private trustedService: DataService<Politician>, 
     fb: FormBuilder, private spinnerService: NgxSpinnerService) {
     this.myForm = fb.group({
-      trustee: this.trustee,
-      trusted: this.trusted,
-      transactionId: this.transactionId,
-      timestamp: this.timestamp
+      trusted: this.trusted
     });
   };
 
@@ -110,27 +104,14 @@ export class TX_TrustComponent implements OnInit {
       $class: 'org.agora.net.TX_Trust',
       'trustee': this.currentTrustee,
       'trusted': trustedIdentification,
-      'transactionId': this.transactionId.value,
-      'timestamp': this.timestamp.value
-    };
-
-    this.myForm.setValue({
-      'trustee': null,
-      'trusted': null,
       'transactionId': null,
       'timestamp': null
-    });
-
+    };
     return this.serviceTX_Trust.addTransaction(this.Transaction)
     .toPromise()
     .then(() => {
       this.errorMessage = null;
-      this.myForm.setValue({
-        'trustee': null,
-        'trusted': null,
-        'transactionId': null,
-        'timestamp': null
-      });
+      this.resetForm();
       this.spinnerService.hide()
     })
     .catch((error) => {
@@ -149,10 +130,7 @@ export class TX_TrustComponent implements OnInit {
       trusted = this.allPoliticians[0].id;
     }
     this.myForm.setValue({
-      'trustee': this.currentTrustee,
-      'trusted': trusted,
-      'transactionId': null,
-      'timestamp': null
+      'trusted': trusted
     });
   }
 }

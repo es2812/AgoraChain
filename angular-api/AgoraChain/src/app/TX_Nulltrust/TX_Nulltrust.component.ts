@@ -27,66 +27,23 @@ import { NgxSpinnerService } from 'ngx-spinner';
 })
 export class TX_NulltrustComponent implements OnInit {
 
-  myForm: FormGroup;
-
   private currentRepresented;
   private Transaction;
   private currentId;
   private errorMessage;
 
-  representedToNull = new FormControl('', Validators.required);
-  transactionId = new FormControl('', Validators.required);
-  timestamp = new FormControl('', Validators.required);
 
-
-  constructor(private serviceTX_Nulltrust: TX_NulltrustService, private loadService: NgxSpinnerService, private identityService:IdentityService, fb: FormBuilder) {
-    this.myForm = fb.group({
-      representedToNull: this.representedToNull,
-      transactionId: this.transactionId,
-      timestamp: this.timestamp
-    });
-  };
+  constructor(private serviceTX_Nulltrust: TX_NulltrustService, private loadService: NgxSpinnerService, private identityService:IdentityService) {};
 
   ngOnInit(): void {
     this.loadRepresented();
   }
 
   loadRepresented(): Promise<any>{
-    return this.identityService.getCurrentParticipant().toPromise()
-    .then((result)=>this.currentRepresented = result)
-    .catch((error) => {
-      if (error === 'Server error') {
-        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else {
-        this.errorMessage = error;
-      }
-    });
-  }
-  
-  addTransaction(form: any): Promise<any> {
     this.loadService.show();
-    this.Transaction = {
-      $class: 'org.agora.net.TX_Nulltrust',
-      'representedToNull': this.representedToNull.value,
-      'transactionId': this.transactionId.value,
-      'timestamp': this.timestamp.value
-    };
-
-    this.myForm.setValue({
-      'representedToNull': null,
-      'transactionId': null,
-      'timestamp': null
-    });
-
-    return this.serviceTX_Nulltrust.addTransaction(this.Transaction)
-    .toPromise()
-    .then(() => {
-      this.errorMessage = null;
-      this.myForm.setValue({
-        'representedToNull': null,
-        'transactionId': null,
-        'timestamp': null
-      });
+    return this.identityService.getCurrentParticipant().toPromise()
+    .then((result)=>{
+      this.currentRepresented = result
       this.loadService.hide();
     })
     .catch((error) => {
@@ -95,56 +52,32 @@ export class TX_NulltrustComponent implements OnInit {
       } else {
         this.errorMessage = error;
       }
+      this.loadService.hide();
     });
   }
-  getForm(id: any): Promise<any> {
-    return this.serviceTX_Nulltrust.getTransaction(id)
+  
+  addTransaction(): Promise<any> {
+    this.loadService.show();
+    this.Transaction = {
+      $class: 'org.agora.net.TX_Nulltrust',
+      'representedToNull': this.currentRepresented,
+      'transactionId': null,
+      'timestamp': null
+    };
+
+    return this.serviceTX_Nulltrust.addTransaction(this.Transaction)
     .toPromise()
-    .then((result) => {
+    .then(() => {
       this.errorMessage = null;
-      const formObject = {
-        'representedToNull': null,
-        'transactionId': null,
-        'timestamp': null
-      };
-
-      if (result.representedToNull) {
-        formObject.representedToNull = result.representedToNull;
-      } else {
-        formObject.representedToNull = null;
-      }
-
-      if (result.transactionId) {
-        formObject.transactionId = result.transactionId;
-      } else {
-        formObject.transactionId = null;
-      }
-
-      if (result.timestamp) {
-        formObject.timestamp = result.timestamp;
-      } else {
-        formObject.timestamp = null;
-      }
-
-      this.myForm.setValue(formObject);
-
+      this.loadService.hide();
     })
     .catch((error) => {
       if (error === 'Server error') {
         this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else if (error === '404 - Not Found') {
-      this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
       } else {
         this.errorMessage = error;
       }
-    });
-  }
-
-  resetForm(): void {
-    this.myForm.setValue({
-      'representedToNull': this.currentRepresented,
-      'transactionId': null,
-      'timestamp': null
+      this.loadService.hide();
     });
   }
 }

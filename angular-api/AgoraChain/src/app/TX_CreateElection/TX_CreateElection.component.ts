@@ -38,26 +38,18 @@ export class TX_CreateElectionComponent implements OnInit {
   private currentLegislator;
   private uniqueID;
 
-  electionID = new FormControl('', Validators.required);
   description = new FormControl('', Validators.required);
   options = new FormArray([
-    new FormControl('', Validators.required)]);
+    new FormControl('')]);
   category = new FormControl('', Validators.required);
-  owner = new FormControl('', Validators.required);
-  transactionId = new FormControl('', Validators.required);
-  timestamp = new FormControl('', Validators.required);
-
+  
 
   constructor(private serviceTX_CreateElection: TX_CreateElectionService, private fb: FormBuilder, private serviceIdentity: IdentityService,
     private serviceElection: DataService<Election>, private spinnerService: NgxSpinnerService) {
     this.myForm = fb.group({
-      electionID: this.electionID,
       description: this.description,
       options: this.fb.array([ this.createOption() ]),
-      category: this.category,
-      owner: this.owner,
-      transactionId: this.transactionId,
-      timestamp: this.timestamp
+      category: this.category
     });
     
   };
@@ -87,6 +79,7 @@ export class TX_CreateElectionComponent implements OnInit {
       } else {
         this.errorMessage = error;
       }
+      this.spinnerService.hide();
     });
   }
 
@@ -104,6 +97,7 @@ export class TX_CreateElectionComponent implements OnInit {
       } else {
         this.errorMessage = error;
       }
+      this.spinnerService.hide();
     });
   }
 
@@ -126,6 +120,7 @@ export class TX_CreateElectionComponent implements OnInit {
       } else {
         this.errorMessage = error;
       }
+      this.spinnerService.hide();
     });
   }
 
@@ -157,91 +152,20 @@ export class TX_CreateElectionComponent implements OnInit {
       'options': optionsList,
       'category': this.category.value,
       'owner': this.currentLegislator,
-      'transactionId': this.transactionId.value,
-      'timestamp': this.timestamp.value
+      'transactionId': null,
+      'timestamp': null
     };
-
-    this.resetForm();
 
     return this.serviceTX_CreateElection.addTransaction(this.Transaction)
     .toPromise()
     .then(() => {
       this.errorMessage = null;
+      this.resetForm();
       this.spinnerService.hide();
     })
     .catch((error) => {
       if (error === 'Server error') {
         this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else {
-        this.errorMessage = error;
-      }
-    });
-  }
-
-  getForm(id: any): Promise<any> {
-    return this.serviceTX_CreateElection.getTransaction(id)
-    .toPromise()
-    .then((result) => {
-      this.errorMessage = null;
-      const formObject = {
-        'electionID': null,
-        'description': null,
-        'options': null,
-        'category': null,
-        'owner': null,
-        'transactionId': null,
-        'timestamp': null
-      };
-
-      if (result.electionID) {
-        formObject.electionID = result.electionID;
-      } else {
-        formObject.electionID = null;
-      }
-
-      if (result.description) {
-        formObject.description = result.description;
-      } else {
-        formObject.description = null;
-      }
-      if (result.options) {
-        formObject.options = result.options;
-      } else {
-        formObject.options = null;
-      }
-
-      if (result.category) {
-        formObject.category = result.category;
-      } else {
-        formObject.category = null;
-      }
-
-      if (result.owner) {
-        formObject.owner = result.owner;
-      } else {
-        formObject.owner = null;
-      }
-
-      if (result.transactionId) {
-        formObject.transactionId = result.transactionId;
-      } else {
-        formObject.transactionId = null;
-      }
-
-      if (result.timestamp) {
-        formObject.timestamp = result.timestamp;
-      } else {
-        formObject.timestamp = null;
-      }
-
-      this.myForm.setValue(formObject);
-
-    })
-    .catch((error) => {
-      if (error === 'Server error') {
-        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else if (error === '404 - Not Found') {
-      this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
       } else {
         this.errorMessage = error;
       }
