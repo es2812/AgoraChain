@@ -35,7 +35,10 @@
                 <label for="name">Name</label>
   
                 
-                  <input [ngModel]="name"formControlName="name" type="text" class="form-control">
+                  <input [ngModel]="name"formControlName="name" type="text" class="form-control" required>
+                  <div *ngIf="name.invalid" class="validation-info">
+                    Required
+                  </div>
                 
   
               </div>
@@ -44,15 +47,18 @@
                 <label for="lastname">Last Name</label>
   
                 
-                  <input [ngModel]="lastname"formControlName="lastname" type="text" class="form-control">
-  
+                  <input [ngModel]="lastname"formControlName="lastname" type="text" class="form-control" required>
+                  <div *ngIf="lastname.invalid" class="validation-info">
+                    Required
+                  </div>
+
               </div>
   
   
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            <button (click)="updateParticipant(myForm)" type="submit" class="btn btn-success" data-dismiss="modal">Submit</button>
+            <button (click)="updateParticipant(myForm)" type="submit" class="btn btn-success" data-dismiss="modal" [disabled]="name.invalid || lastname.invalid">Submit</button>
           </div>
         </form>
       </div>
