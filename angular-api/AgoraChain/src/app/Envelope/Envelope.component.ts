@@ -16,6 +16,9 @@ import { Component, OnInit, Input } from '@angular/core';
 import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
 import { EnvelopeService } from './Envelope.service';
 import 'rxjs/add/operator/toPromise';
+import { NgxSpinnerService } from 'ngx-spinner';
+import { DataService } from 'app/data.service';
+import { Election, Vote } from 'app/org.agora.net';
 
 @Component({
   selector: 'app-envelope',
@@ -25,25 +28,15 @@ import 'rxjs/add/operator/toPromise';
 })
 export class EnvelopeComponent implements OnInit {
 
-  myForm: FormGroup;
 
-  private allAssets;
+  private allAssets = [];
   private asset;
   private currentId;
   private errorMessage;
 
-  envelopeID = new FormControl('', Validators.required);
-  voter = new FormControl('', Validators.required);
-  election = new FormControl('', Validators.required);
-  vote = new FormControl('', Validators.required);
 
-  constructor(public serviceEnvelope: EnvelopeService, fb: FormBuilder) {
-    this.myForm = fb.group({
-      envelopeID: this.envelopeID,
-      voter: this.voter,
-      election: this.election,
-      vote: this.vote
-    });
+  constructor(public serviceEnvelope: EnvelopeService, private serviceSpinner: NgxSpinnerService, private serviceElection: DataService<Election>, private serviceVote: DataService<Vote>) {
+
   };
 
   ngOnInit(): void {
@@ -51,15 +44,18 @@ export class EnvelopeComponent implements OnInit {
   }
 
   loadAll(): Promise<any> {
+    this.serviceSpinner.show();
     const tempList = [];
     return this.serviceEnvelope.getAll()
     .toPromise()
     .then((result) => {
-      this.errorMessage = null;
       result.forEach(asset => {
         tempList.push(asset);
       });
       this.allAssets = tempList;
+      this.loadElections();
+      this.loadVotes();
+      this.serviceSpinner.hide();
     })
     .catch((error) => {
       if (error === 'Server error') {
@@ -69,179 +65,43 @@ export class EnvelopeComponent implements OnInit {
       } else {
         this.errorMessage = error;
       }
+      this.serviceSpinner.hide();
     });
   }
 
-	/**
-   * Event handler for changing the checked state of a checkbox (handles array enumeration values)
-   * @param {String} name - the name of the asset field to update
-   * @param {any} value - the enumeration value for which to toggle the checked state
-   */
-  changeArrayValue(name: string, value: any): void {
-    const index = this[name].value.indexOf(value);
-    if (index === -1) {
-      this[name].value.push(value);
-    } else {
-      this[name].value.splice(index, 1);
-    }
-  }
-
-	/**
-	 * Checkbox helper, determining whether an enumeration value should be selected or not (for array enumeration values
-   * only). This is used for checkboxes in the asset updateDialog.
-   * @param {String} name - the name of the asset field to check
-   * @param {any} value - the enumeration value to check for
-   * @return {Boolean} whether the specified asset field contains the provided value
-   */
-  hasArrayValue(name: string, value: any): boolean {
-    return this[name].value.indexOf(value) !== -1;
-  }
-
-  addAsset(form: any): Promise<any> {
-    this.asset = {
-      $class: 'org.agora.net.Envelope',
-      'envelopeID': this.envelopeID.value,
-      'voter': this.voter.value,
-      'election': this.election.value,
-      'vote': this.vote.value
-    };
-
-    this.myForm.setValue({
-      'envelopeID': null,
-      'voter': null,
-      'election': null,
-      'vote': null
-    });
-
-    return this.serviceEnvelope.addAsset(this.asset)
+  loadElections(): Promise<any> {
+    this.serviceSpinner.show();
+    return this.serviceElection.getAll('Election')
     .toPromise()
-    .then(() => {
-      this.errorMessage = null;
-      this.myForm.setValue({
-        'envelopeID': null,
-        'voter': null,
-        'election': null,
-        'vote': null
-      });
-      this.loadAll();
+    .then((result)=> {
+      this.allAssets.forEach((env)=>{
+        let electionId = env.election.toString().split('#')[1];
+        let election = result.filter(r=>r.electionID == electionId)[0];
+        if(election.closed == true){
+          env.election = null;
+        }
+        else {
+          env.election = election;
+        }
+      })
+      this.allAssets = this.allAssets.filter((e)=> e.election != null); //we remove the envelopes whose elections are closed
+      this.serviceSpinner.hide();
     })
-    .catch((error) => {
-      if (error === 'Server error') {
-          this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else {
-          this.errorMessage = error;
-      }
-    });
   }
 
 
-  updateAsset(form: any): Promise<any> {
-    this.asset = {
-      $class: 'org.agora.net.Envelope',
-      'voter': this.voter.value,
-      'election': this.election.value,
-      'vote': this.vote.value
-    };
-
-    return this.serviceEnvelope.updateAsset(form.get('envelopeID').value, this.asset)
-    .toPromise()
-    .then(() => {
+  loadVotes(): Promise<any> {
+    this.serviceSpinner.show();
+    return this.serviceVote.getAll('Vote').toPromise()
+    .then((result)=>{
       this.errorMessage = null;
-      this.loadAll();
+      this.allAssets.forEach((env)=>{
+        if(env.vote != null){
+          let voteId = env.vote.toString().split('#')[1];
+          env.vote = result.filter(v=>v.voteID == voteId)[0];
+        }
+      })
+      this.serviceSpinner.hide();
     })
-    .catch((error) => {
-      if (error === 'Server error') {
-        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else if (error === '404 - Not Found') {
-        this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
-      } else {
-        this.errorMessage = error;
-      }
-    });
   }
-
-
-  deleteAsset(): Promise<any> {
-
-    return this.serviceEnvelope.deleteAsset(this.currentId)
-    .toPromise()
-    .then(() => {
-      this.errorMessage = null;
-      this.loadAll();
-    })
-    .catch((error) => {
-      if (error === 'Server error') {
-        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else if (error === '404 - Not Found') {
-        this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
-      } else {
-        this.errorMessage = error;
-      }
-    });
-  }
-
-  setId(id: any): void {
-    this.currentId = id;
-  }
-
-  getForm(id: any): Promise<any> {
-
-    return this.serviceEnvelope.getAsset(id)
-    .toPromise()
-    .then((result) => {
-      this.errorMessage = null;
-      const formObject = {
-        'envelopeID': null,
-        'voter': null,
-        'election': null,
-        'vote': null
-      };
-
-      if (result.envelopeID) {
-        formObject.envelopeID = result.envelopeID;
-      } else {
-        formObject.envelopeID = null;
-      }
-
-      if (result.voter) {
-        formObject.voter = result.voter;
-      } else {
-        formObject.voter = null;
-      }
-
-      if (result.election) {
-        formObject.election = result.election;
-      } else {
-        formObject.election = null;
-      }
-
-      if (result.vote) {
-        formObject.vote = result.vote;
-      } else {
-        formObject.vote = null;
-      }
-
-      this.myForm.setValue(formObject);
-
-    })
-    .catch((error) => {
-      if (error === 'Server error') {
-        this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-      } else if (error === '404 - Not Found') {
-        this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
-      } else {
-        this.errorMessage = error;
-      }
-    });
-  }
-
-  resetForm(): void {
-    this.myForm.setValue({
-      'envelopeID': null,
-      'voter': null,
-      'election': null,
-      'vote': null
-      });
-  }
-
 }
