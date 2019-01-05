@@ -10,11 +10,10 @@ The recommended way of running the project is:
 
 1. Follow the [Installing the development environment tutorial](https://hyperledger.github.io/composer/latest/installing/development-tools.html) in the Hyperledger Composer website. 
 2. Run `npm install -g passport-github`
-3. [`deploy.sh`](https://github.com/es2812/AgoraChain/tree/master/composer-env/agora-network/dist/deploy.sh) installs and starts the `.bna` file of the specified version (1.0.1 recommended) and creates some sample participants and cards.
-4. [`startRESTServer.sh`](https://github.com/es2812/AgoraChain/tree/master/composer-env/agora-network/dist/startRESTServer.sh) deploys a rest server through which it's possible to connect to the network vía curl (or as is recommended, thorugh the angular API).
-5. Navigate to the [`angular-api/AgoraChain`](https://github.com/es2812/AgoraChain/tree/master/angular-api/AgoraChain/) folder and execute the command `npm start` to deploy the Angular API (usually on `localhost:4200`).
-6. The Angular API requires you to Log In with Github (this might be changed at some point to a more universal OAuth service) to allow you access to the identity manager.
-7. Within the identity manager you can import one of the cards created in step 2, which correspond to each of the participants currently existing in the network. Each identity will give you a set of allowed actions over the network.
+3. [`start.sh`](https://github.com/es2812/AgoraChain/tree/master/composer-env/agora-network/dist/start.sh) installs and starts the `.bna` file of the specified version (1.0.1 recommended) and creates some sample participants and cards, starting the REST server in `localhost:3000`.
+4. Navigate to the [`angular-api/AgoraChain`](https://github.com/es2812/AgoraChain/tree/master/angular-api/AgoraChain/) folder and execute the command `npm start` to deploy the Angular API (usually on `localhost:4200`).
+5. The Angular API requires you to Log In with Github (this might be changed at some point to a more universal OAuth service) to allow you access to the identity manager.
+6. Within the identity manager you can import one of the cards created in step 2, which correspond to each of the participants currently existing in the network. Each identity will give you a set of allowed actions over the network.
 
 You can undeploy and kill the network with the [`stop.sh`](https://github.com/es2812/AgoraChain/tree/master/composer-env/agora-network/dist/stop.sh) script and kill the REST and Angular servers simply using Ctrl+C on the respective terminals.
 
