@@ -28,7 +28,7 @@ import { NgxSpinnerService } from 'ngx-spinner';
 })
 export class VoteComponent implements OnInit {
 
-  private allAssets;
+  private allAssets = [];
   private asset;
   private currentId;
   private errorMessage;

@@ -51,9 +51,9 @@
                   <strong>Description:</strong>
                   {{asset.election.description}}
                 </td>
-
+                
                 <td class="asset-properties" *ngIf="asset.vote == null">This envelope hasn't been used yet</td>
-                <td class="asset-properties" *ngIf="asset.vote.choice == ''">Blank vote</td>
+                <td class="asset-properties" *ngIf="asset.vote != null && asset.vote.choice == ''">Blank vote</td>
                 <td class="asset-properties" *ngIf="asset.vote != null && asset.vote.choice !=''">{{asset.vote.choice}}</td>
             
           </tr>
