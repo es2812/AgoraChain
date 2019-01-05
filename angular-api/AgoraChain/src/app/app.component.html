@@ -19,11 +19,7 @@
         <p class="navbar-brand">AgoraChain</p>
         <div class="identity">
           <div class="row">
-            <a *ngIf="currentParticipant && currentType=='Citizen'" class="participantText" [routerLink]="['/CurrentCitizen']">Participant: {{currentParticipant.name}} {{currentParticipant.lastname}} ({{currentType}})</a>
-
-            <a *ngIf="currentParticipant && currentType=='Politician'" class="participantText" [routerLink]="['/CurrentPolitician']">Participant: {{currentParticipant.name}} {{currentParticipant.lastname}} ({{currentType}})</a>
-
-            <a *ngIf="currentParticipant && currentType=='Legislator'" class="participantText" [routerLink]="['/CurrentLegislator']">Participant: {{currentParticipant.name}} {{currentParticipant.lastname}} ({{currentType}})</a>
+            <a *ngIf="currentParticipant" class="participantText" [routerLink]="['/Current']">Participant: {{currentParticipant.name}} {{currentParticipant.lastname}} ({{currentType}})</a>
           </div>
           <div class="row">
             <a class="identityChange" *ngIf="!currentParticipant" [routerLink]="['/identity']">Set identity</a>

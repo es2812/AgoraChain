@@ -4,6 +4,7 @@ import { IdentityService } from './identity.service';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 import { Card } from '../card';
 import { Router } from '@angular/router';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 @Component({templateUrl: 'identity.component.html',
             styleUrls: ['identity.component.css']})
@@ -11,12 +12,12 @@ export class IdentityComponent implements OnInit {
 
     importForm: FormGroup;
 
-    private allCards:Array<Card>;
+    private allCards:Array<Card> = [];
     private errorMessage:string;
     allowImport:boolean = false;
 
-    constructor(private identityService:IdentityService, private formBuilder: FormBuilder, private router: Router) {
-        this.allCards = [];
+    constructor(private identityService:IdentityService, private formBuilder: FormBuilder, private router: Router, private spinnerService: NgxSpinnerService) {
+
     }
 
     ngOnInit():void {
@@ -27,6 +28,7 @@ export class IdentityComponent implements OnInit {
     }
 
     loadIdentities(): Promise<any> {
+        this.spinnerService.show();
         this.allCards = [];
         return this.identityService.getIdentities().toPromise().then((data) => {
             this.errorMessage = null;
@@ -36,6 +38,8 @@ export class IdentityComponent implements OnInit {
                 card.default = c.default;
                 this.allCards.push(card);
             });
+
+            this.spinnerService.hide();
           })
           .catch((error) => {
             if (error === 'Server error') {
@@ -44,6 +48,7 @@ export class IdentityComponent implements OnInit {
               this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
               this.errorMessage = error;
             }
+            this.spinnerService.hide();
           });
     }
 
@@ -52,12 +57,15 @@ export class IdentityComponent implements OnInit {
     }
 
     selectCard(card){
+        this.spinnerService.show();
 
         this.allCards.forEach(c => {
             c.default = false;
         });
 
         card.default = true;
+
+        this.spinnerService.hide();
     }
 
     fileToUpload: File = null;
@@ -74,27 +82,29 @@ export class IdentityComponent implements OnInit {
             return;
         }
         this.identityService.importIdentity(this.fileToUpload).toPromise()
-          .catch((error) => {
+            .then(()=>{
+                window.location.reload();
+            })
+            .catch((error) => {
             if (error === 'Server error') {
               this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
             } else if (error === '404 - Not Found') {
               this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
               this.errorMessage = error;
             }
+            this.spinnerService.hide();
           });
-        window.location.reload();
     }
 
-    useIdentity(): Promise<any> {
+    useIdentity(): Promise<any> {    
+        this.spinnerService.show();    
         let selected = this.allCards.filter(c=>c.default==true)[0];
-
         return this.identityService.useIdentity(selected).toPromise()
         .then(
-            ()=> {
-                localStorage.setItem('currentIdentity',selected.name);
-                window.location.reload();
-            }
-        )
+        ()=> {
+            localStorage.setItem('currentIdentity',selected.name);
+            this.navigateToIdentity();
+        })
         .catch((error) => {
             if (error === 'Server error') {
               this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
@@ -102,6 +112,28 @@ export class IdentityComponent implements OnInit {
               this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
               this.errorMessage = error;
             }
+            this.spinnerService.hide();
           });
+    }
+
+    navigateToIdentity(): Promise<any> { 
+        return this.identityService.getCurrentParticipant().toPromise()
+            .then(
+            (data)=>{
+                let type = data.split('.')[3].split('#')[0];
+                localStorage.setItem('currentType',type);
+                this.router.navigateByUrl('/Current');
+                window.location.reload();
+                this.spinnerService.hide();
+            })
+            .catch((error) => {
+                if (error === 'Server error') {
+                  this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
+                } else if (error === '404 - Not Found') {
+                  this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
+                  this.errorMessage = error;
+                }
+                this.spinnerService.hide();
+              });
     }
 }

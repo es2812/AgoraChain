@@ -17,6 +17,7 @@ import { IdentityService } from './identity/identity.service'
 import $ from 'jquery';
 import { DataService } from './data.service';
 import { Person } from './org.agora.net';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 @Component({
   selector: 'app-root',
@@ -32,7 +33,7 @@ export class AppComponent implements OnInit {
   currentType:string;
   participantLink:string;
 
-  constructor(private identityService:IdentityService, private dataService: DataService<Person>){}
+  constructor(private identityService:IdentityService, private dataService: DataService<Person>, private spinnerService: NgxSpinnerService){}
 
 
   ngOnInit() {
@@ -56,6 +57,7 @@ export class AppComponent implements OnInit {
   }
 
   getIdentity():Promise<any>{
+    this.spinnerService.show();
     return this.identityService.getCurrentParticipant().toPromise()
     .then(
       (data)=>{
@@ -69,7 +71,7 @@ export class AppComponent implements OnInit {
         .then( (p) => 
         {
           this.currentParticipant = p;
-          localStorage.setItem('currentType',this.currentType);
+          this.spinnerService.hide();
         }
         )
         .catch((error) => {
@@ -79,6 +81,7 @@ export class AppComponent implements OnInit {
             this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
             this.errorMessage = error;
           }
+          this.spinnerService.hide();
       })
     })
     .catch((error) => {
@@ -88,6 +91,7 @@ export class AppComponent implements OnInit {
         this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
         this.errorMessage = error;
       }
+      this.spinnerService.hide();
     });
   }
 }

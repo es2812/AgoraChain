@@ -31,6 +31,7 @@ import { VoteComponent } from './Vote/Vote.component';
 import { EnvelopeComponent } from './Envelope/Envelope.component';
 import { RestrictionComponent } from './Restriction/Restriction.component';
 
+import { CurrentComponent } from './Current/Current.component';
 import { CurrentCitizenComponent } from './Current/Citizen.component';
 import { CurrentPoliticianComponent } from './Current/Politician.component';
 import { CurrentLegislatorComponent } from './Current/Legislator.component';
@@ -61,6 +62,7 @@ import { IdentityService } from './identity/identity.service';
     VoteComponent,
     EnvelopeComponent,
     RestrictionComponent,
+    CurrentComponent,
     CurrentCitizenComponent,
     CurrentPoliticianComponent,
     CurrentLegislatorComponent,
