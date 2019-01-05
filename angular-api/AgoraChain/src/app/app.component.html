@@ -19,11 +19,11 @@
         <p class="navbar-brand">AgoraChain</p>
         <div class="identity">
           <div class="row">
-            <a *ngIf="currentParticipant && currentType=='Citizen'" class="participantText" [routerLink]="['/CurrentCitizen']">Participant: {{currentParticipant.name}} {{currentParticipant.lastname}}</a>
+            <a *ngIf="currentParticipant && currentType=='Citizen'" class="participantText" [routerLink]="['/CurrentCitizen']">Participant: {{currentParticipant.name}} {{currentParticipant.lastname}} ({{currentType}})</a>
 
-            <a *ngIf="currentParticipant && currentType=='Politician'" class="participantText" [routerLink]="['/CurrentPolitician']">Participant: {{currentParticipant.name}} {{currentParticipant.lastname}}</a>
+            <a *ngIf="currentParticipant && currentType=='Politician'" class="participantText" [routerLink]="['/CurrentPolitician']">Participant: {{currentParticipant.name}} {{currentParticipant.lastname}} ({{currentType}})</a>
 
-            <a *ngIf="currentParticipant && currentType=='Legislator'" class="participantText" [routerLink]="['/CurrentLegislator']">Participant: {{currentParticipant.name}} {{currentParticipant.lastname}}</a>
+            <a *ngIf="currentParticipant && currentType=='Legislator'" class="participantText" [routerLink]="['/CurrentLegislator']">Participant: {{currentParticipant.name}} {{currentParticipant.lastname}} ({{currentType}})</a>
           </div>
           <div class="row">
             <a class="identityChange" *ngIf="!currentParticipant" [routerLink]="['/identity']">Set identity</a>
@@ -31,7 +31,8 @@
           </div>
         </div>
       </div>
-      <ul class="nav navbar-nav">
+
+      <ul class="nav navbar-nav" *ngIf="currentType">
         <li class="dropdown active">
             <a class="dropdown-toggle" data-toggle="dropdown">Assets</a>
             <ul class="dropdown-menu">
@@ -40,9 +41,9 @@
               
               <li><a [routerLink]="['/Vote']">Votes</a></li>
               
-              <li><a [routerLink]="['/Envelope']">Envelopes</a></li>
+              <li *ngIf="currentType=='Citizen'"><a [routerLink]="['/Envelope']">Envelopes</a></li>
               
-              <li><a [routerLink]="['/Restriction']">Restrictions</a></li>
+              <li *ngIf="currentType=='Citizen'"><a [routerLink]="['/Restriction']">Restrictions</a></li>
               
             </ul>
         </li>
@@ -57,33 +58,44 @@
           </ul>
       </li>
       <li class="dropdown active">
-        <a class="dropdown-toggle" data-toggle="dropdown">Transactions</a>
+        <a class="dropdown-toggle" data-toggle="dropdown" *ngIf="currentType=='Citizen'">Trust Transactions</a>
         <ul class="dropdown-menu">
           
-          <li><a [routerLink]="['/TX_Trust']">TX_Trust</a></li>
+          <li *ngIf="currentType=='Citizen'"><a [routerLink]="['/TX_Trust']">TX_Trust</a></li>
           
-          <li><a [routerLink]="['/TX_AddRestriction']">TX_AddRestriction</a></li>
+          <li *ngIf="currentType=='Citizen'"><a [routerLink]="['/TX_Nulltrust']">TX_Nulltrust</a></li>
+
+          <li *ngIf="currentType=='Citizen'"><a [routerLink]="['/TX_AddRestriction']">TX_AddRestriction</a></li>
           
-          <li><a [routerLink]="['/TX_RemoveRestriction']">TX_RemoveRestriction</a></li>
+          <li *ngIf="currentType=='Citizen'"><a [routerLink]="['/TX_RemoveRestriction']">TX_RemoveRestriction</a></li>
+        </ul>
+      </li>
+      <li class="dropdown active">
+        <a class="dropdown-toggle" data-toggle="dropdown" *ngIf="currentType=='Legislator'">Election Transactions</a>
+        <ul class="dropdown-menu">
           
-          <li><a [routerLink]="['/TX_Nulltrust']">TX_Nulltrust</a></li>
+          <li *ngIf="currentType=='Legislator'"><a [routerLink]="['/TX_CreateElection']">TX_CreateElection</a></li>
           
-          <li><a [routerLink]="['/TX_CreateElection']">TX_CreateElection</a></li>
+          <li *ngIf="currentType=='Legislator'"><a [routerLink]="['/TX_OpenElection']">TX_OpenElection</a></li>
           
-          <li><a [routerLink]="['/TX_OpenElection']">TX_OpenElection</a></li>
-          
-          <li><a [routerLink]="['/TX_CloseElection']">TX_CloseElection</a></li>
-          
-          <li><a [routerLink]="['/TX_PublicVote']">TX_PublicVote</a></li>
-          
-          <li><a [routerLink]="['/TX_PrepareEnvelope']">TX_PrepareEnvelope</a></li>
-          
-          <li><a [routerLink]="['/TX_SecretVote']">TX_SecretVote</a></li>
+          <li *ngIf="currentType=='Legislator'"><a [routerLink]="['/TX_CloseElection']">TX_CloseElection</a></li>
           
         </ul>
-    </li>
-      </ul>
-    </div>
-  </nav>
+      </li>
+      
+      <li class="dropdown active">
+          <a class="dropdown-toggle" data-toggle="dropdown" *ngIf="currentType!='Legislator'">Vote Transactions</a>
+          <ul class="dropdown-menu">
+
+            <li *ngIf="currentType=='Politician'"><a [routerLink]="['/TX_PublicVote']">TX_PublicVote</a></li>
+          
+            <li *ngIf="currentType=='Citizen'"><a [routerLink]="['/TX_PrepareEnvelope']">TX_PrepareEnvelope</a></li>
+        
+            <li *ngIf="currentType=='Citizen'"><a [routerLink]="['/TX_SecretVote']">TX_SecretVote</a></li>
+          </ul>
+      </li>
+    </ul>
+  </div>
+</nav>
   
-  <router-outlet></router-outlet>
+<router-outlet></router-outlet>
