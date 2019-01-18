@@ -14,20 +14,33 @@
 
 import { Injectable } from '@angular/core';
 import { Router, CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import { IdentityService } from 'app/identity/identity.service';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
 
-    constructor(private router: Router) { }
+    constructor(private router: Router, private serviceIdentity: IdentityService, private serviceSpinner: NgxSpinnerService) { }
 
-    canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
-        if (localStorage.getItem('currentUser')) {
-            // logged in and has identity so return true
+    canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<any> {
+        this.serviceSpinner.show()
+        return this.serviceIdentity.getIdentities().toPromise()
+        .then((d)=>{
+            this.serviceSpinner.hide()
+            localStorage.setItem('loggedIn','true');
             return true;
         }
-
-        // not logged in so redirect to login page with the return url
-        this.router.navigate(['/login']);
-        return false;
+        )
+        .catch((error)=>{
+            console.log(error.statusText)
+            if(error.statusText=='Unauthorized'){
+                this.serviceSpinner.hide();
+                localStorage.setItem('loggedIn','false');
+                this.router.navigate(['/']);
+            }
+            else{
+                this.serviceSpinner.hide()
+            }
+        })
     }
 }

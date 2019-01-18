@@ -18,7 +18,7 @@ import { HttpModule } from '@angular/http';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgxSpinnerModule } from 'ngx-spinner';
-import { AutosizeModule } from 'ngx-autosize';
+import { Autosize } from 'ng-autosize';
 import { AppRoutingModule } from './app-routing.module';
 import { DataService } from './data.service';
 import { AppComponent } from './app.component';
@@ -51,12 +51,16 @@ import { TX_PublicVoteComponent } from './TX_PublicVote/TX_PublicVote.component'
 import { TX_PrepareEnvelopeComponent } from './TX_PrepareEnvelope/TX_PrepareEnvelope.component';
 import { TX_SecretVoteComponent } from './TX_SecretVote/TX_SecretVote.component';
 import { IdentityService } from './identity/identity.service';
+import { ErrorComponent } from './home/error.component';
+import { LogOutComponent } from './home/logout.component';
 
   @NgModule({
   declarations: [
     AppComponent,
     HomeComponent,
     SuccessComponent,
+    ErrorComponent,
+    LogOutComponent,
     IdentityComponent,
     ElectionComponent,
     VoteComponent,
@@ -77,14 +81,14 @@ import { IdentityService } from './identity/identity.service';
     TX_CloseElectionComponent,
     TX_PublicVoteComponent,
     TX_PrepareEnvelopeComponent,
-    TX_SecretVoteComponent
+    TX_SecretVoteComponent,
+    Autosize
   ],
   imports: [
     BrowserModule,
     FormsModule,
     ReactiveFormsModule,
     NgxSpinnerModule,
-    AutosizeModule,
     HttpModule,
     HttpClientModule,
     AppRoutingModule

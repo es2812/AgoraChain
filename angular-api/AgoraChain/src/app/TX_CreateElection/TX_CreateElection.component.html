@@ -24,7 +24,7 @@
               <div class="form-group text-left">
                 <label for="description">Description</label>
                 
-                  <textarea autosize [minRows]="1" formControlName="description" class="form-control" required></textarea>
+                  <textarea autosize [minHeight]="60" formControlName="description" class="form-control" required></textarea>
                   <div *ngIf="description.invalid" class="validation-info">
                     Required
                   </div>

@@ -12,16 +12,46 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { NgxSpinnerService } from 'ngx-spinner';
+import { IdentityComponent } from 'app/identity';
+import { IdentityService } from 'app/identity/identity.service';
+import { logging } from 'selenium-webdriver';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit{
 
-  constructor () {
+  constructor (private router:Router, private serviceSpinner:NgxSpinnerService, private serviceIdentity:IdentityService) {
   }
   
+  ngOnInit(){
+    this.serviceSpinner.show()
+    return this.serviceIdentity.getIdentities().toPromise()
+      .then((d)=>{
+          this.serviceSpinner.hide()
+          localStorage.setItem('loggedIn','true');
+          this.router.navigate(['/identity']);
+      })
+      .catch((error)=>{
+          console.log(error.statusText)
+          if(error.statusText=='Unauthorized'){
+              this.serviceSpinner.hide();
+              localStorage.setItem('loggedIn','false');
+          }
+          else{
+              this.serviceSpinner.hide()
+          }
+    })
+  }
+
+  login(){
+    this.serviceSpinner.show();
+    window.location.href = "http://20.0.0.99:3000/auth/github";
+    this.serviceSpinner.hide();
+  }
 }

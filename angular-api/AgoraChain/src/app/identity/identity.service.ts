@@ -25,7 +25,7 @@ export class IdentityService {
     options = {}
 
     getIdentities(): Observable<any>{
-        let requestURL = 'http://localhost:3000/api/wallet';
+        let requestURL = 'http://20.0.0.99:3000/api/wallet';
         this.options = {withCredentials: true, headers: new HttpHeaders({'Accept':'application/json'})}
         return this.http.get(requestURL,this.options);
     }
@@ -33,19 +33,19 @@ export class IdentityService {
     importIdentity(file:File): Observable<any>{
         const formData = new FormData();
         formData.append('card',file);
-        let requestURL = 'http://localhost:3000/api/wallet/import';
+        let requestURL = 'http://20.0.0.99:3000/api/wallet/import';
         this.options = {withCredentials: true, headers: new HttpHeaders({})};
         return this.http.post(requestURL,formData,this.options);
     }
 
     useIdentity(card:Card): Observable<any>{
-        let requestURL = 'http://localhost:3000/api/wallet/'+card.name+'/setDefault';
+        let requestURL = 'http://20.0.0.99:3000/api/wallet/'+card.name+'/setDefault';
         this.options = {withCredentials: true, headers: new HttpHeaders({'Content-Type':'application/json'})};
         return this.http.post(requestURL,card.card,this.options);
     }
 
     getCurrentParticipant(): Observable<any>{
-        let requestURL = 'http://localhost:3000/api/system/ping';
+        let requestURL = 'http://20.0.0.99:3000/api/system/ping';
         this.options = {withCredentials: true};
         return this.http.get(requestURL,this.options).map((data)=>data['participant']);
     }

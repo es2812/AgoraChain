@@ -26,7 +26,7 @@ export class SuccessComponent implements OnInit{
   }
 
   ngOnInit(){
-      localStorage.setItem('currentUser','yes');
+      localStorage.setItem('loggedIn','true');
       this.router.navigate(['/identity']);
   }
   

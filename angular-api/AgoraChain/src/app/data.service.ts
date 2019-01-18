@@ -26,11 +26,11 @@ export class DataService<Type> {
     private NS: string;
 
     constructor(private http: Http) {
-        this.actionUrl = 'http://localhost:3000/api/';
+        this.actionUrl = 'http://20.0.0.99:3000/api/';
         this.headers = new Headers();
         this.headers.append('Content-Type', 'application/json');
         this.headers.append('Accept', 'application/json');
-        this.NS = 'org.agora.net.';
+        this.NS = '';
     }
 
     public getAll(ns: string): Observable<Type[]> {

@@ -26,14 +26,20 @@ import { NgxSpinnerService } from 'ngx-spinner';
 })
 export class AppComponent implements OnInit {
   title = 'app works!';
-
-  currentIdentity:string;
-  currentParticipant:Person;
+  currentParticipant:Person = null;
   errorMessage:string;
-  currentType:string;
-  participantLink:string;
+  currentType:string = '';
+  participantLink:string = '';
+  loggedIn:boolean = false;
 
-  constructor(private identityService:IdentityService, private dataService: DataService<Person>, private spinnerService: NgxSpinnerService){}
+  constructor(private identityService:IdentityService, private dataService: DataService<Person>, private spinnerService: NgxSpinnerService){
+    if(localStorage.getItem('loggedIn')=='true'){
+      this.loggedIn = true;
+    }
+    else{
+      this.loggedIn = false;
+    }
+  }
 
 
   ngOnInit() {
@@ -61,28 +67,22 @@ export class AppComponent implements OnInit {
     return this.identityService.getCurrentParticipant().toPromise()
     .then(
       (data)=>{
+        this.loggedIn = true;
         let fs = data.split('.')[3].split('#');
         let ns = fs[0];
 
         this.currentType = ns;
+        localStorage.setItem('currentType',this.currentType);
         let id = fs[1];
 
         return this.dataService.getSingle(ns,id).toPromise()
         .then( (p) => 
         {
           this.currentParticipant = p;
+          localStorage.setItem('currentIdentity',this.currentParticipant.id);
           this.spinnerService.hide();
         }
         )
-        .catch((error) => {
-          if (error === 'Server error') {
-            this.errorMessage = 'Could not connect to REST server. Please check your configuration details';
-          } else if (error === '404 - Not Found') {
-            this.errorMessage = '404 - Could not find API route. Please check your available APIs.';
-            this.errorMessage = error;
-          }
-          this.spinnerService.hide();
-      })
     })
     .catch((error) => {
       if (error === 'Server error') {

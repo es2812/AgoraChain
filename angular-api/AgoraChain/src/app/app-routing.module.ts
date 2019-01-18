@@ -45,11 +45,14 @@ import { TX_CloseElectionComponent } from './TX_CloseElection/TX_CloseElection.c
 import { TX_PublicVoteComponent } from './TX_PublicVote/TX_PublicVote.component';
 import { TX_PrepareEnvelopeComponent } from './TX_PrepareEnvelope/TX_PrepareEnvelope.component';
 import { TX_SecretVoteComponent } from './TX_SecretVote/TX_SecretVote.component';
+import { ErrorComponent } from './home/error.component';
+import { LogOutComponent } from './home/logout.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent},
-  { path: 'login', component: HomeComponent},
-  { path: 'success', component: SuccessComponent},
+  { path:'success', component: SuccessComponent},
+  { path:'error', component: ErrorComponent},
+  { path:'logout', component: LogOutComponent},
   { path: 'identity', component: IdentityComponent, canActivate: [AuthGuard]},
   { path: 'Election', component: ElectionComponent, canActivate: [AuthGuard, IdentityGuard]  },
   { path: 'Vote', component: VoteComponent, canActivate: [AuthGuard, IdentityGuard]  },

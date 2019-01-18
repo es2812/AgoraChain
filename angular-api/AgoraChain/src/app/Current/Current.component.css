@@ -164,8 +164,8 @@ label {
 }
 
 textarea{
+    overflow:auto !important;
     resize: vertical !important;
-    overflow-y: scroll !important;
 }
 
 /***.participant-properties:hover, .participant-properties:hover span{  

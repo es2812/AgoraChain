@@ -22,9 +22,12 @@
             <a *ngIf="currentParticipant" class="participantText" [routerLink]="['/Current']">Participant: {{currentParticipant.name}} {{currentParticipant.lastname}} ({{currentType}})</a>
           </div>
           <div class="row">
-            <a class="identityChange" *ngIf="!currentParticipant" [routerLink]="['/identity']">Set identity</a>
-            <a class="identityChange" *ngIf="currentParticipant" [routerLink]="['/identity']">Change</a>
+            <a class="identityChange" *ngIf="!currentParticipant && loggedIn" [routerLink]="['/identity']">Set identity</a>
+            <a class="identityChange" *ngIf="currentParticipant" [routerLink]="['/identity']">Change identity</a>
           </div>
+          <div class="row">
+              <a class="logout" *ngIf="loggedIn" [routerLink]="['/logout']">Log Out</a>
+            </div>
         </div>
       </div>
 

@@ -102,7 +102,6 @@ export class IdentityComponent implements OnInit {
         return this.identityService.useIdentity(selected).toPromise()
         .then(
         ()=> {
-            localStorage.setItem('currentIdentity',selected.name);
             this.navigateToIdentity();
         })
         .catch((error) => {
@@ -121,7 +120,6 @@ export class IdentityComponent implements OnInit {
             .then(
             (data)=>{
                 let type = data.split('.')[3].split('#')[0];
-                localStorage.setItem('currentType',type);
                 this.router.navigateByUrl('/Current');
                 window.location.reload();
                 this.spinnerService.hide();
